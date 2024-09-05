@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'main_screen.dart';
-import './stack_pages/register_screen.dart'; // Importando a tela de cadastro
 
-class LoginScreen extends StatelessWidget {
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remover o backgroundColor do Scaffold
       body: Container(
         // Usar um Container para definir o gradiente de fundo
         decoration: BoxDecoration(
@@ -29,12 +26,12 @@ class LoginScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(32.0), // Padding aumentado dentro do Card
                   child: Column(
-                    mainAxisSize: MainAxisSize.min, // Permite que o Card ajuste a altura
+                    mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center, // Centraliza verticalmente
                     crossAxisAlignment: CrossAxisAlignment.center, // Centraliza horizontalmente
                     children: [
                       Text(
-                        'Login',
+                        'Cadastro',
                         style: TextStyle(
                           fontSize: 32.0, // Tamanho da fonte
                           fontWeight: FontWeight.bold, // Negrito
@@ -44,7 +41,7 @@ class LoginScreen extends StatelessWidget {
                       SizedBox(height: 24.0), // Espaço entre o texto e o campo de texto
                       TextField(
                         decoration: InputDecoration(
-                          labelText: 'Usuários',
+                          labelText: 'Nome de Usuário',
                           border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.purple, width: 2.0),
@@ -68,6 +65,20 @@ class LoginScreen extends StatelessWidget {
                         ),
                         obscureText: true,
                       ),
+                      SizedBox(height: 16.0),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Confirme a Senha',
+                          border: OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.purple, width: 1.0),
+                          ),
+                        ),
+                        obscureText: true,
+                      ),
                       SizedBox(height: 24.0),
                       Container(
                         width: double.infinity, // Largura igual ao campo de texto
@@ -81,36 +92,17 @@ class LoginScreen extends StatelessWidget {
                             minimumSize: Size(double.infinity, 50), // Largura igual ao campo de texto e altura de 50
                           ),
                           onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => MainScreen(),
-                              ),
-                            );
+                            Navigator.pop(context); // Retorna à página anterior
                           },
-                          child: Text('Login'),
+                          child: Text('Cadastrar'),
                         ),
                       ),
-                      SizedBox(height: 16.0), // Adicionado espaço entre o botão e o texto
+                      SizedBox(height: 16.0), // Espaço entre o botão e o texto
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            PageRouteBuilder(
-                              pageBuilder: (context, animation, secondaryAnimation) => RegisterScreen(),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                const offsetBegin = Offset(1.0, 0.0); // Deslocamento inicial da direita para a esquerda
-                                const offsetEnd = Offset.zero; // Deslocamento final
-                                const curve = Curves.easeInOut; // Curva de animação
-
-                                // Define a animação
-                                var tween = Tween<Offset>(begin: offsetBegin, end: offsetEnd);
-                                var offsetAnimation = animation.drive(tween.chain(CurveTween(curve: curve)));
-
-                                return SlideTransition(position: offsetAnimation, child: child);
-                              },
-                            ),
-                          );
+                          Navigator.pop(context); // Navega para a tela anterior
                         },
-                        child: Text('Não tem uma conta? Cadastre-se'),
+                        child: Text('Voltar'),
                       ),
                     ],
                   ),
