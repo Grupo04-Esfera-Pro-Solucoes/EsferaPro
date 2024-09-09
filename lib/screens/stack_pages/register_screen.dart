@@ -1,6 +1,15 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  bool _termsAccepted = false; // Variável de estado para o checkbox
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -8,16 +17,19 @@ class RegisterScreen extends StatelessWidget {
         // Usar um Container para definir o gradiente de fundo
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF34016E), Color(0xFF6502D4)], // Gradiente de fundo
-            begin: Alignment.centerRight, // Começa no canto superior esquerdo
-            end: Alignment.centerLeft, // Termina no canto inferior direito
+            colors: [
+              Color(0xFF34016E),
+              Color(0xFF6502D4)
+            ], // Gradiente de fundo
+            begin: Alignment.centerRight, // Começa no canto superior direito
+            end: Alignment.centerLeft, // Termina no canto inferior esquerdo
           ),
         ),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0), // Padding lateral
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.8, // Largura 80% da tela
+              width: MediaQuery.of(context).size.width * 0.9, // Largura 80% da tela
               child: Card(
                 elevation: 4.0,
                 shape: RoundedRectangleBorder(
@@ -80,29 +92,122 @@ class RegisterScreen extends StatelessWidget {
                         obscureText: true,
                       ),
                       SizedBox(height: 24.0),
+                      // Checkbox para aceitar os termos de uso
+                      Row(
+                        children: [
+                          Theme(
+                            data: ThemeData(
+                              unselectedWidgetColor: Colors.purple, // Cor da borda do checkbox não selecionado
+                              checkboxTheme: CheckboxThemeData(
+                                fillColor: MaterialStateProperty.all(Colors.transparent), // Fundo do checkbox transparente
+                                checkColor: MaterialStateProperty.all(Colors.purple), // Cor do checkmark
+                                side: BorderSide(
+                                  color: Colors.purple, // Cor da borda do checkbox
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                            child: Checkbox(
+                              value: _termsAccepted,
+                              onChanged: (bool? newValue) {
+                                setState(() {
+                                  _termsAccepted = newValue ?? false;
+                                });
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'Aceito os termos de uso',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.purple, // Cor do texto
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16.0), // Espaço entre o checkbox e o botão
                       Container(
-                        width: double.infinity, // Largura igual ao campo de texto
+                        width: MediaQuery.of(context).size.width * 0.5,  // Largura igual ao campo de texto
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF34016E),
+                              Color(0xFF4A0BA8),
+                              Color.fromARGB(255, 132, 34, 244)
+                            ],
+                            stops: [0.0, 0.5, 1.0], // Ajustar a distribuição das cores
+                            begin: Alignment.centerRight, // Iniciar no canto direito
+                            end: Alignment.centerLeft, // Terminar no canto esquerdo
+                          ),
+                          borderRadius: BorderRadius.circular(5), // Cantos arredondados
+                        ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF6502D4), // Cor de fundo
+                            backgroundColor: Colors.transparent, // Deixa o fundo transparente
                             foregroundColor: Colors.white, // Cor do texto
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero, // Cantos não arredondados
+                              borderRadius: BorderRadius.circular(5), // Cantos arredondados no botão
                             ),
-                            minimumSize: Size(double.infinity, 50), // Largura igual ao campo de texto e altura de 50
+                            minimumSize: Size(double.infinity, 50), // Aumenta a altura para 60
                           ),
-                          onPressed: () {
+                          onPressed: _termsAccepted ? () {
                             Navigator.pop(context); // Retorna à página anterior
-                          },
+                          } : null, // Desabilita o botão se os termos não forem aceitos
                           child: Text('Cadastrar'),
                         ),
                       ),
                       SizedBox(height: 16.0), // Espaço entre o botão e o texto
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Navega para a tela anterior
-                        },
-                        child: Text('Voltar'),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5, // Largura 50% da tela
+                        decoration: BoxDecoration(
+                          color: Colors.white, // Fundo branco
+                          borderRadius: BorderRadius.circular(5), // Cantos arredondados
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4.0,
+                              offset: Offset(0, 4),
+                            ), // Sombra
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent, // Fundo transparente
+                            shadowColor: Colors.transparent, // Remove a sombra default
+                            foregroundColor: Colors.transparent, // Remove o fundo default
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5), // Cantos arredondados
+                              side: BorderSide(
+                                color: Color(0xFF34016E), // Gradiente borda
+                                width: 1.5,
+                              ),
+                            ),
+                            minimumSize: Size(double.infinity, 50), // Mesma altura do botão "Cadastrar"
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context); // Navega para a tela anterior
+                          },
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => LinearGradient(
+                              colors: [
+                                Color(0xFF34016E),
+                                Color(0xFF4A0BA8),
+                                Color.fromARGB(255, 132, 34, 244),
+                              ],
+                              begin: Alignment.centerRight,
+                              end: Alignment.centerLeft,
+                            ).createShader(bounds),
+                            child: Text(
+                              'Voltar',
+                              style: TextStyle(
+                                color: Colors.white, // Cor do texto
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
