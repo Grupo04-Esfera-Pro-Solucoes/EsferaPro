@@ -5,7 +5,7 @@ class StackPage2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stack Page 1'),
+        title: Text('Stack Page 2'),
       ),
       body: Stack(
         children: <Widget>[
@@ -13,7 +13,8 @@ class StackPage2 extends StatelessWidget {
             color: Colors.blueAccent,
             child: Center(
               child: Text(
-                'This is Stack Page 1',
+
+                'This is Stack Page 2',
                 style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
