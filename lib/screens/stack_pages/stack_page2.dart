@@ -13,6 +13,7 @@ class StackPage2 extends StatelessWidget {
             color: Colors.blueAccent,
             child: Center(
               child: Text(
+
                 'This is Stack Page 2',
                 style: TextStyle(color: Colors.white, fontSize: 24),
               ),

@@ -90,6 +90,7 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 Navigator.of(context).pop(); // Fecha o drawer
                 _selectPage(HomeScreen(), 0);
+
               },
             ),
             ListTile(
@@ -120,6 +121,7 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 Navigator.of(context).pop(); // Fecha o drawer
                 _selectPage(Page3(), 3);
+
               },
             ),
             ListTile(
@@ -130,6 +132,7 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () {
                 Navigator.of(context).pop(); // Fecha o drawer
                 _selectPage(Page4(), 4);
+
               },
             ),
           ],
