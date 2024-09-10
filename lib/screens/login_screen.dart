@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'main_screen.dart';
 import './stack_pages/register_screen.dart'; // Importando a tela de cadastro
@@ -127,7 +129,7 @@ class LoginScreen extends StatelessWidget {
                                       5), // Aplicar cantos arredondados
                                 ),
                                 minimumSize: Size(double.infinity,
-                                    60), // Largura total e altura de 50
+                                    50), // Largura total e altura de 50
                               ),
                               onPressed: () {
                                 Navigator.of(context).pushReplacement(

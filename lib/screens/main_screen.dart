@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
   // Função para obter o título com base na página atual
   String _getPageTitle() {
     if (_currentPage is HomeScreen) return 'Home';
-    if (_currentPage is Page1) return 'Page 1';
+    if (_currentPage is ClientPage) return 'Page 1';
     if (_currentPage is Page2) return 'Page 2';
     if (_currentPage is Page3) return 'Page 3';
     if (_currentPage is Page4) return 'Page 4';
@@ -99,7 +99,7 @@ class _MainScreenState extends State<MainScreen> {
                   : null, // Destaca a página atual
               onTap: () {
                 Navigator.of(context).pop(); // Fecha o drawer
-                _selectPage(Page1(), 1);
+                _selectPage(ClientPage(), 1);
               },
             ),
             ListTile(
