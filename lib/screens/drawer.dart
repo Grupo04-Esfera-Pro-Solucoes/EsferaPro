@@ -94,28 +94,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 _buildDrawerItem(
                   index: 4,
                   icon: Icons.table_chart,
-                  text: 'Kanban',
+                  text: 'Tarefas',
                   page: Container(),
-                  title: 'Kanban',
+                  title: 'Tarefas',
                   context: context,
-                ),
-                _buildDrawerItem(
-                  index: 5,
-                  icon: Icons.settings_outlined,
-                  text: 'Configurações',
-                  page: Container(),
-                  title: 'Configurações',
-                  context: context,
-                ),
-                Divider(
-                  height: 1.0,
-                  color: Color(0xFF98A2B3),
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(10.0),
             child: GestureDetector(
               onTap: () {
                 setState(() {
@@ -140,7 +128,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       Navigator.pop(context);
                     },
                   ),
-                  SizedBox(width: 8.0),
+                  SizedBox(width: 4.0),
                   Text(
                     'Ajuda',
                     style: TextStyle(
@@ -207,12 +195,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
           ),
         ),
-        if (!isSelected)
-          Divider(
-            height: 1.0,
-            color: Color(0xFF98A2B3),
-          ),
       ],
-    );
+    ); 
   }
 }
