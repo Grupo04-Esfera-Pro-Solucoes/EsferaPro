@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'main_screen.dart';
+import 'dashbord.dart';
 import './stack_pages/register_screen.dart'; // Importando a tela de cadastro
 
 class LoginScreen extends StatelessWidget {
