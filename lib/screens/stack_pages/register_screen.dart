@@ -49,7 +49,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (response.statusCode == 200) {
         Navigator.pop(context);
       } else {
-        print('Falha ao enviar os dados. Código de Status: ${response.statusCode}');
+        showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('ERRO!'),
+                    content: Text(json.decode(response.body)['message']),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
       }
     } catch (e) {
       print('Erro: $e');
