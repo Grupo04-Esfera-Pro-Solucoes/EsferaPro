@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -9,6 +12,49 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _termsAccepted = false; // Variável de estado para o checkbox
+  TextEditingController _username = TextEditingController();
+  TextEditingController _password = TextEditingController();
+  TextEditingController _email = TextEditingController();
+  TextEditingController _phone = TextEditingController();
+  TextEditingController _role = TextEditingController();
+
+  void _postNewUser() async{
+    String username = _username.text;
+    String password = _password.text;
+    String email = _email.text;
+    String phone = _phone.text;
+    String role = _role.text;
+
+    final url = Uri.parse('http://localhost:8080/register');
+
+    final Map<String, dynamic> dados = {
+      'username': username,
+      'password': password,
+      'email': email,
+      'phone': phone,
+      'role': role
+    };
+
+    try {
+      // Fazendo a requisição POST
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(dados),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+      } else {
+        print('Falha ao enviar os dados. Código de Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +96,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.black, // Cor do texto
                         ),
                       ),
-                      SizedBox(height: 24.0), // Espaço entre o texto e o campo de texto
+                      SizedBox(height: 16.0), // Espaço entre o texto e o campo de texto
                       TextField(
+                        controller: _username,
                         decoration: InputDecoration(
                           labelText: 'Nome de Usuário',
                           border: OutlineInputBorder(),
@@ -63,8 +110,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 20.0),
+                      SizedBox(height: 16.0),
                       TextField(
+                        controller: _password,
                         decoration: InputDecoration(
                           labelText: 'Senha',
                           border: OutlineInputBorder(),
@@ -79,8 +127,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       SizedBox(height: 16.0),
                       TextField(
+                        controller: _email,
                         decoration: InputDecoration(
-                          labelText: 'Confirme a Senha',
+                          labelText: 'Email',
                           border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.purple, width: 2.0),
@@ -89,9 +138,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             borderSide: BorderSide(color: Colors.purple, width: 1.0),
                           ),
                         ),
-                        obscureText: true,
+                        obscureText: false,
                       ),
-                      SizedBox(height: 24.0),
+                      SizedBox(height: 16.0),
+                      TextField(
+                        controller: _phone,
+                        decoration: InputDecoration(
+                          labelText: 'Telefone',
+                          border: OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.purple, width: 1.0),
+                          ),
+                        ),
+                        obscureText: false,
+                      ),
+                      SizedBox(height: 16.0),
+                      TextField(
+                        controller: _role,
+                        decoration: InputDecoration(
+                          labelText: 'Cargo',
+                          border: OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.purple, width: 1.0),
+                          ),
+                        ),
+                        obscureText: false,
+                      ),
+                      SizedBox(height: 16.0),
                       // Checkbox para aceitar os termos de uso
                       Row(
                         children: [
@@ -153,7 +232,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             minimumSize: Size(double.infinity, 50), // Aumenta a altura para 60
                           ),
                           onPressed: _termsAccepted ? () {
-                            Navigator.pop(context); // Retorna à página anterior
+                            _postNewUser();
+                            // Retorna à página anterior
                           } : null, // Desabilita o botão se os termos não forem aceitos
                           child: Text('Cadastrar'),
                         ),
