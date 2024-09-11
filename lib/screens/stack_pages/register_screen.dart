@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 
@@ -25,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String phone = _phone.text;
     String role = _role.text;
 
+    //final SharedPreferences prefs = await SharedPreferences.getInstance();
     final url = Uri.parse('http://localhost:8080/register');
 
     final Map<String, dynamic> dados = {
@@ -36,7 +38,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     };
 
     try {
-      // Fazendo a requisição POST
       final response = await http.post(
         url,
         headers: {
