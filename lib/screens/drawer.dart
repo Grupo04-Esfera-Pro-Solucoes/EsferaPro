@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'clientes.dart';
+import 'ajuda.dart';
 
 class CustomDrawer extends StatefulWidget {
   final Widget currentPage;
@@ -115,28 +116,41 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
           Container(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.help_outline,
-                    color: Color(0xFF98A2B3),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 6;
+                });
+                widget.onSelectPage(AjudaPage(), 'Ajuda');
+                Navigator.pop(context);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.help_outline,
+                      color: Color(0xFF98A2B3),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 6;
+                      });
+                      widget.onSelectPage(AjudaPage(), 'Ajuda');
+                      Navigator.pop(context);
+                    },
                   ),
-                  onPressed: () {
-
-                  },
-                ),
-                SizedBox(width: 8.0),
-                Text(
-                  'Ajuda',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Color(0xFF98A2B3),
-                    fontWeight: FontWeight.bold,
+                  SizedBox(width: 8.0),
+                  Text(
+                    'Ajuda',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Color(0xFF98A2B3),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
