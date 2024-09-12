@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'clientes.dart';
+import 'ajuda.dart';
 
 class CustomDrawer extends StatefulWidget {
   final Widget currentPage;
@@ -93,50 +94,51 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 _buildDrawerItem(
                   index: 4,
                   icon: Icons.table_chart,
-                  text: 'Kanban',
+                  text: 'Tarefas',
                   page: Container(),
-                  title: 'Kanban',
+                  title: 'Tarefas',
                   context: context,
-                ),
-                _buildDrawerItem(
-                  index: 5,
-                  icon: Icons.settings_outlined,
-                  text: 'Configurações',
-                  page: Container(),
-                  title: 'Configurações',
-                  context: context,
-                ),
-                Divider(
-                  height: 1.0,
-                  color: Color(0xFF98A2B3),
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.help_outline,
-                    color: Color(0xFF98A2B3),
+            padding: const EdgeInsets.all(10.0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 6;
+                });
+                widget.onSelectPage(AjudaPage(), 'Ajuda');
+                Navigator.pop(context);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.help_outline,
+                      color: Color(0xFF98A2B3),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _selectedIndex = 6;
+                      });
+                      widget.onSelectPage(AjudaPage(), 'Ajuda');
+                      Navigator.pop(context);
+                    },
                   ),
-                  onPressed: () {
-
-                  },
-                ),
-                SizedBox(width: 8.0),
-                Text(
-                  'Ajuda',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Color(0xFF98A2B3),
-                    fontWeight: FontWeight.bold,
+                  SizedBox(width: 4.0),
+                  Text(
+                    'Ajuda',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Color(0xFF98A2B3),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -193,12 +195,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
           ),
         ),
-        if (!isSelected)
-          Divider(
-            height: 1.0,
-            color: Color(0xFF98A2B3),
-          ),
       ],
-    );
+    ); 
   }
 }
