@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
 import 'home_screen.dart';
 import 'drawer.dart';
+import 'configuration.dart';
+import 'login_screen.dart';
+import 'app_bar.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -22,35 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          _pageTitle,
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Color(0xFF6502D4),
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.account_circle),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Avatar clicked')),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => LoginScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: buildAppBar(context, _pageTitle),
       drawer: CustomDrawer(
         currentPage: _currentPage,
         onSelectPage: _selectPage,
