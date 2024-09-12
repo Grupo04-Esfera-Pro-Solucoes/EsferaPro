@@ -17,7 +17,9 @@ class LoginScreen extends StatefulWidget{
 class _loginScreen extends State<LoginScreen> {
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
+  Color borderColor = Colors.purple;
   String _error = '';
+  
 
   void _validateUser(BuildContext context) async {
     String email = _email.text;
@@ -47,8 +49,8 @@ class _loginScreen extends State<LoginScreen> {
         print(_error);
         setState((){
           _error = json.decode(response.body)['message'];
+          borderColor = Colors.red;
         });
-        print(_error);
       }
     } catch (e) {
       print('Erro: $e');
@@ -125,11 +127,11 @@ class _loginScreen extends State<LoginScreen> {
                           border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
                             borderSide:
-                                BorderSide(color: Colors.purple, width: 2.0),
+                                BorderSide(color: borderColor, width: 2.0),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide:
-                                BorderSide(color: Colors.purple, width: 1.0),
+                                BorderSide(color: borderColor, width: 1.0),
                           ),
                         ),
                       ),
@@ -141,11 +143,11 @@ class _loginScreen extends State<LoginScreen> {
                           border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
                             borderSide:
-                                BorderSide(color: Colors.purple, width: 2.0),
+                                BorderSide(color: borderColor, width: 2.0),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide:
-                                BorderSide(color: Colors.purple, width: 1.0),
+                                BorderSide(color: borderColor, width: 1.0),
                           ),
                         ),
                         obscureText: true,
