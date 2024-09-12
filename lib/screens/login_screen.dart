@@ -1,8 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:esferapro/screens/home_screen.dart';
+import 'package:esferapro/screens/dashbord.dart';
 import 'package:flutter/material.dart';
-import 'dashbord.dart';
 import './stack_pages/register_screen.dart'; // Importando a tela de cadastro
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +11,7 @@ class LoginScreen extends StatelessWidget {
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
 
-  void _validateUser() async {
+  void _validateUser(BuildContext context) async {
     String email = _email.text;
     String password = _password.text;
 
@@ -32,10 +31,10 @@ class LoginScreen extends StatelessWidget {
 
       if (response.statusCode == 200) {
         await prefs.setInt('userId', json.decode(response.body)['idUser']);
-
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(),
-        );
+        Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()), 
+      );
       } else {
         print(json.decode(response.body)['message']);
       }
@@ -178,7 +177,7 @@ class LoginScreen extends StatelessWidget {
                                     50), // Largura total e altura de 50
                               ),
                               onPressed: () {
-                                _validateUser();
+                                _validateUser(context);
                               },
                               child: Text('Entrar'),
                             ),
@@ -190,7 +189,31 @@ class LoginScreen extends StatelessWidget {
                               16.0), // Adicionado espaço entre o botão e o texto
                       TextButton(
                         onPressed: () {
-                          RegisterScreen();
+                          Navigator.of(context).push(
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      RegisterScreen(),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
+                                const offsetBegin = Offset(1.0,
+                                    0.0); // Deslocamento inicial da direita para a esquerda
+                                const offsetEnd =
+                                    Offset.zero; // Deslocamento final
+                                const curve =
+                                    Curves.easeInOut; // Curva de animação
+
+                                // Define a animação
+                                var tween = Tween<Offset>(
+                                    begin: offsetBegin, end: offsetEnd);
+                                var offsetAnimation = animation.drive(
+                                    tween.chain(CurveTween(curve: curve)));
+
+                                return SlideTransition(
+                                    position: offsetAnimation, child: child);
+                              },
+                            ),
+                          );
                         },
                         child: Text('Não tem uma conta? Cadastre-se'),
                       ),
