@@ -7,9 +7,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget{
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _loginScreen();
+}
+
+class _loginScreen extends State<LoginScreen> {
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
+  String _error = '';
 
   void _validateUser(BuildContext context) async {
     String email = _email.text;
@@ -36,7 +44,11 @@ class LoginScreen extends StatelessWidget {
         MaterialPageRoute(builder: (context) => MainScreen()), 
       );
       } else {
-        print(json.decode(response.body)['message']);
+        print(_error);
+        setState((){
+          _error = json.decode(response.body)['message'];
+        });
+        print(_error);
       }
     } catch (e) {
       print('Erro: $e');
@@ -137,6 +149,9 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         obscureText: true,
+                      ),
+                      Text(_error,
+                        style: TextStyle(color: Colors.red),
                       ),
                       SizedBox(height: 24.0),
                       Container(
