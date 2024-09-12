@@ -4,13 +4,13 @@ import 'configuration.dart';
 
 AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
   return AppBar(
-    centerTitle: true,
+    centerTitle: false,
     title: Text(
       title,
-      style: TextStyle(color: Colors.white),
+      style: TextStyle(color: Color(0xFF6502D4)),
     ),
-    backgroundColor: Color(0xFF6502D4),
-    iconTheme: IconThemeData(color: Colors.white),
+    backgroundColor: Color(0xFFEAECF0),
+    iconTheme: IconThemeData(color: Color(0xFF6502D4)),
     actions: [
       if (currentRoute != '/configuration')
         IconButton(
@@ -23,7 +23,7 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
           },
         ),
       IconButton(
-        icon: Icon(Icons.logout),
+        icon: Icon(Icons.logout,),
         onPressed: () {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
