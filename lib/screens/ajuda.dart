@@ -48,7 +48,7 @@ class _AjudaPageState extends State<AjudaPage> {
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: BoxDecoration(
                 border: Border.all(color: Color(0xFF98A2B3), width: 1.0),
-                borderRadius: BorderRadius.circular(15.0), 
+                borderRadius: BorderRadius.circular(15.0),
               ),
               child: Column(
                 children: [
@@ -85,24 +85,26 @@ class _AjudaPageState extends State<AjudaPage> {
                       ),
                     ),
                   ),
-                  AnimatedContainer(
+                  AnimatedSize(
                     duration: const Duration(milliseconds: 300),
-                    height: _expanded[index] ? null : 0,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(15.0)),
-                    ),
-                    child: _expanded[index]
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                            child: Text(
-                              faq[index]['answer']!,
-                              style: TextStyle(
-                                fontSize: 16.0,
+                    curve: Curves.easeInOut,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.vertical(bottom: Radius.circular(15.0)),
+                      ),
+                      child: _expanded[index]
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              child: Text(
+                                faq[index]['answer']!,
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                ),
                               ),
-                            ),
-                          )
-                        : null,
+                            )
+                          : null,
+                    ),
                   ),
                 ],
               ),
