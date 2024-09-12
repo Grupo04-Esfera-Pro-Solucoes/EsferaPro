@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class AjudaPage extends StatefulWidget {
+class HelpPage extends StatefulWidget {
   @override
-  _AjudaPageState createState() => _AjudaPageState();
+  _HelpPageState createState() => _HelpPageState();
 }
 
-class _AjudaPageState extends State<AjudaPage> {
+class _HelpPageState extends State<HelpPage> {
   List<bool> _expanded = List.generate(6, (_) => false);
 
   final List<Map<String, String>> faq = [

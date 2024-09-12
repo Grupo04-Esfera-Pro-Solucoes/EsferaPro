@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'clientes.dart';
-import 'ajuda.dart';
+import 'help.dart';
 
 class CustomDrawer extends StatefulWidget {
   final Widget currentPage;
@@ -37,6 +37,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Column(
         children: <Widget>[
           Container(
@@ -109,7 +110,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 setState(() {
                   _selectedIndex = 6;
                 });
-                widget.onSelectPage(AjudaPage(), 'Ajuda');
+                widget.onSelectPage(HelpPage(), 'Ajuda');
                 Navigator.pop(context);
               },
               child: Row(
@@ -124,7 +125,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       setState(() {
                         _selectedIndex = 6;
                       });
-                      widget.onSelectPage(AjudaPage(), 'Ajuda');
+                      widget.onSelectPage(HelpPage(), 'Ajuda');
                       Navigator.pop(context);
                     },
                   ),
