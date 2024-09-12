@@ -155,7 +155,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                       fontSize: 14,
                     ),
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   _buildTextField(
                     controller: _nomeController,
                     labelText: 'Digite seu nome',
@@ -165,7 +165,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                     controller: _sobrenomeController,
                     labelText: 'Digite seu sobrenome',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   Text(
                     'Cargo',
                     style: TextStyle(
@@ -173,60 +173,60 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8.0),
+                  SizedBox(height: 4),
                   Text(
                     'Essa é a sua função dentro da empresa.',
                     style: TextStyle(
                       fontSize: 14,
                     ),
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   _buildTextField(
                     controller: _cargoController,
                     labelText: 'Digite o seu cargo',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   Text(
                     'Email',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8.0),
+                  SizedBox(height: 4),
                   Text(
                     'Esse e-mail será usado para fazer o login.',
                     style: TextStyle(
                       fontSize: 14,
                     ),
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   _buildTextField(
                     controller: _emailController,
                     labelText: 'Digite o seu email',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   Text(
                     'Telefone',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   _buildTextField(
                     controller: _telefoneController,
                     labelText: 'Digite seu telefone',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   Text(
                     'Senha',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 12.0),
                   _buildTextField(
                     controller: _senhaAtualController,
                     labelText: 'Digite a sua senha atual',
