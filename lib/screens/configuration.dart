@@ -6,7 +6,7 @@ import 'app_bar.dart';
 class ConfigurationPage extends StatefulWidget {
   final int userId;
 
-  ConfigurationPage({required this.userId});
+  const ConfigurationPage({required this.userId});
 
   @override
   _ConfigurationPageState createState() => _ConfigurationPageState();
@@ -14,7 +14,6 @@ class ConfigurationPage extends StatefulWidget {
 
 class _ConfigurationPageState extends State<ConfigurationPage> {
   final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _sobrenomeController = TextEditingController();
   final TextEditingController _cargoController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
@@ -24,24 +23,12 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
 
   bool _isButtonEnabled = false;
 
-  void _checkFields() {
-    setState(() {
-      _isButtonEnabled = _nomeController.text.isNotEmpty ||
-                         _sobrenomeController.text.isNotEmpty ||
-                         _cargoController.text.isNotEmpty ||
-                         _emailController.text.isNotEmpty ||
-                         _telefoneController.text.isNotEmpty ||
-                         _senhaAtualController.text.isNotEmpty ||
-                         _novaSenhaController.text.isNotEmpty ||
-                         _repitaNovaSenhaController.text.isNotEmpty;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
+    _fetchUserData();
+    
     _nomeController.addListener(_checkFields);
-    _sobrenomeController.addListener(_checkFields);
     _cargoController.addListener(_checkFields);
     _emailController.addListener(_checkFields);
     _telefoneController.addListener(_checkFields);
@@ -53,7 +40,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   @override
   void dispose() {
     _nomeController.dispose();
-    _sobrenomeController.dispose();
     _cargoController.dispose();
     _emailController.dispose();
     _telefoneController.dispose();
@@ -63,62 +49,134 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
     super.dispose();
   }
 
-  void _updateUserInfo() async {
-    final nome = _nomeController.text;
-    final sobrenome = _sobrenomeController.text;
-    final cargo = _cargoController.text;
-    final email = _emailController.text;
-    final telefone = _telefoneController.text;
+  void _checkFields() {
+    setState(() {
+      _isButtonEnabled = _nomeController.text.isNotEmpty ||
+                         _cargoController.text.isNotEmpty ||
+                         _emailController.text.isNotEmpty ||
+                         _telefoneController.text.isNotEmpty ||
+                         _senhaAtualController.text.isNotEmpty ||
+                         _novaSenhaController.text.isNotEmpty ||
+                         _repitaNovaSenhaController.text.isNotEmpty;
+    });
+  }
+
+  Future<void> _fetchUserData() async {
+    final url = Uri.parse('http://localhost:8080/user/${widget.userId}');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        setState(() {
+          _nomeController.text = data['name'] ?? '';
+          _cargoController.text = data['role'] ?? '';
+          _emailController.text = data['email'] ?? '';
+          _telefoneController.text = data['phone'] ?? '';
+        });
+      } else {
+        print('Erro ao buscar os dados do usuário.');
+      }
+    } catch (e) {
+      print('Erro: $e');
+    }
+  }
+
+  Future<bool> _validateCurrentPassword() async {
     final senhaAtual = _senhaAtualController.text;
-    final novaSenha = _novaSenhaController.text;
-    final repitaNovaSenha = _repitaNovaSenhaController.text;
-
-    final id = widget.userId; 
-
-    final url = Uri.parse('http://localhost:8080/user/$id');
-
-    final Map<String, dynamic> dados = {
-      'name': nome,
-      'email': email,
-      'phone': telefone,
-      'role': cargo,
-      'passwordHash': novaSenha.isNotEmpty ? novaSenha : null
-    };
+    final url = Uri.parse('http://localhost:8080/user/${widget.userId}/checkPassword');
 
     try {
-      final response = await http.put(
+      final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(dados),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'currentPassword': senhaAtual}),
       );
 
       if (response.statusCode == 200) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Sucesso!'),
-              content: const Text('Informações atualizadas com sucesso.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
+        final data = json.decode(response.body);
+        return data['isValid'] == true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Erro: $e');
+      return false;
+    }
+  }
+
+  void _updateUserInfo() async {
+    try {
+      final validPassword = await _validateCurrentPassword();
+
+      if (validPassword) {
+        final nome = _nomeController.text;
+        final cargo = _cargoController.text;
+        final email = _emailController.text;
+        final telefone = _telefoneController.text;
+        final novaSenha = _novaSenhaController.text;
+
+        final url = Uri.parse('http://localhost:8080/user/${widget.userId}');
+
+        final Map<String, dynamic> dados = {
+          'name': nome,
+          'email': email,
+          'phone': telefone,
+          'role': cargo,
+          'passwordHash': novaSenha.isNotEmpty ? novaSenha : null,
+        };
+
+        final response = await http.put(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(dados),
         );
+
+        if (response.statusCode == 200) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Sucesso!'),
+                content: const Text('Informações atualizadas com sucesso.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Erro!'),
+                content: Text(json.decode(response.body)['message'] ?? 'Erro desconhecido'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       } else {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Erro!'),
-              content: Text(json.decode(response.body)['message'] ?? 'Erro desconhecido'),
+              content: const Text('Senha atual inválida.'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -132,13 +190,12 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
         );
       }
     } catch (e) {
-      print('Erro: $e');
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Erro!'),
-            content: const Text('Ocorreu um erro ao atualizar as informações.'),
+            content: Text(e.toString()),
             actions: [
               TextButton(
                 onPressed: () {
@@ -218,11 +275,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                     labelText: 'Digite seu nome',
                   ),
                   const SizedBox(height: 10),
-                  _buildTextField(
-                    controller: _sobrenomeController,
-                    labelText: 'Digite seu sobrenome',
-                  ),
-                  const SizedBox(height: 8),
                   const Text(
                     'Cargo',
                     style: TextStyle(
