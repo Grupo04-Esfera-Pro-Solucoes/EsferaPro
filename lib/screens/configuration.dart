@@ -132,6 +132,10 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
             content: 'Informações atualizadas com sucesso.',
             isSuccess: true,
           );
+
+          _senhaAtualController.clear();
+          _novaSenhaController.clear();
+          _repitaNovaSenhaController.clear();
         } else {
           _showCustomDialog(
             title: 'Erro!',
@@ -441,12 +445,15 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
           fontSize: 16.0,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility : Icons.visibility_off,
-            color: const Color(0xFF6502D4),
+        suffixIcon: Padding(
+          padding: const EdgeInsets.only(right: 12.0),
+          child: IconButton(
+            icon: Icon(
+              obscureText ? Icons.visibility : Icons.visibility_off,
+              color: const Color(0xFF6502D4),
+            ),
+            onPressed: onVisibilityChanged,
           ),
-          onPressed: onVisibilityChanged,
         ),
       ),
     );
