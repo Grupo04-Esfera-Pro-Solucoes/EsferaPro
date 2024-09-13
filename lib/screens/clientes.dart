@@ -58,18 +58,18 @@ class _ClientPageState extends State<ClientPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Client List'),
+        title: const Text('Client List'),
       ),
       body: Column(
         children: [
           _buildHeader(), // Cabeçalho
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : errorMessage != null
                     ? Center(child: Text(errorMessage!))
                     : clients.isEmpty
-                        ? Center(child: Text('No client data available'))
+                        ? const Center(child: Text('No client data available'))
                         : ListView.builder(
                             itemCount: clients.length,
                             itemBuilder: (context, index) {
@@ -88,7 +88,7 @@ class _ClientPageState extends State<ClientPage> {
     return Container(
       color: Colors.blueGrey[100],
       padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(child: Center(child: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)))),
@@ -104,13 +104,13 @@ Widget _buildClientTile(BuildContext context, Map<String, dynamic> clientData, i
   final contacts = clientData['contact'];
 
   return Container(
-    padding: EdgeInsets.all(8.0),
+    padding: const EdgeInsets.all(8.0),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.start, // Alinha todos os itens à esquerda
       children: [
         // Checkbox colado no canto, não precisa de expansão
         Container(
-          margin: EdgeInsets.only(right: 8.0), // Espaço entre o checkbox e o conteúdo
+          margin: const EdgeInsets.only(right: 8.0), // Espaço entre o checkbox e o conteúdo
           child: Checkbox(
             value: isCheckedList[index],
             onChanged: (bool? newValue) {
@@ -146,7 +146,7 @@ Widget _buildClientTile(BuildContext context, Map<String, dynamic> clientData, i
             alignment: Alignment.centerLeft,
             child: ElevatedButton(
               onPressed: () => _showClientDetails(context, clientData),
-              child: Text('Ver Mais'),
+              child: const Text('Ver Mais'),
             ),
           ),
         ),
@@ -167,44 +167,44 @@ Widget _buildClientTile(BuildContext context, Map<String, dynamic> clientData, i
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('More Details'),
+          title: const Text('More Details'),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Client Details:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('Client Details:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Text('Name: ${client['name'] ?? 'No name'}'),
                 Text('CPF/CNPJ: ${client['cpfCnpj'] ?? 'No CPF/CNPJ'}'),
                 Text('Company: ${client['company'] ?? 'No company'}'),
                 Text('Role: ${client['role'] ?? 'No role'}'),
                 Text('Date: ${client['formattedDate'] ?? 'No date'}'),
-                SizedBox(height: 10),
-                Text('Address:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                const Text('Address:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Text('Street: ${address['street'] ?? 'No street'}'),
                 Text('Number: ${address['number'] ?? 'No number'}'),
                 Text('City: ${address['city'] ?? 'No city'}'),
                 Text('State: ${address['state'] ?? 'No state'}'),
                 Text('Zip Code: ${address['zipCode'] ?? 'No zip code'}'),
                 Text('Country: ${address['country'] ?? 'No country'}'),
-                SizedBox(height: 10),
-                Text('Contacts:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                const Text('Contacts:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ...contacts.map<Widget>((contact) {
                   final type = contact['idTypeContact']?['type'] ?? 'Unknown';
                   final data = contact['data'] ?? 'No data';
                   return ListTile(
-                    leading: Icon(Icons.contact_phone),
+                    leading: const Icon(Icons.contact_phone),
                     title: Text('Type: $type'),
                     subtitle: Text('Contact: $data'),
                   );
                 }).toList(),
-                if (contacts.isEmpty) Text('No contacts available'),
+                if (contacts.isEmpty) const Text('No contacts available'),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Close'),
+              child: const Text('Close'),
             ),
           ],
         );

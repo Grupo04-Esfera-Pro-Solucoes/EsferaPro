@@ -15,8 +15,8 @@ class LoginScreen extends StatefulWidget{
 }
 
 class _loginScreen extends State<LoginScreen> {
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
   Color borderColor = Colors.purple;
   String _error = '';
   
@@ -68,7 +68,7 @@ class _loginScreen extends State<LoginScreen> {
         // Usar um Container para definir o gradiente de fundo
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
+            colors: const [
               Color(0xFF34016E),
               Color(0xFF6502D4)
             ], // Gradiente de fundo
@@ -165,12 +165,12 @@ class _loginScreen extends State<LoginScreen> {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
+                                colors: const [
                                   Color(0xFF34016E),
                                   Color(0xFF4A0BA8),
                                   Color.fromARGB(255, 132, 34, 244)
                                 ],
-                                stops: [
+                                stops: const [
                                   0.0,
                                   0.5,
                                   1.0

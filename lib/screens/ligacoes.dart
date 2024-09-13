@@ -7,9 +7,9 @@ class Page2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Page 1'),
+        title: const Text('Page 1'),
       ),
-      body: Center(
+      body: const Center(
         child: Text('This is Page 1.'),
       ),
       floatingActionButton: Padding(
@@ -28,7 +28,7 @@ class Page2 extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15.0), // Bordas arredondadas
             ),
-            child: Icon(
+            child: const Icon(
               Icons.add,
               size: 40, // Tamanho maior do ícone
               color: Colors.white, // Cor do + branco
