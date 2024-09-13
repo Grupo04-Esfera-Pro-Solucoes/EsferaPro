@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'app_bar.dart';
 
 class ConfigurationPage extends StatefulWidget {
+  final int userId;
+
+  ConfigurationPage({required this.userId});
+
   @override
   _ConfigurationPageState createState() => _ConfigurationPageState();
 }
@@ -57,6 +63,96 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
     super.dispose();
   }
 
+  void _updateUserInfo() async {
+    final nome = _nomeController.text;
+    final sobrenome = _sobrenomeController.text;
+    final cargo = _cargoController.text;
+    final email = _emailController.text;
+    final telefone = _telefoneController.text;
+    final senhaAtual = _senhaAtualController.text;
+    final novaSenha = _novaSenhaController.text;
+    final repitaNovaSenha = _repitaNovaSenhaController.text;
+
+    final id = widget.userId; 
+
+    final url = Uri.parse('http://localhost:8080/user/$id');
+
+    final Map<String, dynamic> dados = {
+      'name': nome,
+      'email': email,
+      'phone': telefone,
+      'role': cargo,
+      'passwordHash': novaSenha.isNotEmpty ? novaSenha : null
+    };
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(dados),
+      );
+
+      if (response.statusCode == 200) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Sucesso!'),
+              content: const Text('Informações atualizadas com sucesso.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Erro!'),
+              content: Text(json.decode(response.body)['message'] ?? 'Erro desconhecido'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print('Erro: $e');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Erro!'),
+            content: const Text('Ocorreu um erro ao atualizar as informações.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,11 +163,11 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.all(14),
+              decoration: const BoxDecoration(
                 color: Color(0xFF6502D4),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
@@ -81,7 +177,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         'Informações Pessoais',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18.0,
+                          fontSize: 20.0,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -90,160 +186,170 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         'Atualize suas informações.',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14.0,
+                          fontSize: 15.0,
                         ),
                       ),
                     ],
-                  ),
-                  ElevatedButton(
-                    onPressed: _isButtonEnabled
-                        ? () {
-                            final nome = _nomeController.text;
-                            final sobrenome = _sobrenomeController.text;
-                            final cargo = _cargoController.text;
-                            final email = _emailController.text;
-                            final telefone = _telefoneController.text;
-                            final senhaAtual = _senhaAtualController.text;
-                            final novaSenha = _novaSenhaController.text;
-                            final repitaNovaSenha = _repitaNovaSenhaController.text;
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 30.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      backgroundColor: Color(0xFF6502D4),
-                      side: BorderSide(
-                        color: Colors.white,
-                        width: 3,
-                      ),
-                      elevation: 0,
-                    ).copyWith(
-                      elevation: MaterialStateProperty.resolveWith<double>(
-                        (states) => states.contains(MaterialState.disabled)
-                            ? 0 : 20,
-                      ),
-                    ),
-                    child: Text(
-                      'Salvar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 36.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Nome',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4.0),
-                  Text(
+                  const Text(
                     'Esse nome será exibido no seu perfil.',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
-                  SizedBox(height: 12.0),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _nomeController,
                     labelText: 'Digite seu nome',
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 10),
                   _buildTextField(
                     controller: _sobrenomeController,
                     labelText: 'Digite seu sobrenome',
                   ),
-                  SizedBox(height: 12.0),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'Cargo',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
+                  const Text(
                     'Essa é a sua função dentro da empresa.',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
-                  SizedBox(height: 12.0),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _cargoController,
                     labelText: 'Digite o seu cargo',
                   ),
-                  SizedBox(height: 12.0),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'Email',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
+                  const Text(
                     'Esse e-mail será usado para fazer o login.',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
-                  SizedBox(height: 12.0),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _emailController,
                     labelText: 'Digite o seu email',
                   ),
-                  SizedBox(height: 12.0),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'Telefone',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 12.0),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _telefoneController,
                     labelText: 'Digite seu telefone',
                   ),
-                  SizedBox(height: 12.0),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     'Senha',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 12.0),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _senhaAtualController,
                     labelText: 'Digite a sua senha atual',
                     obscureText: true,
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 10),
                   _buildTextField(
                     controller: _novaSenhaController,
                     labelText: 'Digite a nova senha',
                     obscureText: true,
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 10),
                   _buildTextField(
                     controller: _repitaNovaSenhaController,
                     labelText: 'Repita a nova senha',
                     obscureText: true,
                   ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _isButtonEnabled
+                          ? () {
+                              if (_novaSenhaController.text == _repitaNovaSenhaController.text) {
+                                _updateUserInfo();
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Erro!'),
+                                      content: const Text('As senhas não coincidem.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30.0,
+                          vertical: 10.0,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        backgroundColor: const Color(0xFF6502D4),
+                        side: const BorderSide(
+                          color: Colors.white,
+                          width: 3,
+                        ),
+                      ),
+                      child: const Text(
+                        'Salvar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -263,16 +369,17 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
       obscureText: obscureText,
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderSide: BorderSide(color: Color(0xFF98A2B3), width: 2),
         ),
-        fillColor: Color(0xFFF0F0F7),
+        fillColor: const Color(0xFFF0F0F7),
         filled: true,
-        labelStyle: TextStyle(
+        labelStyle: const TextStyle(
           color: Color(0xFF9395C3),
-          fontWeight: FontWeight.w500,
-          fontSize: 18.0,
+          fontWeight: FontWeight.w400,
+          fontSize: 16.0,
         ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       ),
     );
   }
