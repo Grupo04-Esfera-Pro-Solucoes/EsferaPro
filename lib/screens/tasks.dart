@@ -32,7 +32,7 @@ class _TasksPageState extends State<TasksPage> {
         tasks = fetchedTasks;
       });
     } catch (e) {
-      print('Erro ao buscar tarefas: $e');
+      _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
     }
   }
 
@@ -54,13 +54,11 @@ class _TasksPageState extends State<TasksPage> {
       _fetchTasks();
       _showCustomDialog(title: 'Sucesso!', content: 'Tarefa atualizada com sucesso.', isSuccess: true);
     } catch (e) {
-      print('Erro ao atualizar tarefa: $e');
       _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
     }
   }
 
-
-  Future<void> _deleteTask(String id) async {
+  Future<void> _deleteTask(int id) async {
     try {
       await _taskService.deleteTask(id);
       _fetchTasks();
@@ -166,123 +164,109 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
-Widget _buildTaskCard(Task task) {
-  IconData statusIcon;
-  switch (task.status) {
-    case 'todo':
-      statusIcon = Icons.check_box_outline_blank;
-      break;
-    case 'inProgress':
-      statusIcon = Icons.sync;
-      break;
-    case 'done':
-      statusIcon = Icons.check_circle;
-      break;
-    default:
-      statusIcon = Icons.help;
-  }
 
-  Widget buildDismissBackground(Alignment alignment, IconData icon) {
-    return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      alignment: alignment,
-      child: Icon(
-        icon,
-        color: const Color(0xFF6502D4),
-        size: 30,
+  Widget _buildTaskCard(Task task) {
+    IconData statusIcon;
+    switch (task.status) {
+      case 'todo':
+        statusIcon = Icons.check_box_outline_blank;
+        break;
+      case 'inProgress':
+        statusIcon = Icons.sync;
+        break;
+      case 'done':
+        statusIcon = Icons.check_circle;
+        break;
+      default:
+        statusIcon = Icons.help;
+    }
+
+    Widget buildDismissBackground(Alignment alignment, IconData icon) {
+      return Container(
+        color: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        alignment: alignment,
+        child: Icon(
+          icon,
+          color: const Color(0xFF6502D4),
+          size: 30,
+        ),
+      );
+    }
+
+    return Dismissible(
+      key: Key(task.id.toString()),
+      background: buildDismissBackground(Alignment.centerLeft, Icons.arrow_back_ios),
+      secondaryBackground: buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
+      direction: DismissDirection.horizontal,
+      onDismissed: (direction) async {
+        final newStatus = direction == DismissDirection.startToEnd
+            ? _getNextStatus(TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status))
+            : _getPreviousStatus(TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status));
+
+        // Atualiza o status da tarefa
+        final updatedTask = task.copyWith(status: newStatus.toString().split('.').last);
+
+        try {
+          await _updateTask(updatedTask);
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? updatedTask : t).toList();
+          });
+        } catch (e) {
+          setState(() {
+          });
+          _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey, width: 1),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    task.getFormattedDueDate(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Icon(
+              statusIcon,
+              color: const Color(0xFF6502D4),
+              size: 30,
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  return Dismissible(
-    key: Key(task.id.toString()),
-    background: buildDismissBackground(Alignment.centerLeft, Icons.arrow_back_ios),
-    secondaryBackground: buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
-    direction: DismissDirection.horizontal,
-    onDismissed: (direction) async {
-      // Atualiza o status da tarefa
-      setState(() {
-        if (direction == DismissDirection.startToEnd) {
-          task.status = _getPreviousStatus(
-            TaskStatus.values.firstWhere(
-              (e) => e.toString().split('.').last == task.status,
-            ),
-          ).toString().split('.').last;
-        } else if (direction == DismissDirection.endToStart) {
-          task.status = _getNextStatus(
-            TaskStatus.values.firstWhere(
-              (e) => e.toString().split('.').last == task.status,
-            ),
-          ).toString().split('.').last;
-        }
-      });
-
-      try {
-        // Atualiza a tarefa na API
-        await _updateTask(task);
-
-        // Remove o item da lista local após a atualização bem-sucedida
-        setState(() {
-          tasks.removeWhere((t) => t.id == task.id);
-        });
-      } catch (e) {
-        print('Erro ao atualizar tarefa após arrastar: $e');
-        // Re-adiciona a tarefa à lista em caso de erro
-        setState(() {
-          tasks.add(task);
-        });
-      }
-    },
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey, width: 1),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  task.getFormattedDueDate(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Icon(
-            statusIcon,
-            color: const Color(0xFF6502D4),
-            size: 30,
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
   void _showAddTaskDialog(BuildContext context) {
     showDialog(

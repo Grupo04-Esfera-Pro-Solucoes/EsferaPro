@@ -1,11 +1,11 @@
 import 'package:intl/intl.dart';
 
 class Task {
-  String id;
-  String name;
-  String description;
-  DateTime dueDate;
-  String status;
+  final String id;
+  final String name;
+  final String description;
+  final DateTime dueDate;
+  final String status;
 
   Task({
     required this.id,
@@ -37,5 +37,21 @@ class Task {
 
   String getFormattedDueDate() {
     return DateFormat('dd/MM/yyyy').format(dueDate);
+  }
+
+  Task copyWith({
+    String? id,
+    String? name,
+    String? description,
+    DateTime? dueDate,
+    String? status,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      status: status ?? this.status,
+    );
   }
 }
