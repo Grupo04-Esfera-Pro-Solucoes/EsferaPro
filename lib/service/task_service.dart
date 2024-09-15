@@ -46,6 +46,19 @@ class TaskService {
     }
   }
 
+  Future<void> updateTaskStatus(int id, String status) async {
+    final url = Uri.parse('$baseUrl/$id/status');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'status': status}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao atualizar status da tarefa: ${response.statusCode}');
+    }
+  }
+
   Future<void> deleteTask(int id) async {
     final url = Uri.parse('$baseUrl/$id');
     final response = await http.delete(url);

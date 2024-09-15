@@ -49,22 +49,13 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
-  Future<void> _updateTask(Task task) async {
+  Future<void> _updateTaskStatus(int id, String status) async {
     try {
-      final taskWithUserId = task.copyWith(userId: widget.userId);
-      await _taskService.updateTask(taskWithUserId);
-      _fetchTasks();
-      _showCustomDialog(title: 'Sucesso!', content: 'Tarefa atualizada com sucesso.', isSuccess: true);
-    } catch (e) {
-      _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
-    }
-  }
-
-  Future<void> _deleteTask(int id) async {
-    try {
-      await _taskService.deleteTask(id);
-      _fetchTasks();
-      _showCustomDialog(title: 'Sucesso!', content: 'Tarefa excluída com sucesso.', isSuccess: true);
+      await _taskService.updateTaskStatus(id, status);
+      setState(() {
+        tasks = tasks.map((t) => t.id == id ? t.copyWith(status: status) : t).toList();
+      });
+      _showCustomDialog(title: 'Sucesso!', content: 'Status da tarefa atualizado com sucesso.', isSuccess: true);
     } catch (e) {
       _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
     }
@@ -201,20 +192,21 @@ class _TasksPageState extends State<TasksPage> {
       secondaryBackground: buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
       direction: DismissDirection.horizontal,
       onDismissed: (direction) async {
+        final currentStatus = TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status);
         final newStatus = direction == DismissDirection.startToEnd
-            ? _getNextStatus(TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status))
-            : _getPreviousStatus(TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status));
-
-        final updatedTask = task.copyWith(status: newStatus.toString().split('.').last);
+            ? _getNextStatus(currentStatus)
+            : _getPreviousStatus(currentStatus);
 
         try {
-          await _updateTask(updatedTask);
-          setState(() {
-            tasks = tasks.map((t) => t.id == task.id ? updatedTask : t).toList();
-          });
+          await _updateTaskStatus(task.id, newStatus.toString().split('.').last);
         } catch (e) {
           _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
         }
+
+        // Remove the task from the list after successful status update
+        setState(() {
+          tasks.remove(task);
+        });
       },
       child: Container(
         decoration: BoxDecoration(
@@ -322,7 +314,7 @@ class CustomElevatedButton extends StatelessWidget {
   final String text;
   final Color backgroundColor;
 
-  CustomElevatedButton({
+  const CustomElevatedButton({
     required this.onPressed,
     required this.text,
     required this.backgroundColor,
