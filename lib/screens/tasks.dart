@@ -8,7 +8,7 @@ enum TaskStatus { todo, inProgress, done }
 class TasksPage extends StatefulWidget {
   final int userId;
 
-  TasksPage({required this.userId});
+  const TasksPage({required this.userId});
 
   @override
   _TasksPageState createState() => _TasksPageState();
@@ -38,7 +38,8 @@ class _TasksPageState extends State<TasksPage> {
 
   Future<void> _createTask(Task task) async {
     try {
-      Task createdTask = await _taskService.createTask(task);
+      final taskWithUserId = task.copyWith(userId: widget.userId);
+      Task createdTask = await _taskService.createTask(taskWithUserId);
       setState(() {
         tasks.add(createdTask);
       });
@@ -50,7 +51,8 @@ class _TasksPageState extends State<TasksPage> {
 
   Future<void> _updateTask(Task task) async {
     try {
-      await _taskService.updateTask(task);
+      final taskWithUserId = task.copyWith(userId: widget.userId);
+      await _taskService.updateTask(taskWithUserId);
       _fetchTasks();
       _showCustomDialog(title: 'Sucesso!', content: 'Tarefa atualizada com sucesso.', isSuccess: true);
     } catch (e) {
@@ -103,7 +105,7 @@ class _TasksPageState extends State<TasksPage> {
                   Navigator.of(context).pop();
                 },
                 text: 'OK',
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFF6502D4),
               ),
             ],
           ),
@@ -164,7 +166,6 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
-
   Widget _buildTaskCard(Task task) {
     IconData statusIcon;
     switch (task.status) {
@@ -204,7 +205,6 @@ class _TasksPageState extends State<TasksPage> {
             ? _getNextStatus(TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status))
             : _getPreviousStatus(TaskStatus.values.firstWhere((e) => e.toString().split('.').last == task.status));
 
-        // Atualiza o status da tarefa
         final updatedTask = task.copyWith(status: newStatus.toString().split('.').last);
 
         try {
@@ -213,8 +213,6 @@ class _TasksPageState extends State<TasksPage> {
             tasks = tasks.map((t) => t.id == task.id ? updatedTask : t).toList();
           });
         } catch (e) {
-          setState(() {
-          });
           _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
         }
       },
@@ -276,6 +274,7 @@ class _TasksPageState extends State<TasksPage> {
           onTaskCreated: (Task task) {
             _createTask(task);
           },
+          userId: widget.userId,
         );
       },
     );
@@ -301,22 +300,18 @@ class _TasksPageState extends State<TasksPage> {
           Expanded(
             child: ListView.builder(
               itemCount: _filteredTasks.length,
-              itemBuilder: (context, index) {
-                final task = _filteredTasks[index];
-                return _buildTaskCard(task);
+              itemBuilder: (BuildContext context, int index) {
+                return _buildTaskCard(_filteredTasks[index]);
               },
             ),
           ),
         ],
       ),
-      floatingActionButton: SizedBox(
-        height: 70,
-        width: 70,
-        child: FloatingActionButton(
-          onPressed: () => _showAddTaskDialog(context),
-          backgroundColor: const Color(0xFF6502D4),
-          child: const Icon(Icons.add, size: 35, color: Colors.white),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddTaskDialog(context),
+        backgroundColor: const Color(0xFF6502D4),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -327,10 +322,10 @@ class CustomElevatedButton extends StatelessWidget {
   final String text;
   final Color backgroundColor;
 
-  const CustomElevatedButton({
+  CustomElevatedButton({
     required this.onPressed,
     required this.text,
-    this.backgroundColor = Colors.white,
+    required this.backgroundColor,
   });
 
   @override
@@ -346,8 +341,8 @@ class CustomElevatedButton extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: Colors.black,
           fontSize: 16,
+          color: Colors.white,
         ),
       ),
     );

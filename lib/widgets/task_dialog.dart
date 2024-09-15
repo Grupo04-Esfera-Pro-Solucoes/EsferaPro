@@ -4,8 +4,9 @@ import '../model/task_model.dart';
 
 class AddTaskDialog extends StatelessWidget {
   final void Function(Task) onTaskCreated;
+  final int userId;
 
-  AddTaskDialog({required this.onTaskCreated});
+  const AddTaskDialog({required this.onTaskCreated, required this.userId}); 
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +155,12 @@ class AddTaskDialog extends StatelessWidget {
                         DateTime dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
 
                         Task task = Task(
-                          id: '',
+                          id: 0,
                           name: title,
                           description: description,
                           dueDate: dueDate,
                           status: "todo",
+                          userId: userId,
                         );
                         onTaskCreated(task);
                         Navigator.pop(context);

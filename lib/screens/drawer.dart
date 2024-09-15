@@ -112,7 +112,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     index: 4,
                     icon: Icons.table_chart,
                     text: 'Tarefas',
-                    page: TasksPage(userId: userId!), // Passe userId como int
+                    page: TasksPage(userId: userId!),
                     title: 'Tarefas',
                     context: context,
                   ),
