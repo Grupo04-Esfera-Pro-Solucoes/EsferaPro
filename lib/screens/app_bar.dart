@@ -36,7 +36,9 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
         ),
       IconButton(
         icon: const Icon(Icons.logout),
-        onPressed: () {
+        onPressed: () async {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.remove('userId');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => const LoginScreen(),
