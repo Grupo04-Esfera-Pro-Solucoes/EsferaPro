@@ -1,80 +1,58 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'package:esferapro/screens/dashbord.dart';
-import 'package:esferapro/screens/main_screen.dart';
+import 'package:esferapro/service/login_service.dart';
 import 'package:flutter/material.dart';
-import './stack_pages/register_screen.dart'; // Importando a tela de cadastro
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:esferapro/screens/main_screen.dart';
+import './stack_pages/register_screen.dart';
 
-class LoginScreen extends StatefulWidget{
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _loginScreen();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _loginScreen extends State<LoginScreen> {
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  Color borderColor = Colors.purple;
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  Color borderColor = const Color(0xFF6502D4);
   String _error = '';
-  
 
+  final LoginService _loginService = LoginService();
+
+  // Método para validar o usuário
   void _validateUser(BuildContext context) async {
-    String email = _email.text;
-    String password = _password.text;
-
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final url = Uri.parse('http://localhost:8080/login');
-
-    final Map<String, dynamic> dados = {'email': email, 'password': password};
+    String email = _emailController.text;
+    String password = _passwordController.text;
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(dados),
-      );
-
-      if (response.statusCode == 200) {
-        await prefs.setInt('userId', json.decode(response.body)['idUser']);
-        Navigator.pushReplacement(
+      // Tenta logar usando o serviço de login
+      await _loginService.login(email, password);
+      
+      // Se o login for bem-sucedido, navega para a tela principal
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()), 
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
-      } else {
-        print(_error);
-        setState((){
-          _error = json.decode(response.body)['message'];
-          borderColor = Colors.red;
-        });
-      }
     } catch (e) {
-      print('Erro: $e');
+      setState(() {
+        // Em caso de erro, define a cor da borda como vermelha e exibe o erro
+        _error = e.toString();
+        borderColor = Colors.red;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final double containerWidth = MediaQuery.of(context).size.width * 0.9;
-    final double containerHeight = containerWidth * 0.4; // 70% da largura
+    final double containerHeight = containerWidth * 0.4;
 
     return Scaffold(
-      // Remover o backgroundColor do Scaffold
       body: Container(
-        // Usar um Container para definir o gradiente de fundo
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: const [
-              Color(0xFF34016E),
-              Color(0xFF6502D4)
-            ], // Gradiente de fundo
-            begin: Alignment.centerRight, // Começa no canto superior esquerdo
-            end: Alignment.centerLeft, // Termina no canto inferior direito
+            colors: [Color(0xFF34016E), Color(0xFF6502D4)],
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
           ),
         ),
         child: Center(
@@ -130,7 +108,7 @@ class _loginScreen extends State<LoginScreen> {
                         ),
                       ),
                       TextField(
-                        controller: _email,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           hintText: 'Digite seu e-mail',
                           hintStyle: const TextStyle(color: Colors.grey),
@@ -159,24 +137,29 @@ class _loginScreen extends State<LoginScreen> {
                         ),
                       ),
                       TextField(
-                        controller: _password,
+                        controller: _passwordController,
                         decoration: InputDecoration(
-                          labelText: 'Senha',
-                          border: OutlineInputBorder(),
+                          hintText: 'Digite sua senha',
+                          hintStyle: const TextStyle(color: Colors.grey),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: borderColor, width: 2.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: borderColor, width: 2.0),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: borderColor, width: 1.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide(color: borderColor, width: 1.0),
                           ),
                         ),
                         obscureText: true,
                       ),
-                      Text(_error,
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      const SizedBox(height: 16.0),
+                      // Exibe mensagens de erro (se houver)
+                      Text(_error, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16.0),
+                      // Botão de Login
                       SizedBox(
                         width: containerWidth * 0.5,
                         child: Container(
