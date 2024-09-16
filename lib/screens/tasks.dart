@@ -7,7 +7,7 @@ import '../widgets/task_dialog.dart';
 enum TaskStatus { todo, inProgress, done }
 
 class TasksPage extends StatefulWidget {
-  const TasksPage({Key? key}) : super(key: key);
+  const TasksPage({super.key});
 
   @override
   _TasksPageState createState() => _TasksPageState();
