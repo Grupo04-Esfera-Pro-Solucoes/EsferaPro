@@ -170,9 +170,11 @@ class _TasksPageState extends State<TasksPage> {
         }
       },
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey, width: 1),
+        decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey, width: 1),
+          ),
         ),
         padding: const EdgeInsets.all(16),
         child: Row(

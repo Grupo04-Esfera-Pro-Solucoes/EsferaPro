@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:esferapro/screens/dashbord.dart';
+import 'package:esferapro/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import './stack_pages/register_screen.dart'; // Importando a tela de cadastro
 import 'package:http/http.dart' as http;
