@@ -23,7 +23,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   void initState() {
     super.initState();
     _updateSelectedIndex(widget.currentPage);
-    _loadUserId();
+    _loadUserId(); 
   }
 
   Future<void> _loadUserId() async {
@@ -112,7 +112,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     index: 4,
                     icon: Icons.table_chart,
                     text: 'Tarefas',
-                    page: TasksPage(userId: userId!),
+                    page: const TasksPage(),
                     title: 'Tarefas',
                     context: context,
                   ),

@@ -6,7 +6,7 @@ class Task {
   final String description;
   final DateTime dueDate;
   final String status;
-  final User user;
+  final int userId;
 
   Task({
     required this.id,
@@ -14,13 +14,18 @@ class Task {
     required this.description,
     required this.dueDate,
     required this.status,
-    required this.user,
+    required this.userId,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
-    final id = json['id'];
+    final id = json['idTask'];
     if (id == null || id <= 0) {
       throw ArgumentError('Invalid id: $id');
+    }
+
+    final userId = json['user']['idUser'];
+    if (userId == null || userId <= 0) {
+      throw ArgumentError('Invalid userId: $userId');
     }
 
     return Task(
@@ -31,18 +36,18 @@ class Task {
           ? DateTime.tryParse(json['dueDate']) ?? DateTime.now()
           : DateTime.now(),
       status: json['status'] ?? 'todo',
-      user: User.fromJson(json['user']),
+      userId: userId,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'idTask': id,
       'name': name,
       'description': description,
       'dueDate': dueDate.toIso8601String(),
       'status': status,
-      'user': user.toJson(),
+      'userId': userId,
     };
   }
 
@@ -56,7 +61,7 @@ class Task {
     String? description,
     DateTime? dueDate,
     String? status,
-    User? user,
+    int? userId,
   }) {
     return Task(
       id: id ?? this.id,
@@ -64,25 +69,7 @@ class Task {
       description: description ?? this.description,
       dueDate: dueDate ?? this.dueDate,
       status: status ?? this.status,
-      user: user ?? this.user,
+      userId: userId ?? this.userId,
     );
-  }
-}
-
-class User {
-  final int idUser;
-
-  User({required this.idUser});
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      idUser: json['idUser'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'idUser': idUser,
-    };
   }
 }

@@ -6,7 +6,9 @@ class AddTaskDialog extends StatelessWidget {
   final void Function(Task) onTaskCreated;
   final int userId;
 
-  const AddTaskDialog({required this.onTaskCreated, required this.userId});
+  AddTaskDialog({required this.onTaskCreated, required this.userId}) {
+    print('AddTaskDialog inicializado com userId: $userId');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +17,7 @@ class AddTaskDialog extends StatelessWidget {
     final descriptionController = TextEditingController();
 
     return AlertDialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -160,10 +163,14 @@ class AddTaskDialog extends StatelessWidget {
                           description: description,
                           dueDate: dueDate,
                           status: "todo",
-                          user: User(idUser: userId),
+                          userId: userId,
                         );
+
+                        print('Criando tarefa com userId: $userId');
+
                         onTaskCreated(task);
                         Navigator.pop(context);
+                        _showMessageDialog(context, 'Sucesso', 'Tarefa criada com sucesso!');
                       } catch (e) {
                         _showErrorDialog(context, 'Data inválida', 'Por favor, insira a data no formato dd/MM/yyyy.');
                       }
@@ -186,6 +193,26 @@ class AddTaskDialog extends StatelessWidget {
   }
 
   void _showErrorDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showMessageDialog(BuildContext context, String title, String content) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

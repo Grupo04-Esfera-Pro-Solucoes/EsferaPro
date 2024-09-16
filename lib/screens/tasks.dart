@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../service/task_service.dart';
 import '../model/task_model.dart';
 import '../widgets/task_dialog.dart';
@@ -6,9 +7,7 @@ import '../widgets/task_dialog.dart';
 enum TaskStatus { todo, inProgress, done }
 
 class TasksPage extends StatefulWidget {
-  final int userId;
-
-  const TasksPage({required this.userId});
+  const TasksPage({Key? key}) : super(key: key);
 
   @override
   _TasksPageState createState() => _TasksPageState();
@@ -18,54 +17,75 @@ class _TasksPageState extends State<TasksPage> {
   final TaskService _taskService = TaskService();
   TaskStatus selectedStatus = TaskStatus.todo;
   List<Task> tasks = [];
+  late int userId;
 
   @override
   void initState() {
     super.initState();
-    _fetchTasks();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getInt('userId')!;
+      if (userId <= 0) {
+        _showCustomDialog(title: 'Erro!', content: 'ID do usuário não encontrado.', isSuccess: false);
+      } else {
+        _fetchTasks();
+      }
+    });
   }
 
   Future<void> _fetchTasks() async {
     try {
-      List<Task> fetchedTasks = await _taskService.fetchTasks(widget.userId);
+      List<Task> fetchedTasks = await _taskService.fetchTasks(userId);
       setState(() {
         tasks = fetchedTasks;
       });
-      debugPrint('Tarefas recuperadas: ${fetchedTasks.map((task) => task.toJson()).toList()}');
     } catch (e) {
-      debugPrint('Erro ao buscar tarefas: $e');
       _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
     }
   }
 
   Future<void> _createTask(Task task) async {
     try {
-      final taskWithUser = task.copyWith(user: User(idUser: widget.userId));
-      debugPrint('Criando tarefa com dados: ${taskWithUser.toJson()}');
-
-      Task createdTask = await _taskService.createTask(taskWithUser);
+      Task taskWithUserId = Task(
+        id: task.id,
+        name: task.name,
+        description: task.description,
+        dueDate: task.dueDate,
+        status: task.status,
+        userId: userId,
+      );
+      Task createdTask = await _taskService.createTask(taskWithUserId);
       setState(() {
         tasks.add(createdTask);
       });
-      _showCustomDialog(title: 'Sucesso!', content: 'Tarefa criada com sucesso.', isSuccess: true);
+
+      _showCustomDialog(
+        title: 'Sucesso!',
+        content: 'Tarefa criada com sucesso.',
+        isSuccess: true,
+      );
     } catch (e) {
-      debugPrint('Erro ao criar tarefa: $e');
-      _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
+      print('Erro ao criar tarefa: $e');
+      _showCustomDialog(
+        title: 'Erro!',
+        content: e.toString(),
+        isSuccess: false,
+      );
     }
   }
 
-
   Future<void> _updateTaskStatus(int id, String status) async {
     try {
-      debugPrint('Atualizando tarefa ID: $id para o status: $status');
-
       Task updatedTask = await _taskService.updateTaskStatus(id, status);
       setState(() {
         tasks = tasks.map((t) => t.id == id ? updatedTask : t).toList();
       });
       _showCustomDialog(title: 'Sucesso!', content: 'Status da tarefa atualizado com sucesso.', isSuccess: true);
     } catch (e) {
-      debugPrint('Erro ao atualizar status da tarefa: $e');
       _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
     }
   }
@@ -214,9 +234,6 @@ class _TasksPageState extends State<TasksPage> {
             ? _getNextStatus(currentStatus)
             : _getPreviousStatus(currentStatus);
 
-        debugPrint('ID da tarefa: ${task.id}');
-        debugPrint('Novo Status: ${newStatus.toString().split('.').last}');
-
         try {
           await _updateTaskStatus(task.id, newStatus.toString().split('.').last);
           setState(() {
@@ -287,7 +304,7 @@ class _TasksPageState extends State<TasksPage> {
           onTaskCreated: (Task task) {
             _createTask(task);
           },
-          userId: widget.userId,
+          userId: userId,
         );
       },
     );
@@ -296,6 +313,7 @@ class _TasksPageState extends State<TasksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Container(
