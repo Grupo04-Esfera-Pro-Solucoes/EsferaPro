@@ -177,36 +177,49 @@ class _loginScreen extends State<LoginScreen> {
                       Text(_error,
                         style: TextStyle(color: Colors.red),
                       ),
-                      SizedBox(
-                        width: containerWidth * 0.5,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF4A0BA8),
-                                Color(0xFF6502D4),
-                                Color.fromARGB(255, 132, 34, 244)
-                              ],
-                              stops: [0.0, 0.5, 1.0],
-                              begin: Alignment.centerRight,
-                              end: Alignment.centerLeft,
-                            ),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
+                      SizedBox(height: 24.0),
+                      Container(
+                        width: MediaQuery.of(context).size.width *
+                            0.5, // Largura total
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                              5), // Aplicar cantos arredondados
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: const [
+                                  Color(0xFF34016E),
+                                  Color(0xFF4A0BA8),
+                                  Color.fromARGB(255, 132, 34, 244)
+                                ],
+                                stops: const [
+                                  0.0,
+                                  0.5,
+                                  1.0
+                                ], // Ajustar a distribuição das cores
+                                begin: Alignment
+                                    .centerRight, // Iniciar no canto direito
+                                end: Alignment
+                                    .centerLeft, // Terminar no canto esquerdo
                               ),
-                              minimumSize: const Size(double.infinity, 50),
-                              textStyle: const TextStyle(fontSize: 20),
                             ),
-                            onPressed: () {
-                              _validateUser(context);
-                            },
-                            child: const Text('Entrar'),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors
+                                    .transparent, // Fundo transparente para mostrar o gradiente
+                                foregroundColor: Colors.white, // Cor do texto
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      5), // Aplicar cantos arredondados
+                                ),
+                                minimumSize: Size(double.infinity,
+                                    50), // Largura total e altura de 50
+                              ),
+                              onPressed: () {
+                                _validateUser(context);
+                              },
+                              child: Text('Entrar'),
+                            ),
                           ),
                         ),
                       ),
