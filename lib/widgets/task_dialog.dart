@@ -6,7 +6,7 @@ class AddTaskDialog extends StatelessWidget {
   final void Function(Task) onTaskCreated;
   final int userId;
 
-  const AddTaskDialog({required this.onTaskCreated, required this.userId}); 
+  const AddTaskDialog({required this.onTaskCreated, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -146,21 +146,21 @@ class AddTaskDialog extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    String title = titleController.text;
-                    String description = descriptionController.text;
-                    String dueDateStr = timeController.text;
+                    final title = titleController.text.trim();
+                    final description = descriptionController.text.trim();
+                    final dueDateStr = timeController.text.trim();
 
                     if (title.isNotEmpty && description.isNotEmpty && dueDateStr.isNotEmpty) {
                       try {
-                        DateTime dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
+                        final dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
 
-                        Task task = Task(
+                        final task = Task(
                           id: 0,
                           name: title,
                           description: description,
                           dueDate: dueDate,
                           status: "todo",
-                          userId: userId,
+                          user: User(idUser: userId),
                         );
                         onTaskCreated(task);
                         Navigator.pop(context);

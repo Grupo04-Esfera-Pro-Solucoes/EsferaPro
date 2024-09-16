@@ -57,7 +57,7 @@ class _TasksPageState extends State<TasksPage> {
               itemBuilder: (context, index) {
                 final task = _filteredTasks[index];
                 return Dismissible(
-                  key: Key('${task.title}_${index}'), // Chave única e estável
+                  key: Key('${task.title}_$index'), // Chave única e estável
                   background: Container(color: Colors.transparent),
                   secondaryBackground: Container(color: Colors.transparent),
                   onDismissed: (direction) {
@@ -194,9 +194,9 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   void _showAddTaskDialog(BuildContext context) {
-    final _titleController = TextEditingController();
-    final _timeController = TextEditingController();
-    final _descriptionController = TextEditingController();
+    final titleController = TextEditingController();
+    final timeController = TextEditingController();
+    final descriptionController = TextEditingController();
 
     showDialog(
       context: context,
@@ -233,7 +233,7 @@ class _TasksPageState extends State<TasksPage> {
                           ),
                           const SizedBox(height: 4),
                           TextField(
-                            controller: _timeController,
+                            controller: timeController,
                             decoration: InputDecoration(
                               hintText: "dd/mm/aaaa",
                               hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
@@ -264,7 +264,7 @@ class _TasksPageState extends State<TasksPage> {
                         ),
                         const SizedBox(height: 4),
                         TextField(
-                          controller: _titleController,
+                          controller: titleController,
                           decoration: InputDecoration(
                             hintText: "Título",
                             hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
@@ -292,7 +292,7 @@ class _TasksPageState extends State<TasksPage> {
               ),
               const SizedBox(height: 4),
               TextField(
-                controller: _descriptionController,
+                controller: descriptionController,
                 decoration: InputDecoration(
                   hintText: "Escreva uma descrição",
                   hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
@@ -325,9 +325,9 @@ class _TasksPageState extends State<TasksPage> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      String title = _titleController.text;
-                      String time = _timeController.text;
-                      String description = _descriptionController.text;
+                      String title = titleController.text;
+                      String time = timeController.text;
+                      String description = descriptionController.text;
 
                       setState(() {
                         tasks.add(Task(
