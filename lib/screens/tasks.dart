@@ -29,109 +29,37 @@ class _TasksPageState extends State<TasksPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getInt('userId')!;
-      if (userId <= 0) {
-        _showCustomDialog(title: 'Erro!', content: 'ID do usuário não encontrado.', isSuccess: false);
-      } else {
-        _fetchTasks();
-      }
+      _fetchTasks();
     });
   }
 
   Future<void> _fetchTasks() async {
-    try {
-      List<Task> fetchedTasks = await _taskService.fetchTasks(userId);
-      setState(() {
-        tasks = fetchedTasks;
-      });
-    } catch (e) {
-      _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
-    }
+    List<Task> fetchedTasks = await _taskService.fetchTasks(userId);
+    setState(() {
+      tasks = fetchedTasks;
+    });
   }
 
   Future<void> _createTask(Task task) async {
-    try {
-      Task taskWithUserId = Task(
-        id: task.id,
-        name: task.name,
-        description: task.description,
-        dueDate: task.dueDate,
-        status: task.status,
-        userId: userId,
-      );
-      Task createdTask = await _taskService.createTask(taskWithUserId);
-      setState(() {
-        tasks.add(createdTask);
-      });
-
-      _showCustomDialog(
-        title: 'Sucesso!',
-        content: 'Tarefa criada com sucesso.',
-        isSuccess: true,
-      );
-    } catch (e) {
-      print('Erro ao criar tarefa: $e');
-      _showCustomDialog(
-        title: 'Erro!',
-        content: e.toString(),
-        isSuccess: false,
-      );
-    }
+    Task taskWithUserId = Task(
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      dueDate: task.dueDate,
+      status: task.status,
+      userId: userId,
+    );
+    Task createdTask = await _taskService.createTask(taskWithUserId);
+    setState(() {
+      tasks.add(createdTask);
+    });
   }
 
   Future<void> _updateTaskStatus(int id, String status) async {
-    try {
-      Task updatedTask = await _taskService.updateTaskStatus(id, status);
-      setState(() {
-        tasks = tasks.map((t) => t.id == id ? updatedTask : t).toList();
-      });
-      _showCustomDialog(title: 'Sucesso!', content: 'Status da tarefa atualizado com sucesso.', isSuccess: true);
-    } catch (e) {
-      _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
-    }
-  }
-
-  void _showCustomDialog({required String title, required String content, required bool isSuccess}) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          contentPadding: const EdgeInsets.all(16.0),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF6502D4),
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                content,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 20),
-              CustomElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                text: 'OK',
-                backgroundColor: const Color(0xFF6502D4),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    Task updatedTask = await _taskService.updateTaskStatus(id, status);
+    setState(() {
+      tasks = tasks.map((t) => t.id == id ? updatedTask : t).toList();
+    });
   }
 
   List<Task> get _filteredTasks {
@@ -221,10 +149,6 @@ class _TasksPageState extends State<TasksPage> {
       secondaryBackground: buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
       direction: DismissDirection.horizontal,
       onDismissed: (direction) async {
-        if (task.id <= 0) {
-          _showCustomDialog(title: 'Erro!', content: 'ID da tarefa inválido.', isSuccess: false);
-          return;
-        }
 
         final currentStatus = TaskStatus.values.firstWhere(
           (e) => e.toString().split('.').last == task.status,
@@ -240,7 +164,6 @@ class _TasksPageState extends State<TasksPage> {
             tasks.remove(task);
           });
         } catch (e) {
-          _showCustomDialog(title: 'Erro!', content: e.toString(), isSuccess: false);
           setState(() {
             tasks.add(task);
           });

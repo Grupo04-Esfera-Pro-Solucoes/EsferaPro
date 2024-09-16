@@ -6,9 +6,7 @@ class AddTaskDialog extends StatelessWidget {
   final void Function(Task) onTaskCreated;
   final int userId;
 
-  AddTaskDialog({required this.onTaskCreated, required this.userId}) {
-    print('AddTaskDialog inicializado com userId: $userId');
-  }
+  const AddTaskDialog({required this.onTaskCreated, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -152,31 +150,18 @@ class AddTaskDialog extends StatelessWidget {
                     final title = titleController.text.trim();
                     final description = descriptionController.text.trim();
                     final dueDateStr = timeController.text.trim();
+                    final dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
+                    final task = Task(
+                      id: 0,
+                      name: title,
+                      description: description,
+                      dueDate: dueDate,
+                      status: "todo",
+                      userId: userId,
+                    );
 
-                    if (title.isNotEmpty && description.isNotEmpty && dueDateStr.isNotEmpty) {
-                      try {
-                        final dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
-
-                        final task = Task(
-                          id: 0,
-                          name: title,
-                          description: description,
-                          dueDate: dueDate,
-                          status: "todo",
-                          userId: userId,
-                        );
-
-                        print('Criando tarefa com userId: $userId');
-
-                        onTaskCreated(task);
-                        Navigator.pop(context);
-                        _showMessageDialog(context, 'Sucesso', 'Tarefa criada com sucesso!');
-                      } catch (e) {
-                        _showErrorDialog(context, 'Data inválida', 'Por favor, insira a data no formato dd/MM/yyyy.');
-                      }
-                    } else {
-                      _showErrorDialog(context, 'Campos obrigatórios', 'Todos os campos devem ser preenchidos.');
-                    }
+                    onTaskCreated(task);
+                    Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6502D4),
@@ -189,46 +174,6 @@ class AddTaskDialog extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-
-  void _showErrorDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showMessageDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
