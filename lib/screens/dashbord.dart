@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'drawer.dart';
-import 'configuration.dart';
-import 'login_screen.dart';
 import 'app_bar.dart';
 
 class MainScreen extends StatefulWidget {

@@ -6,7 +6,7 @@ class HelpPage extends StatefulWidget {
 }
 
 class _HelpPageState extends State<HelpPage> {
-  List<bool> _expanded = List.generate(6, (_) => false);
+  final List<bool> _expanded = List.generate(6, (_) => false);
 
   final List<Map<String, String>> faq = [
     {
@@ -47,7 +47,7 @@ class _HelpPageState extends State<HelpPage> {
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFF98A2B3), width: 1.0),
+                border: Border.all(color: const Color(0xFF98A2B3), width: 1.0),
                 borderRadius: BorderRadius.circular(15.0),
               ),
               child: Column(
@@ -59,7 +59,7 @@ class _HelpPageState extends State<HelpPage> {
                       });
                     },
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.all(Radius.circular(15.0)),
                       ),
@@ -70,7 +70,7 @@ class _HelpPageState extends State<HelpPage> {
                           Expanded(
                             child: Text(
                               faq[index]['question']!,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF6502D4),
@@ -79,7 +79,7 @@ class _HelpPageState extends State<HelpPage> {
                           ),
                           Icon(
                             _expanded[index] ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                            color: Color(0xFF6502D4),
+                            color: const Color(0xFF6502D4),
                           ),
                         ],
                       ),
@@ -91,14 +91,14 @@ class _HelpPageState extends State<HelpPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
-                        borderRadius: BorderRadius.vertical(bottom: Radius.circular(15.0)),
+                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(15.0)),
                       ),
                       child: _expanded[index]
                           ? Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Text(
                                 faq[index]['answer']!,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 16.0,
                                 ),
                               ),

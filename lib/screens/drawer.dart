@@ -7,7 +7,7 @@ class CustomDrawer extends StatefulWidget {
   final Widget currentPage;
   final void Function(Widget page, String title) onSelectPage;
 
-  CustomDrawer({required this.currentPage, required this.onSelectPage});
+  const CustomDrawer({required this.currentPage, required this.onSelectPage});
 
   @override
   _CustomDrawerState createState() => _CustomDrawerState();
@@ -43,7 +43,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           Container(
             height: 150.0,
             child: DrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF6502D4), Color(0xFF34016E)],
                   begin: Alignment.centerLeft,
@@ -117,7 +117,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.help_outline,
                       color: Color(0xFF98A2B3),
                     ),
@@ -129,8 +129,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       Navigator.pop(context);
                     },
                   ),
-                  SizedBox(width: 4.0),
-                  Text(
+                  const SizedBox(width: 4.0),
+                  const Text(
                     'Ajuda',
                     style: TextStyle(
                       fontSize: 18.0,
@@ -163,7 +163,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           height: 70.0,
           decoration: BoxDecoration(
             gradient: isSelected
-                ? LinearGradient(
+                ? const LinearGradient(
                     colors: [Color(0xFF6502D4), Color(0xFF34016E)],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
@@ -173,16 +173,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
           child: Align(
             alignment: Alignment.center,
             child: ListTile(
-              contentPadding: EdgeInsets.only(left: 24.0),
+              contentPadding: const EdgeInsets.only(left: 24.0),
               leading: Icon(
                 icon,
-                color: isSelected ? Colors.amber : Color(0xFF6502D4),
+                color: isSelected ? Colors.amber : const Color(0xFF6502D4),
               ),
               title: Text(
                 text,
                 style: TextStyle(
                   fontSize: 20.0,
-                  color: isSelected ? Colors.amber : Color(0xFF6502D4),
+                  color: isSelected ? Colors.amber : const Color(0xFF6502D4),
                   fontWeight: FontWeight.w500,
                 ),
               ),

@@ -13,11 +13,11 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _termsAccepted = false; // Variável de estado para o checkbox
-  TextEditingController _username = TextEditingController();
-  TextEditingController _password = TextEditingController();
-  TextEditingController _email = TextEditingController();
-  TextEditingController _phone = TextEditingController();
-  TextEditingController _role = TextEditingController();
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _role = TextEditingController();
 
   void _postNewUser() async{
     String username = _username.text;
@@ -195,8 +195,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             data: ThemeData(
                               unselectedWidgetColor: Colors.purple, // Cor da borda do checkbox não selecionado
                               checkboxTheme: CheckboxThemeData(
-                                fillColor: MaterialStateProperty.all(Colors.transparent), // Fundo do checkbox transparente
-                                checkColor: MaterialStateProperty.all(Colors.purple), // Cor do checkmark
+                                fillColor: WidgetStateProperty.all(Colors.transparent), // Fundo do checkbox transparente
+                                checkColor: WidgetStateProperty.all(Colors.purple), // Cor do checkmark
                                 side: BorderSide(
                                   color: Colors.purple, // Cor da borda do checkbox
                                   width: 1.5,
