@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 
+
 class RegisterScreen extends StatefulWidget {
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -195,6 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             data: ThemeData(
                               unselectedWidgetColor: Colors.purple, // Cor da borda do checkbox não selecionado
                               checkboxTheme: CheckboxThemeData(
+
                                 fillColor: WidgetStateProperty.all(Colors.transparent), // Fundo do checkbox transparente
                                 checkColor: WidgetStateProperty.all(Colors.purple), // Cor do checkmark
                                 side: BorderSide(

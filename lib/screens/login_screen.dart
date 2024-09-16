@@ -56,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Center(
           child: Padding(
+
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Container(
               width: containerWidth,
@@ -171,6 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Color(0xFF4A0BA8),
                                   Color.fromARGB(255, 132, 34, 244)
                                 ],
+
                                 stops: [0.0, 0.5, 1.0],
                                 begin: Alignment.centerRight,
                                 end: Alignment.centerLeft,
@@ -198,6 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.of(context).push(
                             PageRouteBuilder(
+
                               pageBuilder: (context, animation, secondaryAnimation) =>
                                   RegisterScreen(),
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -231,3 +234,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
