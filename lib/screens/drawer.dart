@@ -1,7 +1,10 @@
+import 'package:esferapro/screens/dashbord.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'clientes.dart';
 import 'help.dart';
+import 'tasks.dart';
 
 class CustomDrawer extends StatefulWidget {
   final Widget currentPage;
@@ -15,11 +18,20 @@ class CustomDrawer extends StatefulWidget {
 
 class _CustomDrawerState extends State<CustomDrawer> {
   int _selectedIndex = 0;
+  int? userId;
 
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex(widget.currentPage);
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getInt('userId');
+    });
   }
 
   void _updateSelectedIndex(Widget page) {
@@ -30,6 +42,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
     } else if (page is ClientPage) {
       setState(() {
         _selectedIndex = 1;
+      });
+    } else if (page is TasksPage) {
+      setState(() {
+        _selectedIndex = 4;
       });
     }
   }
@@ -64,7 +80,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   index: 0,
                   icon: Icons.dashboard_outlined,
                   text: 'Dashboard',
-                  page: HomeScreen(),
+                  page: Dashboard(),
                   title: 'Dashboard',
                   context: context,
                 ),
@@ -92,14 +108,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   title: 'Propostas',
                   context: context,
                 ),
-                _buildDrawerItem(
-                  index: 4,
-                  icon: Icons.table_chart,
-                  text: 'Tarefas',
-                  page: Container(),
-                  title: 'Tarefas',
-                  context: context,
-                ),
+                if (userId != null)
+                  _buildDrawerItem(
+                    index: 4,
+                    icon: Icons.table_chart,
+                    text: 'Tarefas',
+                    page: const TasksPage(),
+                    title: 'Tarefas',
+                    context: context,
+                  ),
               ],
             ),
           ),
@@ -197,6 +214,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
         ),
       ],
-    ); 
+    );
   }
 }

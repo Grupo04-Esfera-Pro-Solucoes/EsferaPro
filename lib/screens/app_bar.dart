@@ -47,5 +47,6 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
         },
       ),
     ],
+    toolbarHeight: 60,
   );
 }
