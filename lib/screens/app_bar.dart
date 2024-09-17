@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import 'login.dart';
 import 'configuration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

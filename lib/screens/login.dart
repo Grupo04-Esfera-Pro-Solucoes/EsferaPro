@@ -1,7 +1,7 @@
 import 'package:esferapro/service/login_service.dart';
 import 'package:flutter/material.dart';
 import 'package:esferapro/screens/main_screen.dart';
-import 'package:esferapro/screens/stack_pages/register_screen.dart';// Importa o AuthService
+import 'package:esferapro/screens/stack_pages/register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
-  Color borderColor = Colors.purple;
+  Color borderColor = const Color.fromARGB(255, 132, 34, 244);
   String _error = '';
 
   final AuthService _authService = AuthService(); 
@@ -56,7 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Center(
           child: Padding(
-
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Container(
               width: containerWidth,
@@ -96,86 +95,64 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Login:',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontSize: 14.0,
-                                color: const Color(0xFF6502D4),
-                              ),
-                        ),
-                      ),
+                      const SizedBox(height: 40),
                       TextField(
                         controller: _email,
-                        decoration: InputDecoration(
-                          hintText: 'Digite seu e-mail',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF98A2B3),
                           ),
+                          border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: borderColor, width: 2.0),
+                            borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 2.0),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: borderColor, width: 1.0),
+                            borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 1.0),
                           ),
                         ),
+                        obscureText: false,
                       ),
                       const SizedBox(height: 20.0),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Senha:',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontSize: 14.0,
-                                color: const Color(0xFF6502D4),
-                              ),
-                        ),
-                      ),
                       TextField(
                         controller: _password,
-                        decoration: InputDecoration(
-                          hintText: 'Digite sua senha',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                        decoration: const InputDecoration(
+                          labelText: 'Senha',
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF98A2B3),
                           ),
+                          border: OutlineInputBorder(),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: borderColor, width: 2.0),
+                            borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 2.0),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: borderColor, width: 1.0),
+                            borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 1.0),
                           ),
                         ),
-                        obscureText: true,
+                        obscureText: false,
                       ),
                       Text(
                         _error,
                         style: const TextStyle(color: Colors.red),
                       ),
-                      const SizedBox(height: 24.0),
+                      const SizedBox(height: 14),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.42,
+                        height: 40,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(5),
                           child: DecoratedBox(
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Color(0xFF34016E),
                                   Color(0xFF4A0BA8),
+                                  Color(0xFF6502D4),
                                   Color.fromARGB(255, 132, 34, 244)
                                 ],
-
-                                stops: [0.0, 0.5, 1.0],
-                                begin: Alignment.centerRight,
-                                end: Alignment.centerLeft,
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
                               ),
                             ),
                             child: ElevatedButton(
@@ -200,7 +177,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.of(context).push(
                             PageRouteBuilder(
-
                               pageBuilder: (context, animation, secondaryAnimation) =>
                                   RegisterScreen(),
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -234,4 +210,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
