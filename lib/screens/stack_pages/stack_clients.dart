@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class StackPage2 extends StatelessWidget {
+class StackClients extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
