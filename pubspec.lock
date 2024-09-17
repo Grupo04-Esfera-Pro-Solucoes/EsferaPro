@@ -91,7 +91,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -101,7 +100,6 @@ packages:
     dependency: "direct main"
     description:
       name: http
-
       sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
       url: "https://pub.dev"
     source: hosted
@@ -386,4 +384,3 @@ packages:
 sdks:
   dart: ">=3.4.4 <4.0.0"
   flutter: ">=3.22.0"
-
