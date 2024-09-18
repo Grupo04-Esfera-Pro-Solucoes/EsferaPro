@@ -115,51 +115,46 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _buildTaskCard(Task task) {
-    IconData statusIcon;
-    switch (task.status) {
-      case 'todo':
-        statusIcon = Icons.check_box_outline_blank;
-        break;
-      case 'inProgress':
-        statusIcon = Icons.sync;
-        break;
-      case 'done':
-        statusIcon = Icons.check_circle;
-        break;
-      default:
-        statusIcon = Icons.help;
-    }
+  IconData statusIcon;
 
-    Widget buildDismissBackground(Alignment alignment, IconData icon) {
-      return Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        alignment: alignment,
-        child: Icon(
-          icon,
-          color: const Color(0xFF6502D4),
-          size: 30,
-        ),
-      );
-    }
+  switch (task.status) {
+    case 'todo':
+      statusIcon = Icons.check_box_outline_blank;
+      break;
+    case 'inProgress':
+      statusIcon = Icons.sync;
+      break;
+    case 'done':
+      statusIcon = Icons.check_circle;
+      break;
+    default:
+      statusIcon = Icons.help;
+  }
 
-    return Dismissible(
-      key: ValueKey(task.id),
-      background: buildDismissBackground(Alignment.centerLeft, Icons.arrow_back_ios),
-      secondaryBackground: buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
-      direction: DismissDirection.horizontal,
-      onDismissed: (direction) async {
+  Widget buildDismissBackground(Alignment alignment, IconData icon) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      alignment: alignment,
+      child: Icon(
+        icon,
+        color: const Color(0xFF6502D4),
+        size: 30,
+      ),
+    );
+  }
 
-        final currentStatus = TaskStatus.values.firstWhere(
-          (e) => e.toString().split('.').last == task.status,
-          orElse: () => TaskStatus.todo,
-        );
-        final newStatus = direction == DismissDirection.startToEnd
-            ? _getNextStatus(currentStatus)
-            : _getPreviousStatus(currentStatus);
-
+  return Dismissible(
+    key: ValueKey(task.id),
+    background: buildDismissBackground(Alignment.centerLeft, Icons.arrow_back_ios),
+    secondaryBackground: task.status == 'todo'
+        ? buildDismissBackground(Alignment.centerRight, Icons.delete)
+        : buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
+    direction: DismissDirection.horizontal,
+    onDismissed: (direction) async {
+      if (task.status == 'todo' && direction == DismissDirection.endToStart) {
         try {
-          await _updateTaskStatus(task.id, newStatus.toString().split('.').last);
+          await _taskService.deleteTask(task.id);
           setState(() {
             tasks.remove(task);
           });
@@ -168,59 +163,107 @@ class _TasksPageState extends State<TasksPage> {
             tasks.add(task);
           });
         }
-      },
-      child: Container(
-        decoration: const BoxDecoration(
+      } else if (direction == DismissDirection.startToEnd) {
+        final currentStatus = TaskStatus.values.firstWhere(
+          (e) => e.toString().split('.').last == task.status,
+          orElse: () => TaskStatus.todo,
+        );
+        final newStatus = _getNextStatus(currentStatus);
+
+        try {
+          await _updateTaskStatus(task.id, newStatus.toString().split('.').last);
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? Task(
+              id: t.id,
+              name: t.name,
+              description: t.description,
+              dueDate: t.dueDate,
+              status: newStatus.toString().split('.').last,
+              userId: t.userId
+            ) : t).toList();
+          });
+        } catch (e) {
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? task : t).toList();
+          });
+        }
+      } else if (direction == DismissDirection.endToStart && task.status != 'todo') {
+        final currentStatus = TaskStatus.values.firstWhere(
+          (e) => e.toString().split('.').last == task.status,
+          orElse: () => TaskStatus.todo,
+        );
+        final previousStatus = _getPreviousStatus(currentStatus);
+
+        try {
+          await _updateTaskStatus(task.id, previousStatus.toString().split('.').last);
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? Task(
+              id: t.id,
+              name: t.name,
+              description: t.description,
+              dueDate: t.dueDate,
+              status: previousStatus.toString().split('.').last,
+              userId: t.userId
+            ) : t).toList();
+          });
+        } catch (e) {
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? task : t).toList();
+          });
+        }
+      }
+    },
+    child: Container(
+      decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
           bottom: BorderSide(color: Colors.grey, width: 1),
-          ),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    task.getFormattedDueDate(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Icon(
-              statusIcon,
-              color: const Color(0xFF6502D4),
-              size: 30,
-            ),
-          ],
         ),
       ),
-    );
-  }
-
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  task.getFormattedDueDate(),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Icon(
+            statusIcon,
+            color: const Color(0xFF6502D4),
+            size: 30,
+          ),
+        ],
+      ),
+    ),
+  );
+}
   void _showAddTaskDialog(BuildContext context) {
     showDialog(
       context: context,
