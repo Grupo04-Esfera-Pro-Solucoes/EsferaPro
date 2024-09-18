@@ -100,7 +100,7 @@ class _ClientPageState extends State<ClientPage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.purple,
+                  color: Color(0xFF6502D4),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
