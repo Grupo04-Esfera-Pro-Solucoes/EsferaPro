@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'drawer.dart';
 import 'app_bar.dart';
 
-
 class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -33,4 +32,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-

@@ -133,10 +133,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         obscureText: false,
                       ),
-                      Text(
-                        _error,
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                      const SizedBox(height: 10),
+                      if (_error.isNotEmpty) 
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            _error,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
                       const SizedBox(height: 14),
                       Container(
                         width: MediaQuery.of(context).size.width * 0.42,
@@ -148,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               gradient: LinearGradient(
                                 colors: [
                                   Color(0xFF4A0BA8),
-                                  Color(0xFF6502D4),
                                   Color.fromARGB(255, 132, 34, 244)
                                 ],
                                 begin: Alignment.topRight,
