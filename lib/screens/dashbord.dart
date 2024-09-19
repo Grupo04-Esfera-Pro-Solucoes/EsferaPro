@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/task_model.dart';
 import '../service/task_service.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 enum TaskStatus { todo, inProgress, done }
 
@@ -158,6 +159,48 @@ class _DashboardState extends State<Dashboard> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            'Ligações',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6502D4),
+                            ),
+                          ),
+                          Text(
+                            '150',
+                            style: TextStyle(
+                              fontSize: 60, 
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_upward,
+                                color: Colors.green,
+                                size: 16,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                '10% Mês anterior',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 Expanded(
@@ -168,28 +211,256 @@ class _DashboardState extends State<Dashboard> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            'Propostas',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6502D4),
+                            ),
+                          ),
+                          Text(
+                            '200',
+                            style: TextStyle(
+                              fontSize: 60,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_downward,
+                                color: Colors.red,
+                                size: 16,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                '5% Mês anterior',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16.0),
-            // Caixa 3
             Container(
-              width: double.infinity,
               height: 150,
+              width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text(
+                      'Faturamento Mensal',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF6502D4),
+                      ),
+                    ),
+                    Text(
+                      'R\$ 1.000,00',
+                      style: TextStyle(
+                        fontSize: 60,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.arrow_upward,
+                          color: Colors.green,
+                          size: 16,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          '15% Mês anterior',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16.0),
-            // Caixa 4 com borda
             Container(
+              height: 200,
               width: double.infinity,
-              height: 150,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Propostas',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF6502D4),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Stack(
+                                children: [
+                                  PieChart(
+                                    PieChartData(
+                                      sections: [
+                                        PieChartSectionData(
+                                          value: 50,
+                                          color: Color(0xFF6A1B9A),
+                                          radius: 15,
+                                          title: '',
+                                          titleStyle: const TextStyle(
+                                            fontSize: 0,
+                                          ),
+                                        ),
+                                        PieChartSectionData(
+                                          value: 30,
+                                          color: Color(0xFFAB47BC),
+                                          radius: 15,
+                                          title: '',
+                                          titleStyle: const TextStyle(
+                                            fontSize: 0,
+                                          ),
+                                        ),
+                                        PieChartSectionData(
+                                          value: 20,
+                                          color: Color(0xFFCE93D8),
+                                          radius: 15,
+                                          title: '',
+                                          titleStyle: const TextStyle(
+                                            fontSize: 0,
+                                          ),
+                                        ),
+                                      ],
+                                      borderData: FlBorderData(show: false),
+                                      sectionsSpace: 0,
+                                      centerSpaceRadius: 40,
+                                    ),
+                                  ),
+                                  Center(
+                                    child: Text(
+                                      '30',
+                                      style: const TextStyle(
+                                        fontSize: 35,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF6502D4),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              children: const [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      color: Color(0xFF6A1B9A),
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '50% Fechado',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFF6A1B9A),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      color: Color(0xFFAB47BC),
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '30% Em Negociado',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFFAB47BC),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      color: Color(0xFFCE93D8),
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '20% Perdido',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFFCE93D8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16.0),
