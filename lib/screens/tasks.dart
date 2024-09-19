@@ -19,10 +19,12 @@ class _TasksPageState extends State<TasksPage> {
   TaskStatus selectedStatus = TaskStatus.todo;
   List<Task> tasks = [];
   late int userId;
+  late PageController _pageController; 
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _loadUserId();
   }
 
@@ -82,6 +84,15 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
+  List<Task> _getFilteredTasks(TaskStatus status) {
+    return tasks.where((task) {
+      return TaskStatus.values.firstWhere(
+        (s) => s.toString().split('.').last == task.status,
+        orElse: () => TaskStatus.todo,
+      ) == status;
+    }).toList().reversed.toList();
+  }
+
   List<Task> get _filteredTasks {
     return tasks.where((task) {
       final taskStatus = TaskStatus.values.firstWhere(
@@ -99,6 +110,7 @@ class _TasksPageState extends State<TasksPage> {
       onPressed: () {
         setState(() {
           selectedStatus = status;
+          _pageController.jumpToPage(status.index); 
         });
       },
       child: Text(
@@ -334,41 +346,63 @@ Widget _buildTaskCard(Task task) {
   }
   
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-            color: const Color(0xFF6502D4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildOption('A Fazer', TaskStatus.todo),
-                _buildOption('Em Progresso', TaskStatus.inProgress),
-                _buildOption('Concluídas', TaskStatus.done),
-              ],
-            ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+          color: const Color(0xFF6502D4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildOption('A Fazer', TaskStatus.todo),
+              _buildOption('Em Progresso', TaskStatus.inProgress),
+              _buildOption('Concluídas', TaskStatus.done),
+            ],
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredTasks.length,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildTaskCard(_filteredTasks[index]);
-              },
-            ),
+        ),
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                selectedStatus = TaskStatus.values[index];
+              });
+            },
+            children: [
+              ListView.builder(
+                itemCount: _getFilteredTasks(TaskStatus.todo).length,
+                itemBuilder: (context, index) {
+                  return _buildTaskCard(_getFilteredTasks(TaskStatus.todo)[index]);
+                },
+              ),
+              ListView.builder(
+                itemCount: _getFilteredTasks(TaskStatus.inProgress).length,
+                itemBuilder: (context, index) {
+                  return _buildTaskCard(_getFilteredTasks(TaskStatus.inProgress)[index]);
+                },
+              ),
+              ListView.builder(
+                itemCount: _getFilteredTasks(TaskStatus.done).length,
+                itemBuilder: (context, index) {
+                  return _buildTaskCard(_getFilteredTasks(TaskStatus.done)[index]);
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showTaskCreateDialog(context),
-        backgroundColor: const Color(0xFF6502D4),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () => _showTaskCreateDialog(context),
+      backgroundColor: const Color(0xFF6502D4),
+      foregroundColor: Colors.white,
+      child: const Icon(Icons.add),
+    ),
+  );
+}
 }
 
 class CustomElevatedButton extends StatelessWidget {
