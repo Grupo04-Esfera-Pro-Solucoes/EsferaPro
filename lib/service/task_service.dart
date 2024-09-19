@@ -24,7 +24,7 @@ class TaskService {
 
   Future<Task> createTask(Task task) async {
   final response = await http.post(
-    Uri.parse('$baseUrl'),
+    Uri.parse(baseUrl),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },

@@ -66,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             colors: [
               Color(0xFF34016E),
-              Color(0xFF6502D4)
+              Color(0xFF6502D4),
             ],
             begin: Alignment.centerRight,
             end: Alignment.centerLeft,
@@ -82,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(32.0),
                   child: Form(
                     key: _formKey,
@@ -99,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               colors: [
                                 Color(0xFF4A0BA8),
                                 Color(0xFF6502D4),
-                                Color.fromARGB(255, 132, 34, 244)
+                                Color.fromARGB(255, 132, 34, 244),
                               ],
                               begin: Alignment.topRight,
                               end: Alignment.bottomLeft,
@@ -176,6 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 16.0),
                         TextFormField(
+                          keyboardType: TextInputType.emailAddress,
                           controller: _email,
                           decoration: const InputDecoration(
                             labelText: 'Email',
@@ -205,6 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 16.0),
                         TextFormField(
                           controller: _phone,
+                          keyboardType: TextInputType.phone,
                           decoration: const InputDecoration(
                             labelText: 'Telefone',
                             labelStyle: TextStyle(
@@ -263,8 +265,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             Theme(
                               data: ThemeData(
-                                unselectedWidgetColor:
-                                    const Color.fromARGB(255, 132, 34, 244),
+                                checkboxTheme: CheckboxThemeData(
+                                  side: WidgetStateBorderSide.resolveWith(
+                                    (states) {
+                                      return const BorderSide(
+                                        color: Color.fromARGB(255, 132, 34, 244),
+                                        width: 2.0,
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
                               child: Checkbox(
                                 value: _termsAccepted,
@@ -305,19 +315,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
+                              foregroundColor: _termsAccepted ? Colors.white : Colors.grey,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               minimumSize: Size(
-                                  MediaQuery.of(context).size.width * 0.42, 40),
+                                MediaQuery.of(context).size.width * 0.42, 40
+                              ),
                             ),
                             onPressed: _termsAccepted
                                 ? () {
                                     _postNewUser();
                                   }
                                 : null,
-                            child: const Text('Cadastrar'),
+                            child: Text(
+                              'Cadastrar',
+                              style: TextStyle(
+                                color: _termsAccepted ? Colors.white : Colors.grey, // Cor do texto cinza quando desativado
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16.0),
@@ -340,7 +356,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 side: const BorderSide(
-                                  color: Color(0xFF34016E),
+                                  color: Color.fromARGB(255, 132, 34, 244),
                                   width: 1.0,
                                 ),
                               ),

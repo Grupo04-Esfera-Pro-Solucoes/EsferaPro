@@ -13,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  bool _obscurePassword = true;
   Color borderColor = const Color.fromARGB(255, 132, 34, 244);
   String _error = '';
 
@@ -64,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -117,26 +118,45 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20.0),
                       TextField(
                         controller: _password,
-                        decoration: const InputDecoration(
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
                           labelText: 'Senha',
-                          labelStyle: TextStyle(
+                          labelStyle: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF98A2B3),
                           ),
-                          border: OutlineInputBorder(),
-                          focusedBorder: OutlineInputBorder(
+                          border: const OutlineInputBorder(),
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 2.0),
                           ),
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 1.0),
                           ),
+                          suffixIcon: Padding (
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              color: const Color(0xFF98A2B3),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        )
                         ),
-                        obscureText: false,
                       ),
-                      Text(
-                        _error,
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                      const SizedBox(height: 10),
+                      if (_error.isNotEmpty) 
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            _error,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
                       const SizedBox(height: 14),
                       Container(
                         width: MediaQuery.of(context).size.width * 0.42,
@@ -148,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               gradient: LinearGradient(
                                 colors: [
                                   Color(0xFF4A0BA8),
-                                  Color(0xFF6502D4),
                                   Color.fromARGB(255, 132, 34, 244)
                                 ],
                                 begin: Alignment.topRight,
