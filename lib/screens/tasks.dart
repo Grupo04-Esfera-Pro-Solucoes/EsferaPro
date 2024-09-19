@@ -1,8 +1,9 @@
+import 'package:esferapro/widgets/task_update.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../service/task_service.dart';
 import '../model/task_model.dart';
-import '../widgets/task_dialog.dart';
+import '../widgets/task_create.dart';
 
 enum TaskStatus { todo, inProgress, done }
 
@@ -62,6 +63,14 @@ class _TasksPageState extends State<TasksPage> {
     });
   }
 
+  void _updateTask(Task updatedTask) {
+    setState(() {
+      tasks = tasks.map((t) {
+        return t.id == updatedTask.id ? updatedTask : t;
+      }).toList();
+    });
+  }
+
   List<Task> get _filteredTasks {
     return tasks.where((task) {
       final taskStatus = TaskStatus.values.firstWhere(
@@ -114,7 +123,7 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
-  Widget _buildTaskCard(Task task) {
+Widget _buildTaskCard(Task task) {
   IconData statusIcon;
 
   switch (task.status) {
@@ -145,10 +154,9 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   DismissDirection getDismissDirection(Task task) {
-    if (task.status == 'done') {
-      return DismissDirection.endToStart;
-    }
-    return DismissDirection.horizontal;
+    return task.status == 'done'
+        ? DismissDirection.endToStart
+        : DismissDirection.horizontal;
   }
 
   return Dismissible(
@@ -220,64 +228,88 @@ class _TasksPageState extends State<TasksPage> {
         }
       }
     },
-    child: Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-              bottom: BorderSide(color: Colors.grey, width: 1),
-              right: BorderSide(color: Colors.grey, width: 1),
-              left: BorderSide(color: Colors.grey, width: 1),
+    child: GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return TaskUpdateDialog(
+              task: task,
+              onTaskUpdated: (updatedTask) {
+                _updateTask(updatedTask);
+              },
+              userId: userId,
+            );
+          },
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      task.getFormattedDueDate(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                statusIcon,
+                color: const Color(0xFF6502D4),
+                size: 30,
+              ),
+            ],
+          ),
         ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  task.getFormattedDueDate(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Icon(
-            statusIcon,
-            color: const Color(0xFF6502D4),
-            size: 30,
-          ),
-        ],
       ),
     ),
   );
 }
-  void _showAddTaskDialog(BuildContext context) {
+  void _showTaskCreateDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddTaskDialog(
+        return TaskCreateDialog(
           onTaskCreated: (Task task) {
             _createTask(task);
           },
@@ -286,7 +318,7 @@ class _TasksPageState extends State<TasksPage> {
       },
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -316,7 +348,7 @@ class _TasksPageState extends State<TasksPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTaskDialog(context),
+        onPressed: () => _showTaskCreateDialog(context),
         backgroundColor: const Color(0xFF6502D4),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
