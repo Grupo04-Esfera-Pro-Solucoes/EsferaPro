@@ -100,7 +100,7 @@ class _ClientPageState extends State<ClientPage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Color(0xFF6502D4),
+                  color: const Color(0xFF6502D4),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -108,7 +108,7 @@ class _ClientPageState extends State<ClientPage> {
                           .withOpacity(0.3), 
                       spreadRadius: 2, 
                       blurRadius: 10,
-                      offset: Offset(0,
+                      offset: const Offset(0,
                           4), 
                     ),
                   ],

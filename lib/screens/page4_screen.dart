@@ -6,17 +6,17 @@ class Page4 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Page 4'),
+        title: const Text('Page 4'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Center(
+          const Center(
             child: Text('This is Page 4.'),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           ElevatedButton(
-            child: Text('Go to Stack Page 4'),
+            child: const Text('Go to Stack Page 4'),
             onPressed: () {
               Navigator.push(
                 context,
