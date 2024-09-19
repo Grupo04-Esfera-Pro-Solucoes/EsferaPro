@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'login.dart';
-import 'configuration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'configuration.dart';
+import 'login.dart';
 
 AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
   return AppBar(
@@ -16,6 +16,7 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
       if (currentRoute != '/configuration')
         IconButton(
           icon: const Icon(Icons.account_circle),
+          iconSize: 30,
           onPressed: () async {
             final SharedPreferences prefs = await SharedPreferences.getInstance();
             int? userId = prefs.getInt('userId');
@@ -34,8 +35,10 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
             }
           },
         ),
+       const SizedBox(width: 10),
       IconButton(
         icon: const Icon(Icons.logout),
+        iconSize: 30,
         onPressed: () async {
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.remove('userId');
@@ -46,6 +49,7 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
           );
         },
       ),
+      const SizedBox(width: 10),
     ],
     toolbarHeight: 60,
   );

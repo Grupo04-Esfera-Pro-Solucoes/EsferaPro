@@ -122,7 +122,7 @@ class _TasksPageState extends State<TasksPage> {
       statusIcon = Icons.check_box_outline_blank;
       break;
     case 'inProgress':
-      statusIcon = Icons.sync;
+      statusIcon = Icons.hourglass_empty;
       break;
     case 'done':
       statusIcon = Icons.check_circle;
@@ -144,13 +144,20 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
+  DismissDirection getDismissDirection(Task task) {
+    if (task.status == 'done') {
+      return DismissDirection.endToStart;
+    }
+    return DismissDirection.horizontal;
+  }
+
   return Dismissible(
     key: ValueKey(task.id),
-    background: buildDismissBackground(Alignment.centerLeft, Icons.arrow_back_ios),
+    background: buildDismissBackground(Alignment.centerLeft, Icons.change_circle_outlined),
     secondaryBackground: task.status == 'todo'
         ? buildDismissBackground(Alignment.centerRight, Icons.delete)
-        : buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
-    direction: DismissDirection.horizontal,
+        : buildDismissBackground(Alignment.centerRight, Icons.change_circle_outlined),
+    direction: getDismissDirection(task),
     onDismissed: (direction) async {
       if (task.status == 'todo' && direction == DismissDirection.endToStart) {
         try {
@@ -184,7 +191,7 @@ class _TasksPageState extends State<TasksPage> {
           });
         } catch (e) {
           setState(() {
-            tasks = tasks.map((t) => t.id == task.id ? task : t).toList();
+            tasks = tasks.map((t) => t.id == task.id ? task : t).toList(); 
           });
         }
       } else if (direction == DismissDirection.endToStart && task.status != 'todo') {
@@ -208,7 +215,7 @@ class _TasksPageState extends State<TasksPage> {
           });
         } catch (e) {
           setState(() {
-            tasks = tasks.map((t) => t.id == task.id ? task : t).toList();
+            tasks = tasks.map((t) => t.id == task.id ? task : t).toList(); 
           });
         }
       }
@@ -217,7 +224,9 @@ class _TasksPageState extends State<TasksPage> {
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
-          bottom: BorderSide(color: Colors.grey, width: 1),
+              bottom: BorderSide(color: Colors.grey, width: 1),
+              right: BorderSide(color: Colors.grey, width: 1),
+              left: BorderSide(color: Colors.grey, width: 1),
         ),
       ),
       padding: const EdgeInsets.all(16),
