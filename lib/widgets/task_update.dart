@@ -6,11 +6,13 @@ import '../model/task_model.dart';
 class TaskUpdateDialog extends StatefulWidget {
   final Task task;
   final void Function(Task) onTaskUpdated;
+  final void Function() onTaskDeleted;
   final int userId;
 
   const TaskUpdateDialog({
     required this.task,
     required this.onTaskUpdated,
+    required this.onTaskDeleted,
     required this.userId,
     Key? key,
   }) : super(key: key);
@@ -219,6 +221,25 @@ class _TaskUpdateState extends State<TaskUpdateDialog> {
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: TextButton(
+            onPressed: () {
+              widget.onTaskDeleted();
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: Color(0xFF6502D4),
+              shape: CircleBorder(),
+              padding: EdgeInsets.all(16),
+            ),
+            child: const Icon(
+              Icons.delete,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
         ),
       ],
     );

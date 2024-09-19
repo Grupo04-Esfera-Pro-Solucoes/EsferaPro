@@ -71,6 +71,17 @@ class _TasksPageState extends State<TasksPage> {
     });
   }
 
+  Future<void> _deleteTask(int taskId) async {
+    try {
+      await _taskService.deleteTask(taskId);
+      setState(() {
+        tasks.removeWhere((task) => task.id == taskId);
+      });
+    } catch (e) {
+      print('Erro ao excluir a tarefa: $e');
+    }
+  }
+
   List<Task> get _filteredTasks {
     return tasks.where((task) {
       final taskStatus = TaskStatus.values.firstWhere(
@@ -79,7 +90,7 @@ class _TasksPageState extends State<TasksPage> {
       );
 
       return taskStatus == selectedStatus;
-    }).toList();
+    }).toList().reversed.toList();
   }
 
   Widget _buildOption(String title, TaskStatus status) {
@@ -237,6 +248,9 @@ Widget _buildTaskCard(Task task) {
               task: task,
               onTaskUpdated: (updatedTask) {
                 _updateTask(updatedTask);
+              },
+              onTaskDeleted: () {
+                _deleteTask(task.id);
               },
               userId: userId,
             );
