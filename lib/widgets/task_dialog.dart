@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import '../model/task_model.dart';
 
-class AddTaskDialog extends StatelessWidget {
+class AddTaskDialog extends StatefulWidget {
   final void Function(Task) onTaskCreated;
   final int userId;
 
   const AddTaskDialog({required this.onTaskCreated, required this.userId});
 
   @override
-  Widget build(BuildContext context) {
-    final titleController = TextEditingController();
-    final timeController = TextEditingController();
-    final descriptionController = TextEditingController();
+  _AddTaskDialogState createState() => _AddTaskDialogState();
+}
 
+class _AddTaskDialogState extends State<AddTaskDialog> {
+  final titleController = TextEditingController();
+  final timeController = TextEditingController();
+  final descriptionController = TextEditingController();
+
+  bool _isDateInvalid = false;
+
+  @override
+  Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -62,8 +70,24 @@ class AddTaskDialog extends StatelessWidget {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
-                        keyboardType: TextInputType.datetime,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          MaskedInputFormatter('00/00/0000'),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _isDateInvalid = false;
+                          });
+                        },
                       ),
+                      if (_isDateInvalid)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Formato de data inválido",
+                            style: TextStyle(color: Colors.red, fontSize: 12),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -150,17 +174,26 @@ class AddTaskDialog extends StatelessWidget {
                     final title = titleController.text.trim();
                     final description = descriptionController.text.trim();
                     final dueDateStr = timeController.text.trim();
-                    final dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
+
+                    DateTime? dueDate;
+                    try {
+                      dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
+                    } catch (e) {
+                      setState(() {
+                        _isDateInvalid = true;
+                      });
+                      return;
+                    }
                     final task = Task(
                       id: 0,
                       name: title,
                       description: description,
                       dueDate: dueDate,
                       status: "todo",
-                      userId: userId,
+                      userId: widget.userId,
                     );
 
-                    onTaskCreated(task);
+                    widget.onTaskCreated(task);
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
