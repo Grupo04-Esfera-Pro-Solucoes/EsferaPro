@@ -3,17 +3,17 @@ import 'package:intl/intl.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import '../model/task_model.dart';
 
-class AddTaskDialog extends StatefulWidget {
+class TaskCreateDialog extends StatefulWidget {
   final void Function(Task) onTaskCreated;
   final int userId;
 
-  const AddTaskDialog({required this.onTaskCreated, required this.userId});
+  const TaskCreateDialog({required this.onTaskCreated, required this.userId});
 
   @override
-  _AddTaskDialogState createState() => _AddTaskDialogState();
+  _taskCreateState createState() => _taskCreateState();
 }
 
-class _AddTaskDialogState extends State<AddTaskDialog> {
+class _taskCreateState extends State<TaskCreateDialog> {
   final titleController = TextEditingController();
   final timeController = TextEditingController();
   final descriptionController = TextEditingController();
