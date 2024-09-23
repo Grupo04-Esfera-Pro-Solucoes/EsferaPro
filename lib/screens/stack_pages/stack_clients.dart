@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:esferapro/service/createCustumer_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:esferapro/service/createCustumer_service.dart';
 
 class StackClients extends StatefulWidget {
   @override
@@ -24,88 +24,26 @@ class _StackClientsState extends State<StackClients> {
   final TextEditingController _addressCity = TextEditingController();
   final TextEditingController _addressCountry = TextEditingController();
 
-  void _postNewUser() async {
-    String name = _clientName.text;
-    String cpfCnpj = _clientCpfCnpj.text;
-    String company = _clientCompany.text;
-    String role = _clientRole.text;
-    String email = _clientEmail.text;
-    String date = _clientDate.text;
-    String contactNumber1 = _contactNumber.text;
-    String addressNumber1 = _addressNumber.text;
-    String zipCode = _addressZipCode.text;
-    String street = _addressStreet.text;
-    String state = _addressState.text;
-    String city = _addressCity.text;
-    String country = _addressCountry.text;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
+  final UserService _userService = UserService();
 
-    final url = Uri.parse('http://localhost:8080/client-address-contact/add');
-
-    final Map<String, dynamic> dados = {
-      "client": {
-        "name": name,
-        "cpfCnpj": cpfCnpj,
-        "company": company,
-        "role": role,
-        "email": email,
-        "date": date,
-        "user": {"idUser": userId}
-      },
-      "contact": [
-        {
-          "data": contactNumber1,
-          "idTypeContact": {"idTypeContact": 2, "type": "telefone"}
-        }
-      ],
-      "address": {
-        "zipCode": zipCode,
-        "street": street,
-        "number": addressNumber1,
-        "state": state,
-        "city": city,
-        "country": country
-      }
-    };
-    print('dados: $dados');
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(dados),
-      );
-      if (response.statusCode == 200) {
-        String responseBody = utf8.decode(response.bodyBytes);
-
-        if (responseBody.contains("Adicionado com sucesso")) {
-          print('Sucesso: $responseBody');
-          Navigator.pop(context);
-        } else {
-          try {
-            final jsonResponse = jsonDecode(responseBody);
-            print('Resposta JSON: $jsonResponse');
-            Navigator.pop(context);
-          } catch (e) {
-            print('Resposta não JSON: $responseBody');
-          }
-        }
-      } else {
-        String responseBody = utf8.decode(response.bodyBytes);
-        try {
-          final Map<String, dynamic> data = json.decode(responseBody);
-          String errorMessage = data['message'] ?? 'Erro desconhecido';
-          print('Erro do servidor: $errorMessage');
-        } catch (e) {
-          print('Erro: $responseBody');
-        }
-      }
-    } catch (e) {
-      print('Erro: $e');
-    }
-    Navigator.of(context).pop();
+  void _postNewUser() {
+    _userService.postNewUser(
+      name: _clientName.text,
+      cpfCnpj: _clientCpfCnpj.text,
+      company: _clientCompany.text,
+      role: _clientRole.text,
+      email: _clientEmail.text,
+      date: _clientDate.text,
+      contactNumber: _contactNumber.text,
+      addressNumber: _addressNumber.text,
+      zipCode: _addressZipCode.text,
+      street: _addressStreet.text,
+      state: _addressState.text,
+      city: _addressCity.text,
+      country: _addressCountry.text,
+    ).then((_) {
+      Navigator.pop(context);
+    });
   }
 
   @override
@@ -205,7 +143,7 @@ class _StackClientsState extends State<StackClients> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     Row(children: [
                       Expanded(
                         child: Column(
@@ -237,7 +175,7 @@ class _StackClientsState extends State<StackClients> {
                     ]),
                     const SizedBox(height: 10),
                     Row(children: [
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +206,7 @@ class _StackClientsState extends State<StackClients> {
                     ]),
                     const SizedBox(height: 10),
                     Row(children: [
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,7 +220,7 @@ class _StackClientsState extends State<StackClients> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 5),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +235,7 @@ class _StackClientsState extends State<StackClients> {
                         ),
                       ),
                     ]),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(
@@ -335,6 +273,7 @@ class _StackClientsState extends State<StackClients> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20),
                   ])),
         ));
   }
