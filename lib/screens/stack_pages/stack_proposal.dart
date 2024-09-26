@@ -147,7 +147,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                             flex: 2,
                             child: TextFormField(
                               controller: _dateController,
-                              decoration: inputDecoration.copyWith(
+                              decoration: inputDecoration._selectDate(
                                 labelText: 'Data de Conclusão',
                                 suffixIcon: IconButton(
                                   icon: Icon(

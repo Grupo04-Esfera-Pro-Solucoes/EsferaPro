@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'stack_pages/proposalcadastro.dart'; // Importe o arquivo correto
+import 'stack_pages/stack_proposal.dart'; // Importe o arquivo correto
 
-class Proposals extends StatefulWidget {
+class Proposal extends StatefulWidget {
   @override
-  _ProposalsState createState() => _ProposalsState();
+  _ProposalState createState() => _ProposalState();
 }
 
-class _ProposalsState extends State<Proposals> {
+class _ProposalState extends State<Proposal> {
   List<Map<String, dynamic>> proposals = [];
 
   @override
