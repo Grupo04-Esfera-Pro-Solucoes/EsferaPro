@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../widgets/input_formatters.dart';
 import 'package:esferapro/service/createCustumer_service.dart';
 
 class StackClients extends StatefulWidget {
@@ -128,7 +130,8 @@ class _StackClientsState extends State<StackClients> {
               const SizedBox(height: 5),
               _buildTextField(
                 controller: _clientDate,
-                hintText: 'dd/mm/yyyy',
+                hintText: '00/00/0000',
+                inputFormatters: [DateInputFormatter()],
               ),
               const SizedBox(height: 15),
               const Text(
@@ -151,6 +154,7 @@ class _StackClientsState extends State<StackClients> {
               _buildTextField(
                 controller: _contactNumber,
                 hintText: '99 999999999',
+                inputFormatters: [PhoneInputFormatter()],
               ),
               const SizedBox(height: 15),
               const Text(
@@ -171,6 +175,7 @@ class _StackClientsState extends State<StackClients> {
                       _buildHalfWidthTextField(
                         controller: _addressZipCode,
                         hintText: '00000-00',
+                        inputFormatters: [ZipCodeInputFormatter()],
                       ),
                     ],
                   ),
@@ -250,7 +255,7 @@ class _StackClientsState extends State<StackClients> {
                   ),
                 ),
               ]),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               Row(
                 children: [
                   Expanded(
@@ -318,18 +323,25 @@ class _StackClientsState extends State<StackClients> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: controller,
+      inputFormatters: inputFormatters,
+      style: const TextStyle(fontSize: 16),
       decoration: InputDecoration(
         hintText: hintText,
-        filled: true, // Enable filling
-        fillColor: const Color(0xFFF0F0F7), // Set background color
+        filled: true,
+        fillColor: const Color(0xFFF0F0F7),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.black),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+          fontSize: 12, 
+        ),
       ),
     );
   }
@@ -337,18 +349,25 @@ class _StackClientsState extends State<StackClients> {
   Widget _buildHalfWidthTextField({
     required TextEditingController controller,
     required String hintText,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: controller,
+      inputFormatters: inputFormatters,
+      style: const TextStyle(fontSize: 16),
       decoration: InputDecoration(
         hintText: hintText,
-        filled: true, // Enable filling
-        fillColor: const Color(0xFFF0F0F7), // Set background color
+        filled: true,
+        fillColor: const Color(0xFFF0F0F7),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.black),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+          fontSize: 12,
+        ),
       ),
     );
   }
