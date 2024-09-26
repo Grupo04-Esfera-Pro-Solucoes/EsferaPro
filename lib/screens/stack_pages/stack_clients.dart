@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:esferapro/service/createCustumer_service.dart';
 
 class StackClients extends StatefulWidget {
@@ -49,265 +46,290 @@ class _StackClientsState extends State<StackClients> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: const Icon(
-            Icons.person_add,
-            color: Colors.yellow,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: const Color(0xff6502d4),
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: const [
+                  Icon(
+                    Icons.person_add,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                  SizedBox(width: 20),
+                  Text(
+                    'Cadastrar Cliente',
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
-          backgroundColor: Color(0xff6502d4),
-          title: const Text('Cadastro de cliente'),
-          foregroundColor: Colors.white,
         ),
-        backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 36.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Dados básicos',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTitle('Nome'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                      controller: _clientName,
-                      hintText: 'Nome do cliente',
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTitle('CPF ou CNPJ'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                      controller: _clientCpfCnpj,
-                      hintText: 'CPF/CNPJ',
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTitle('Empresa'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                      controller: _clientCompany,
-                      hintText: 'Nome da empresa',
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTitle('Cargo'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                      controller: _clientRole,
-                      hintText: 'Cargo do cliente',
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTitle('Data de Nascimento'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                      controller: _clientDate,
-                      hintText: 'dd/mm/aaaa',
-                    ),
-                    const Divider(
-                      thickness: 1,
-                      color: Colors.grey,
-                    ),
-                    const Text(
-                      'Informações para contato',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTitle('Email'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                      controller: _clientEmail,
-                      hintText: 'exemplo@email.com',
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTitle('Contato'),
-                    const SizedBox(height: 5),
-                    _buildTextField(
-                        controller: _contactNumber,
-                        hintText: "(99) 99999-9999"),
-                    const Divider(
-                      thickness: 1,
-                      color: Colors.grey,
-                    ),
-                    const Text(
-                      'Endereço',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTitle('CEP'),
-                            const SizedBox(height: 8),
-                            _buildHalfWidthTextField(
-                              controller: _addressZipCode,
-                              hintText: '99999-99',
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTitle('Pais'),
-                            const SizedBox(height: 8),
-                            _buildHalfWidthTextField(
-                              controller: _addressCountry,
-                              hintText: 'Brasil',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]),
-                    const SizedBox(height: 10),
-                    Row(children: [
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 36.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Dados básicos',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+              _buildTitle('Nome'),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _clientName,
+                hintText: 'Digite o nome completo',
+              ),
+              const SizedBox(height: 10),
+              _buildTitle('CPF ou CNPJ'),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _clientCpfCnpj,
+                hintText: '123.456.789-00 ou 12.345.678/0001-95',
+              ),
+              const SizedBox(height: 10),
+              _buildTitle('Empresa'),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _clientCompany,
+                hintText: 'Nome da empresa',
+              ),
+              const SizedBox(height: 10),
+              _buildTitle('Cargo', isRequired: false),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _clientRole,
+                hintText: 'Seu cargo na empresa',
+              ),
+              const SizedBox(height: 10),
+              _buildTitle('Data de Nascimento', isRequired: false),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _clientDate,
+                hintText: 'dd/mm/yyyy',
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                'Informações para contato',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildTitle('Email'),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _clientEmail,
+                hintText: 'exemplo@email.com',
+              ),
+              const SizedBox(height: 10),
+              _buildTitle('Contato'),
+              const SizedBox(height: 5),
+              _buildTextField(
+                controller: _contactNumber,
+                hintText: '99 999999999',
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                'Endereço',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle('CEP', isRequired: false),
                       const SizedBox(height: 5),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTitle('Estado'),
-                            const SizedBox(height: 8),
-                            _buildHalfWidthTextField(
-                              controller: _addressState,
-                              hintText: 'Parana',
-                            ),
-                          ],
-                        ),
+                      _buildHalfWidthTextField(
+                        controller: _addressZipCode,
+                        hintText: '00000-00',
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTitle('Cidade'),
-                            const SizedBox(height: 8),
-                            _buildHalfWidthTextField(
-                              controller: _addressCity,
-                              hintText: 'Cidade x',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]),
-                    const SizedBox(height: 10),
-                    Row(children: [
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle('País', isRequired: false),
                       const SizedBox(height: 5),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTitle('Rua'),
-                            const SizedBox(height: 8),
-                            _buildHalfWidthTextField(
-                              controller: _addressStreet,
-                              hintText: 'Rua x',
-                            ),
-                          ],
+                      _buildHalfWidthTextField(
+                        controller: _addressCountry,
+                        hintText: 'Nome do país',
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 15),
+              Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle('Estado', isRequired: false),
+                      const SizedBox(height: 5),
+                      _buildHalfWidthTextField(
+                        controller: _addressState,
+                        hintText: 'Nome do estado',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle('Cidade', isRequired: false),
+                      const SizedBox(height: 5),
+                      _buildHalfWidthTextField(
+                        controller: _addressCity,
+                        hintText: 'Nome da cidade',
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 15),
+              Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle('Rua', isRequired: false),
+                      const SizedBox(height: 5),
+                      _buildHalfWidthTextField(
+                        controller: _addressStreet,
+                        hintText: 'Nome da rua',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle('Número', isRequired: false),
+                      const SizedBox(height: 5),
+                      _buildHalfWidthTextField(
+                        controller: _addressNumber,
+                        hintText: 'Casa/Apartamento',
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(color: Color(0xff6502D4), width: 2),
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          color: Color(0xff6502D4),
+                          fontSize: 20,
                         ),
                       ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTitle('Número'),
-                            const SizedBox(height: 8),
-                            _buildHalfWidthTextField(
-                              controller: _addressNumber,
-                              hintText: '00',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 25, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                side: const BorderSide(
-                                    color: Color(0xff475467)), 
-                              ),
-                              backgroundColor: Colors.white, 
-                            ),
-                            child: const Text(
-                              'Cancelar',
-                              style: TextStyle(
-                                color: Color(0xff475467),
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: CustomSizedElevatedButton(
-                            onPressed: () {
-                              _postNewUser();
-                            },
-                            text: 'Salvar',
-                          ),
-                        ),
-                      ],
                     ),
-                    const SizedBox(height: 20),
-                  ])),
-        ));
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomSizedElevatedButton(
+                      onPressed: () {
+                        _postNewUser();
+                      },
+                      text: 'Salvar',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildTitle(String title) {
+  Widget _buildTitle(String title, {bool isRequired = true}) {
     return Row(
       children: [
         Text(
           title,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,
           ),
         ),
-        const Text(
-          '*',
-          style: TextStyle(
-            color: Colors.red,
-            fontSize: 16,
+        if (isRequired)
+          const Text(
+            '*',
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 14,
+            ),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller, required String hintText}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+  }) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        labelStyle: TextStyle(color: Colors.grey[600]),
-        filled: true,
-        fillColor: Color(0xfff0f0f7),
-        border: const OutlineInputBorder(),
+        filled: true, // Enable filling
+        fillColor: const Color(0xFFF0F0F7), // Set background color
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
       ),
     );
   }
@@ -320,10 +342,13 @@ class _StackClientsState extends State<StackClients> {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        labelStyle: TextStyle(color: Colors.grey[600]),
-        filled: true,
-        fillColor: Color(0xfff0f0f7),
-        border: const OutlineInputBorder(),
+        filled: true, // Enable filling
+        fillColor: const Color(0xFFF0F0F7), // Set background color
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
       ),
     );
   }
@@ -334,29 +359,28 @@ class CustomSizedElevatedButton extends StatelessWidget {
   final String text;
 
   const CustomSizedElevatedButton({
+    super.key,
     required this.onPressed,
     required this.text,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity, // mesma largura do TextField
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          backgroundColor: const Color(0xFF6502D4),
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(color: Color(0xff6502D4)),
         ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-          ),
+        backgroundColor: const Color(0xff6502D4),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
         ),
       ),
     );
