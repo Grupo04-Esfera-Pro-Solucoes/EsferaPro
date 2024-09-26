@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import the intl package for date formatting
+import 'package:intl/intl.dart'; // Usada para formatação de datas
+// import 'package:http/http.dart' as http; // Apenas caso esteja utilizando chamadas HTTP
+import 'package:esferapro/service/createProposal_service.dart'; // Importe o serviço correto
 
 class ProposalCadastro extends StatefulWidget {
   @override
@@ -7,6 +9,7 @@ class ProposalCadastro extends StatefulWidget {
 }
 
 class _ProposalCadastroState extends State<ProposalCadastro> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
@@ -14,42 +17,20 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _clientIdController = TextEditingController();
   final TextEditingController _clientNameController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
-  void _postNewProposal() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      String title = _titleController.text;
-      String description = _descriptionController.text;
-      String value = _valueController.text;
-      String date = _dateController.text;
-      String id = _idController.text;
-      String clientId = _clientIdController.text;
-      String clientName = _clientNameController.text;
+  final ProposalService _createProposalService = ProposalService(); // Instância do serviço correto
 
-      try {
-        // Simulação de envio de proposta
-        final response = await Future.delayed(
-          Duration(seconds: 2),
-          () => {'statusCode': 200},
-        );
-
-        if (response['statusCode'] == 200) {
-          Navigator.pop(context);
-        } else {
-          _showErrorSnackBar('Erro ao enviar proposta');
-        }
-      } catch (e) {
-        _showErrorSnackBar('Erro: $e');
-      }
-    }
-  }
-
-  void _showErrorSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  void _postNewProposal() {
+    _createProposalService.postNewProposal(
+      idLead: int.parse(_idController.text),
+      proposalDate: _dateController.text,
+      description: _descriptionController.text,
+      service: _titleController.text,
+      value: double.parse(_valueController.text),
+      idStatusProposal: 1,
+    ).then((_) {
+      Navigator.pop(context);
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -85,8 +66,8 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
       appBar: AppBar(
         title: Row(
           children: const [
-            Icon(Icons.description, color: Color(0xFFF7BD2E)), // Icon updated here
-            SizedBox(width: 8.0), // Space between icon and text
+            Icon(Icons.description, color: Color(0xFFF7BD2E)), // Ícone atualizado aqui
+            SizedBox(width: 8.0), // Espaço entre ícone e texto
             Text(
               'Cadastro de Propostas',
               style: TextStyle(color: Colors.white),
@@ -94,7 +75,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
           ],
         ),
         backgroundColor: Color(0xFF6502D4),
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false, // Remove o botão de voltar
       ),
       body: Column(
         children: [
@@ -147,7 +128,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                             flex: 2,
                             child: TextFormField(
                               controller: _dateController,
-                              decoration: inputDecoration._selectDate(
+                              decoration: inputDecoration.copyWith(
                                 labelText: 'Data de Conclusão',
                                 suffixIcon: IconButton(
                                   icon: Icon(
@@ -339,13 +320,13 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                             width: 140,
                             height: 40,
                             child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF6502D4),
+                              ),
                               onPressed: _postNewProposal,
                               child: const Text(
                                 'Salvar',
                                 style: TextStyle(color: Colors.white),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF6502D4),
                               ),
                             ),
                           ),

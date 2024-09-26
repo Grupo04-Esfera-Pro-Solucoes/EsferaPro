@@ -19,7 +19,7 @@ class _ProposalState extends State<Proposal> {
 
   Future<void> _fetchProposals() async {
     try {
-      final response = await http.get(Uri.parse('http://grupo04.duckdns.org:8080/proposal/all'));
+      final response = await http.get(Uri.parse('http://localhost:8080/proposal/all'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body)['content'];
         setState(() {
