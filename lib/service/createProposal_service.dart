@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart';
-import 'dart:io';
 
 
 class ProposalService{
@@ -52,6 +49,8 @@ class ProposalService{
       print('Erro: $e');
     }
   }
+
+
 
 }
 

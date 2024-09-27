@@ -9,24 +9,41 @@ class ProposalCadastro extends StatefulWidget {
 }
 
 class _ProposalCadastroState extends State<ProposalCadastro> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _valueController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _clientIdController = TextEditingController();
-  final TextEditingController _clientNameController = TextEditingController();
+  final TextEditingController _service = TextEditingController();
+  final TextEditingController _description = TextEditingController();
+  final TextEditingController _value = TextEditingController();
+  final TextEditingController _date = TextEditingController();
+  final TextEditingController _leadId = TextEditingController();
+  final TextEditingController _clientId = TextEditingController();
+  final TextEditingController _clientName = TextEditingController();
+  final TextEditingController _solution = TextEditingController();
 
-  final ProposalService _createProposalService = ProposalService(); // Instância do serviço correto
+  final ProposalService _createProposalService = ProposalService();
+
+  List<String> _statusOptions = [];
+  String? _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStatusOptions();
+  }
+
+  Future<void> _fetchStatusOptions() async {
+    // Função fake para buscar os status disponíveis
+    await Future.delayed(Duration(seconds: 1)); // Simula uma chamada de rede
+    setState(() {
+      _statusOptions = ['Status 1', 'Status 2', 'Status 3']; // Exemplo de status
+    });
+  }
 
   void _postNewProposal() {
     _createProposalService.postNewProposal(
-      idLead: int.parse(_idController.text),
-      proposalDate: _dateController.text,
-      description: _descriptionController.text,
-      service: _titleController.text,
-      value: double.parse(_valueController.text),
+      idLead: int.parse(_leadId.text),
+      proposalDate: _date.text,
+      description: _description.text,
+      service: _service.text,
+      value: double.parse(_value.text),
       idStatusProposal: 1,
     ).then((_) {
       Navigator.pop(context);
@@ -42,7 +59,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
     );
     if (picked != null) {
       setState(() {
-        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        _date.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
   }
@@ -87,253 +104,291 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Informações Gerais',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(
+                      child: Text(
+                        'Informações Gerais',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 16.0),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: TextFormField(
-                              controller: _idController,
-                              decoration: inputDecoration.copyWith(
-                                labelText: 'ID da Ligação',
-                              ),
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 22,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'ID é obrigatório';
-                                }
-                                return null;
-                              },
+                    ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: TextFormField(
+                            controller: _leadId,
+                            decoration: inputDecoration.copyWith(
+                              labelText: 'ID da Ligação',
                             ),
+                            style: const TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 22,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'ID é obrigatório';
+                              }
+                              return null;
+                            },
                           ),
-                          const SizedBox(width: 16.0),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller: _dateController,
-                              decoration: inputDecoration.copyWith(
-                                labelText: 'Data de Conclusão',
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    Icons.calendar_today,
-                                    color: Color(0xFF9393C2),
-                                  ),
-                                  onPressed: () {
-                                    _selectDate(context);
-                                  },
+                        ),
+                        const SizedBox(width: 16.0),
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _date,
+                            decoration: inputDecoration.copyWith(
+                              labelText: 'Data de Conclusão',
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  Icons.calendar_today,
+                                  color: Color(0xFF9393C2),
                                 ),
+                                onPressed: () {
+                                  _selectDate(context);
+                                },
                               ),
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 22,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Data de Conclusão é obrigatória';
-                                }
-                                return null;
-                              },
                             ),
+                            style: const TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 22,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Data de Conclusão é obrigatória';
+                              }
+                              return null;
+                            },
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: _value,
+                      decoration: inputDecoration.copyWith(
+                        labelText: 'Valor da Proposta',
+                        prefixText: 'R\$ ',
                       ),
-                      const SizedBox(height: 16.0),
-                      TextFormField(
-                        controller: _valueController,
-                        decoration: inputDecoration.copyWith(
-                          labelText: 'Valor da Proposta',
-                          prefixText: 'R\$ ',
+                      style: const TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 22,
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Valor da Proposta é obrigatório';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Por favor, insira um valor válido';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: TextFormField(
+                            controller: _clientId,
+                            decoration: inputDecoration.copyWith(
+                              labelText: 'ID do Cliente',
+                            ),
+                            style: const TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 22,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'ID do Cliente é obrigatório';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 22,
+                        const SizedBox(width: 16.0),
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _clientName,
+                            decoration: inputDecoration.copyWith(
+                              labelText: 'Nome do Cliente',
+                            ),
+                            style: const TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 22,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Nome do Cliente é obrigatório';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Valor da Proposta é obrigatório';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Por favor, insira um valor válido';
-                          }
-                          return null;
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                    DropdownButtonFormField<String>(
+                      decoration: inputDecoration.copyWith(
+                        labelText: 'Status da Proposta',
+                      ),
+                      value: _selectedStatus,
+                      items: _statusOptions.map((String status) {
+                        return DropdownMenuItem<String>(
+                          value: status,
+                          child: Text(status),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedStatus = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Status da Proposta é obrigatório';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: _solution,
+                      decoration: inputDecoration.copyWith(
+                        labelText: 'Solução',
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 22,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Solução é obrigatória';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 32.0),
+                    const Center(
+                      child: Text(
+                        'Anexo de Arquivo',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          // Implementar a lógica de anexar arquivos
                         },
-                      ),
-                      const SizedBox(height: 16.0),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: TextFormField(
-                              controller: _clientIdController,
-                              decoration: inputDecoration.copyWith(
-                                labelText: 'ID do Cliente',
-                              ),
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 22,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'ID do Cliente é obrigatório';
-                                }
-                                return null;
-                              },
-                            ),
+                        child: Container(
+                          width: 250.0,
+                          height: 150.0,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Color(0xFF475467)),
+                            borderRadius: BorderRadius.circular(8.0),
+                            color: Colors.white,
                           ),
-                          const SizedBox(width: 16.0),
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller: _clientNameController,
-                              decoration: inputDecoration.copyWith(
-                                labelText: 'Nome do Cliente',
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.attach_file,
+                                color: Color(0xFF475467),
+                                size: 30.0,
                               ),
-                              style: const TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 22,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Nome do Cliente é obrigatório';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32.0),
-                      const Center(
-                        child: Text(
-                          'Anexo de Arquivo',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            // Implementar a lógica de anexar arquivos
-                          },
-                          child: Container(
-                            width: 250.0,
-                            height: 150.0,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Color(0xFF475467)),
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: Colors.white,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(
-                                  Icons.attach_file,
+                              SizedBox(height: 8.0),
+                              Text(
+                                'Clique aqui para anexar um arquivo',
+                                style: TextStyle(
                                   color: Color(0xFF475467),
-                                  size: 30.0,
+                                  fontSize: 16.0,
                                 ),
-                                SizedBox(height: 8.0),
-                                Text(
-                                  'Clique aqui para anexar um arquivo',
-                                  style: TextStyle(
-                                    color: Color(0xFF475467),
-                                    fontSize: 16.0,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32.0),
+                    const Center(
+                      child: Text(
+                        'Descrição da Tarefa',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    TextFormField(
+                      controller: _description,
+                      maxLines: 5,
+                      decoration: inputDecoration.copyWith(
+                        labelText: 'Descrição da Tarefa',
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 22,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Descrição é obrigatória';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 140,
+                          height: 40,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text(
+                              'Cancelar',
+                              style: TextStyle(color: Color(0xFF475467)),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: Color(0xFF475467)),
+                              backgroundColor: Colors.white,
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 32.0),
-                      const Center(
-                        child: Text(
-                          'Descrição da Tarefa',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      TextFormField(
-                        controller: _descriptionController,
-                        maxLines: 5,
-                        decoration: inputDecoration.copyWith(
-                          labelText: 'Descrição da Tarefa',
-                        ),
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 22,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Descrição é obrigatória';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 140,
-                            height: 40,
-                            child: OutlinedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text(
-                                'Cancelar',
-                                style: TextStyle(color: Color(0xFF475467)),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Color(0xFF475467)),
-                                backgroundColor: Colors.white,
-                              ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: 140,
+                          height: 40,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF6502D4),
+                            ),
+                            onPressed: _postNewProposal,
+                            child: const Text(
+                              'Salvar',
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 140,
-                            height: 40,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF6502D4),
-                              ),
-                              onPressed: _postNewProposal,
-                              child: const Text(
-                                'Salvar',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
