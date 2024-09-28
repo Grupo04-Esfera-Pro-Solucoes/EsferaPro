@@ -1,7 +1,7 @@
 import 'package:esferapro/screens/dashbord.dart';
+import 'package:esferapro/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'home_screen.dart';
 import 'clientes.dart';
 import 'help.dart';
 import 'tasks.dart';
@@ -35,7 +35,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   void _updateSelectedIndex(Widget page) {
-    if (page is HomeScreen) {
+    if (page is MainScreen) {
       setState(() {
         _selectedIndex = 0;
       });

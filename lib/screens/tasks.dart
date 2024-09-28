@@ -1,8 +1,9 @@
+import 'package:esferapro/widgets/task_update.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../service/task_service.dart';
 import '../model/task_model.dart';
-import '../widgets/task_dialog.dart';
+import '../widgets/task_create.dart';
 
 enum TaskStatus { todo, inProgress, done }
 
@@ -18,10 +19,12 @@ class _TasksPageState extends State<TasksPage> {
   TaskStatus selectedStatus = TaskStatus.todo;
   List<Task> tasks = [];
   late int userId;
+  late PageController _pageController; 
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _loadUserId();
   }
 
@@ -62,6 +65,34 @@ class _TasksPageState extends State<TasksPage> {
     });
   }
 
+  void _updateTask(Task updatedTask) {
+    setState(() {
+      tasks = tasks.map((t) {
+        return t.id == updatedTask.id ? updatedTask : t;
+      }).toList();
+    });
+  }
+
+  Future<void> _deleteTask(int taskId) async {
+    try {
+      await _taskService.deleteTask(taskId);
+      setState(() {
+        tasks.removeWhere((task) => task.id == taskId);
+      });
+    } catch (e) {
+      print('Erro ao excluir a tarefa: $e');
+    }
+  }
+
+  List<Task> _getFilteredTasks(TaskStatus status) {
+    return tasks.where((task) {
+      return TaskStatus.values.firstWhere(
+        (s) => s.toString().split('.').last == task.status,
+        orElse: () => TaskStatus.todo,
+      ) == status;
+    }).toList().reversed.toList();
+  }
+
   List<Task> get _filteredTasks {
     return tasks.where((task) {
       final taskStatus = TaskStatus.values.firstWhere(
@@ -70,7 +101,7 @@ class _TasksPageState extends State<TasksPage> {
       );
 
       return taskStatus == selectedStatus;
-    }).toList();
+    }).toList().reversed.toList();
   }
 
   Widget _buildOption(String title, TaskStatus status) {
@@ -79,6 +110,7 @@ class _TasksPageState extends State<TasksPage> {
       onPressed: () {
         setState(() {
           selectedStatus = status;
+          _pageController.jumpToPage(status.index); 
         });
       },
       child: Text(
@@ -114,52 +146,53 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
-  Widget _buildTaskCard(Task task) {
-    IconData statusIcon;
-    switch (task.status) {
-      case 'todo':
-        statusIcon = Icons.check_box_outline_blank;
-        break;
-      case 'inProgress':
-        statusIcon = Icons.sync;
-        break;
-      case 'done':
-        statusIcon = Icons.check_circle;
-        break;
-      default:
-        statusIcon = Icons.help;
-    }
+Widget _buildTaskCard(Task task) {
+  IconData statusIcon;
 
-    Widget buildDismissBackground(Alignment alignment, IconData icon) {
-      return Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        alignment: alignment,
-        child: Icon(
-          icon,
-          color: const Color(0xFF6502D4),
-          size: 30,
-        ),
-      );
-    }
+  switch (task.status) {
+    case 'todo':
+      statusIcon = Icons.check_box_outline_blank;
+      break;
+    case 'inProgress':
+      statusIcon = Icons.hourglass_empty;
+      break;
+    case 'done':
+      statusIcon = Icons.check_circle;
+      break;
+    default:
+      statusIcon = Icons.help;
+  }
 
-    return Dismissible(
-      key: ValueKey(task.id),
-      background: buildDismissBackground(Alignment.centerLeft, Icons.arrow_back_ios),
-      secondaryBackground: buildDismissBackground(Alignment.centerRight, Icons.arrow_forward_ios),
-      direction: DismissDirection.horizontal,
-      onDismissed: (direction) async {
+  Widget buildDismissBackground(Alignment alignment, IconData icon) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      alignment: alignment,
+      child: Icon(
+        icon,
+        color: const Color(0xFF6502D4),
+        size: 30,
+      ),
+    );
+  }
 
-        final currentStatus = TaskStatus.values.firstWhere(
-          (e) => e.toString().split('.').last == task.status,
-          orElse: () => TaskStatus.todo,
-        );
-        final newStatus = direction == DismissDirection.startToEnd
-            ? _getNextStatus(currentStatus)
-            : _getPreviousStatus(currentStatus);
+  DismissDirection getDismissDirection(Task task) {
+    return task.status == 'done'
+        ? DismissDirection.endToStart
+        : DismissDirection.horizontal;
+  }
 
+  return Dismissible(
+    key: ValueKey(task.id),
+    background: buildDismissBackground(Alignment.centerLeft, Icons.change_circle_outlined),
+    secondaryBackground: task.status == 'todo'
+        ? buildDismissBackground(Alignment.centerRight, Icons.delete)
+        : buildDismissBackground(Alignment.centerRight, Icons.change_circle_outlined),
+    direction: getDismissDirection(task),
+    onDismissed: (direction) async {
+      if (task.status == 'todo' && direction == DismissDirection.endToStart) {
         try {
-          await _updateTaskStatus(task.id, newStatus.toString().split('.').last);
+          await _taskService.deleteTask(task.id);
           setState(() {
             tasks.remove(task);
           });
@@ -168,64 +201,141 @@ class _TasksPageState extends State<TasksPage> {
             tasks.add(task);
           });
         }
+      } else if (direction == DismissDirection.startToEnd) {
+        final currentStatus = TaskStatus.values.firstWhere(
+          (e) => e.toString().split('.').last == task.status,
+          orElse: () => TaskStatus.todo,
+        );
+        final newStatus = _getNextStatus(currentStatus);
+
+        try {
+          await _updateTaskStatus(task.id, newStatus.toString().split('.').last);
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? Task(
+              id: t.id,
+              name: t.name,
+              description: t.description,
+              dueDate: t.dueDate,
+              status: newStatus.toString().split('.').last,
+              userId: t.userId
+            ) : t).toList();
+          });
+        } catch (e) {
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? task : t).toList(); 
+          });
+        }
+      } else if (direction == DismissDirection.endToStart && task.status != 'todo') {
+        final currentStatus = TaskStatus.values.firstWhere(
+          (e) => e.toString().split('.').last == task.status,
+          orElse: () => TaskStatus.todo,
+        );
+        final previousStatus = _getPreviousStatus(currentStatus);
+
+        try {
+          await _updateTaskStatus(task.id, previousStatus.toString().split('.').last);
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? Task(
+              id: t.id,
+              name: t.name,
+              description: t.description,
+              dueDate: t.dueDate,
+              status: previousStatus.toString().split('.').last,
+              userId: t.userId
+            ) : t).toList();
+          });
+        } catch (e) {
+          setState(() {
+            tasks = tasks.map((t) => t.id == task.id ? task : t).toList(); 
+          });
+        }
+      }
+    },
+    child: GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return TaskUpdateDialog(
+              task: task,
+              onTaskUpdated: (updatedTask) {
+                _updateTask(updatedTask);
+              },
+              onTaskDeleted: () {
+                _deleteTask(task.id);
+              },
+              userId: userId,
+            );
+          },
+        );
       },
-      child: Container(
-        decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey, width: 1),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      task.getFormattedDueDate(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                statusIcon,
+                color: const Color(0xFF6502D4),
+                size: 30,
+              ),
+            ],
           ),
         ),
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    task.description.isNotEmpty ? task.description : 'Escreva uma descrição',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    task.getFormattedDueDate(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            Icon(
-              statusIcon,
-              color: const Color(0xFF6502D4),
-              size: 30,
-            ),
-          ],
-        ),
       ),
-    );
-  }
-
-  void _showAddTaskDialog(BuildContext context) {
+    ),
+  );
+}
+  void _showTaskCreateDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddTaskDialog(
+        return TaskCreateDialog(
           onTaskCreated: (Task task) {
             _createTask(task);
           },
@@ -234,43 +344,65 @@ class _TasksPageState extends State<TasksPage> {
       },
     );
   }
-
+  
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
-            color: const Color(0xFF6502D4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildOption('A Fazer', TaskStatus.todo),
-                _buildOption('Em Progresso', TaskStatus.inProgress),
-                _buildOption('Concluídas', TaskStatus.done),
-              ],
-            ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+          color: const Color(0xFF6502D4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildOption('A Fazer', TaskStatus.todo),
+              _buildOption('Em Progresso', TaskStatus.inProgress),
+              _buildOption('Concluídas', TaskStatus.done),
+            ],
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredTasks.length,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildTaskCard(_filteredTasks[index]);
-              },
-            ),
+        ),
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                selectedStatus = TaskStatus.values[index];
+              });
+            },
+            children: [
+              ListView.builder(
+                itemCount: _getFilteredTasks(TaskStatus.todo).length,
+                itemBuilder: (context, index) {
+                  return _buildTaskCard(_getFilteredTasks(TaskStatus.todo)[index]);
+                },
+              ),
+              ListView.builder(
+                itemCount: _getFilteredTasks(TaskStatus.inProgress).length,
+                itemBuilder: (context, index) {
+                  return _buildTaskCard(_getFilteredTasks(TaskStatus.inProgress)[index]);
+                },
+              ),
+              ListView.builder(
+                itemCount: _getFilteredTasks(TaskStatus.done).length,
+                itemBuilder: (context, index) {
+                  return _buildTaskCard(_getFilteredTasks(TaskStatus.done)[index]);
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTaskDialog(context),
-        backgroundColor: const Color(0xFF6502D4),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () => _showTaskCreateDialog(context),
+      backgroundColor: const Color(0xFF6502D4),
+      foregroundColor: Colors.white,
+      child: const Icon(Icons.add),
+    ),
+  );
+}
 }
 
 class CustomElevatedButton extends StatelessWidget {
