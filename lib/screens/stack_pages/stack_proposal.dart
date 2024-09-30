@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Usada para formatação de datas
-// import 'package:http/http.dart' as http; // Apenas caso esteja utilizando chamadas HTTP
-import 'package:esferapro/service/createProposal_service.dart'; // Importe o serviço correto
+import 'package:esferapro/service/createProposal_service.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
+import 'dart:io';
 
 class ProposalCadastro extends StatefulWidget {
   @override
@@ -17,6 +18,8 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
   final TextEditingController _clientId = TextEditingController();
   final TextEditingController _clientName = TextEditingController();
   final TextEditingController _solution = TextEditingController();
+  final TextEditingController _file = TextEditingController();
+  File? _selectedFile;
 
   final ProposalService _createProposalService = ProposalService();
 
@@ -30,23 +33,30 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
   }
 
   Future<void> _fetchStatusOptions() async {
-    // Função fake para buscar os status disponíveis
-    await Future.delayed(Duration(seconds: 1)); // Simula uma chamada de rede
-    setState(() {
-      _statusOptions = ['Status 1', 'Status 2', 'Status 3']; // Exemplo de status
-    });
+      List<dynamic> statusList = await _createProposalService.getAllStatusProposals();
+      setState(() {
+        _statusOptions = statusList.map((status) => status['name'].toString()).toList();
+      });
   }
 
   void _postNewProposal() {
-    _createProposalService.postNewProposal(
-      idLead: int.parse(_leadId.text),
-      proposalDate: _date.text,
-      description: _description.text,
-      service: _service.text,
-      value: double.parse(_value.text),
-      idStatusProposal: 1,
-    ).then((_) {
+    _createProposalService
+        .postNewProposal(
+          idLead: int.parse(_leadId.text),
+          completionDate: DateFormat('yyyy-MM-dd')
+              .format(DateFormat('dd/MM/yyyy').parse(_date.text)),
+          description: _description.text,
+          service: _service.text,
+          value: double.parse(_value.text),
+          idStatusProposal: 1, 
+          file: _selectedFile!,
+        )
+        .then((_) {
       Navigator.pop(context);
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar proposta: $error')),
+      );
     });
   }
 
@@ -59,7 +69,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
     );
     if (picked != null) {
       setState(() {
-        _date.text = DateFormat('yyyy-MM-dd').format(picked);
+        _date.text = DateFormat('dd/MM/yyyy').format(picked);
       });
     }
   }
@@ -159,6 +169,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                               fontFamily: 'Roboto',
                               fontSize: 22,
                             ),
+                            readOnly: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Data de Conclusão é obrigatória';
@@ -277,51 +288,70 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                       },
                     ),
                     const SizedBox(height: 32.0),
-                    const Center(
-                      child: Text(
-                        'Anexo de Arquivo',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          // Implementar a lógica de anexar arquivos
-                        },
-                        child: Container(
-                          width: 250.0,
-                          height: 150.0,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Color(0xFF475467)),
-                            borderRadius: BorderRadius.circular(8.0),
-                            color: Colors.white,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.attach_file,
-                                color: Color(0xFF475467),
-                                size: 30.0,
-                              ),
-                              SizedBox(height: 8.0),
-                              Text(
-                                'Clique aqui para anexar um arquivo',
-                                style: TextStyle(
-                                  color: Color(0xFF475467),
-                                  fontSize: 16.0,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+const Center(
+  child: Text(
+    'Anexo de Arquivo',
+    style: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+),
+const SizedBox(height: 16.0),
+Center(
+  child: GestureDetector(
+    onTap: () async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result != null) {
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+          _file.text = "${result.files.single.name} anexado"; // Atualizando a mensagem para exibir o nome do arquivo
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Arquivo selecionado com sucesso!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Nenhum arquivo selecionado.')),
+        );
+      }
+    },
+    child: Container(
+      width: 250.0,
+      height: 150.0,
+      decoration: BoxDecoration(
+        border: Border.all(color: Color(0xFF475467)),
+        borderRadius: BorderRadius.circular(8.0),
+        color: Colors.white,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.attach_file,
+            color: Color(0xFF475467),
+            size: 30.0,
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            _selectedFile == null ? 'Clique aqui para anexar um arquivo' : _file.text, // Mensagem atualizada
+            style: const TextStyle(
+              color: Color(0xFF475467),
+              fontSize: 16.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+
                     const SizedBox(height: 32.0),
                     const Center(
                       child: Text(
@@ -361,13 +391,13 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: const Text(
-                              'Cancelar',
-                              style: TextStyle(color: Color(0xFF475467)),
-                            ),
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(color: Color(0xFF475467)),
                               backgroundColor: Colors.white,
+                            ),
+                            child: const Text(
+                              'Cancelar',
+                              style: TextStyle(color: Color(0xFF475467)),
                             ),
                           ),
                         ),
