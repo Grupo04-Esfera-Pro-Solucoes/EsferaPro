@@ -2,6 +2,7 @@ import 'dart:convert'; // Para decodificar a resposta JSON
 import 'package:esferapro/screens/stack_pages/stack_clients.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -13,17 +14,20 @@ class _ClientPageState extends State<ClientPage> {
   List<bool> isCheckedList = []; // Lista para o estado dos checkboxes
   bool isLoading = true; // Indicador de carregamento
   String? errorMessage; // Mensagem de erro, se houver
+  
 
   // Função para buscar os dados dos clientes
   Future<void> fetchClientData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? UserId = prefs.getInt('userId');
     final url = Uri.parse(
-        'http://localhost:8080/client-address-contact/all/1'); // Use 10.0.2.2 para Android emulator
+        'http://localhost:8080/client-address-contact/all/${UserId}'); 
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Fetched data: ${json.encode(data)}');
+        //print('Fetched data: ${json.encode(data)}');
 
         setState(() {
           clients = data['content']; // Obtém a lista de clientes
@@ -46,7 +50,7 @@ class _ClientPageState extends State<ClientPage> {
   @override
   void initState() {
     super.initState();
-    fetchClientData(); // Busca os dados ao iniciar a página
+    fetchClientData();
   }
 
   // Função para atualizar o estado do checkbox
