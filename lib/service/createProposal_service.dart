@@ -33,10 +33,8 @@ Future<void> postNewProposal({
       ..fields['idStatusProposal'] = idStatusProposal.toString()
       ..fields['user'] = jsonEncode({"idUser": userId});
 
-    if (file != null) {
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
-    }
-
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+  
     try {
       final response = await request.send();
 
@@ -59,6 +57,28 @@ Future<List<dynamic>> getAllStatusProposals() async {
       return jsonDecode(response.body) as List<dynamic>;
     } else {
       throw Exception('Erro ao buscar status das propostas: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Erro: $e');
+  }
+}
+
+Future<Map<String, dynamic>> fetchSearchProposalByName(int idLead) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final int? userId = prefs.getInt('userId');
+
+  if (userId == null) {
+    throw Exception("Usuário não autenticado.");
+  }
+
+  final url = Uri.parse('$baseUrl/lead/$idLead/$userId');
+
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Erro ao buscar proposta: ${response.statusCode}');
     }
   } catch (e) {
     throw Exception('Erro: $e');

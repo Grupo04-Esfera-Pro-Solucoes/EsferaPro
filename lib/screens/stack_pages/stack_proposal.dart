@@ -23,20 +23,43 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
 
   final ProposalService _createProposalService = ProposalService();
 
-  List<String> _statusOptions = [];
-  String? _selectedStatus;
+  List<Map<String, dynamic>> _statusOptions = [];
+  int? _selectedStatus;
 
   @override
   void initState() {
     super.initState();
     _fetchStatusOptions();
+    _leadId.addListener(_fetchClientDetails);
   }
 
   Future<void> _fetchStatusOptions() async {
-      List<dynamic> statusList = await _createProposalService.getAllStatusProposals();
-      setState(() {
-        _statusOptions = statusList.map((status) => status['name'].toString()).toList();
-      });
+    List<dynamic> statusList = await _createProposalService.getAllStatusProposals();
+    setState(() {
+      _statusOptions = statusList.map((status) {
+        return {
+          'idStatusProposal': status['idStatusProposal'],
+          'name': status['name'],
+        };
+      }).toList();
+    });
+  }
+
+  Future<void> _fetchClientDetails() async {
+    if (_leadId.text.isNotEmpty) {
+      try {
+        int idLead = int.parse(_leadId.text);
+        Map<String, dynamic> proposalDetails = await _createProposalService.fetchSearchProposalByName(idLead);
+        setState(() {
+          _clientId.text = proposalDetails['idClient']['idClient'].toString();
+          _clientName.text = proposalDetails['idClient']['name'].toString();
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao buscar detalhes do cliente')),
+        );
+      }
+    }
   }
 
   void _postNewProposal() {
@@ -48,8 +71,8 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
           description: _description.text,
           service: _service.text,
           value: double.parse(_value.text),
-          idStatusProposal: 1, 
-          file: _selectedFile!,
+          idStatusProposal: _selectedStatus!,
+          file: _selectedFile != null ? _selectedFile! : File(''),
         )
         .then((_) {
       Navigator.pop(context);
@@ -93,8 +116,8 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
       appBar: AppBar(
         title: Row(
           children: const [
-            Icon(Icons.description, color: Color(0xFFF7BD2E)), // Ícone atualizado aqui
-            SizedBox(width: 8.0), // Espaço entre ícone e texto
+            Icon(Icons.description, color: Color(0xFFF7BD2E)),
+            SizedBox(width: 8.0),
             Text(
               'Cadastro de Propostas',
               style: TextStyle(color: Colors.white),
@@ -102,7 +125,7 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
           ],
         ),
         backgroundColor: Color(0xFF6502D4),
-        automaticallyImplyLeading: false, // Remove o botão de voltar
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -169,7 +192,6 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                               fontFamily: 'Roboto',
                               fontSize: 22,
                             ),
-                            readOnly: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Data de Conclusão é obrigatória';
@@ -247,24 +269,24 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                       ],
                     ),
                     const SizedBox(height: 16.0),
-                    DropdownButtonFormField<String>(
+                    DropdownButtonFormField<int>(
                       decoration: inputDecoration.copyWith(
                         labelText: 'Status da Proposta',
                       ),
                       value: _selectedStatus,
-                      items: _statusOptions.map((String status) {
-                        return DropdownMenuItem<String>(
-                          value: status,
-                          child: Text(status),
+                      items: _statusOptions.map((status) {
+                        return DropdownMenuItem<int>(
+                          value: status['idStatusProposal'],
+                          child: Text(status['name']),
                         );
                       }).toList(),
-                      onChanged: (String? newValue) {
+                      onChanged: (int? newValue) {
                         setState(() {
                           _selectedStatus = newValue;
                         });
                       },
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null) {
                           return 'Status da Proposta é obrigatório';
                         }
                         return null;
@@ -288,70 +310,69 @@ class _ProposalCadastroState extends State<ProposalCadastro> {
                       },
                     ),
                     const SizedBox(height: 32.0),
-const Center(
-  child: Text(
-    'Anexo de Arquivo',
-    style: TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-),
-const SizedBox(height: 16.0),
-Center(
-  child: GestureDetector(
-    onTap: () async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-      );
+                    const Center(
+                      child: Text(
+                        'Anexo de Arquivo',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () async {
+                          FilePickerResult? result = await FilePicker.platform.pickFiles(
+                            type: FileType.any,
+                            allowMultiple: false,
+                          );
 
-      if (result != null) {
-        setState(() {
-          _selectedFile = File(result.files.single.path!);
-          _file.text = "${result.files.single.name} anexado"; // Atualizando a mensagem para exibir o nome do arquivo
-        });
+                          if (result != null) {
+                            setState(() {
+                              _selectedFile = File(result.files.single.path!);
+                              _file.text = "${result.files.single.name} anexado";
+                            });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Arquivo selecionado com sucesso!')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nenhum arquivo selecionado.')),
-        );
-      }
-    },
-    child: Container(
-      width: 250.0,
-      height: 150.0,
-      decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF475467)),
-        borderRadius: BorderRadius.circular(8.0),
-        color: Colors.white,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.attach_file,
-            color: Color(0xFF475467),
-            size: 30.0,
-          ),
-          const SizedBox(height: 8.0),
-          Text(
-            _selectedFile == null ? 'Clique aqui para anexar um arquivo' : _file.text, // Mensagem atualizada
-            style: const TextStyle(
-              color: Color(0xFF475467),
-              fontSize: 16.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    ),
-  ),
-),
-
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Arquivo selecionado com sucesso!')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Nenhum arquivo selecionado.')),
+                            );
+                          }
+                        },
+                        child: Container(
+                          width: 250.0,
+                          height: 150.0,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Color(0xFF475467)),
+                            borderRadius: BorderRadius.circular(8.0),
+                            color: Colors.white,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.attach_file,
+                                color: Color(0xFF475467),
+                                size: 30.0,
+                              ),
+                              const SizedBox(height: 8.0),
+                              Text(
+                                _selectedFile == null ? 'Clique aqui para anexar um arquivo' : _file.text,
+                                style: const TextStyle(
+                                  color: Color(0xFF475467),
+                                  fontSize: 16.0,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 32.0),
                     const Center(
                       child: Text(
