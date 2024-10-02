@@ -1,6 +1,6 @@
 import 'package:esferapro/screens/dashbord.dart';
 import 'package:esferapro/screens/main_screen.dart';
-import 'package:esferapro/screens/porposal.dart';
+import 'package:esferapro/screens/proposal.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'clientes.dart';
