@@ -10,12 +10,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Esfera Pro',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
 
-      home: const LoginScreen(),
+      home: LoginScreen(),
 
     );
   }
