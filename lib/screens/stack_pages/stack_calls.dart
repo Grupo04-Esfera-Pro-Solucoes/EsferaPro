@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../service/create_call_service.dart';
+import '../../service/call_service.dart';
 
 class StackCalls extends StatefulWidget {
   @override
@@ -95,6 +95,7 @@ class _StackCallsState extends State<StackCalls> {
                       _buildTitle('CPF ou CNPJ'),
                       const SizedBox(height: 5),
                       _buildTextField(
+                        maxLines: 1,
                         controller: _clientCpfCnpj,
                         hintText: '123.456.789-00',
                       ),
@@ -120,7 +121,8 @@ class _StackCallsState extends State<StackCalls> {
               _buildTitle('Resultado'),
               const SizedBox(height: 5),
               _buildTextField(
-                controller: _clientCpfCnpj,
+                maxLines: 1,
+                controller: _callResult,
                 hintText: 'Escolha o Resultado',
               ),
               const SizedBox(height: 10),
@@ -132,7 +134,7 @@ class _StackCallsState extends State<StackCalls> {
                       _buildTitle('Duração da ligação', isRequired: false),
                       const SizedBox(height: 5),
                       _buildHalfWidthTextField(
-                        controller: _callResult,
+                        controller: _callDuration,
                         hintText: '--:--',
                       ),
                     ],
@@ -193,10 +195,11 @@ class _StackCallsState extends State<StackCalls> {
               ),
               const SizedBox(height: 10),
               _buildTextField(
-                controller: _clientCpfCnpj,
-                hintText: 'Escolha o Resultado',
+                controller: _callDescription,
+                maxLines: 7,
+                hintText: 'Informações da ligação',
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
               Row(
                 children: [
                   Expanded(
@@ -264,12 +267,13 @@ class _StackCallsState extends State<StackCalls> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
-    List<TextInputFormatter>? inputFormatters,
+    List<TextInputFormatter>? inputFormatters, required int maxLines,
   }) {
     return TextField(
       controller: controller,
       inputFormatters: inputFormatters,
       style: const TextStyle(fontSize: 16),
+      maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
