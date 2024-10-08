@@ -3,6 +3,7 @@ import 'package:esferapro/screens/stack_pages/stack_clients.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -14,25 +15,29 @@ class _ClientPageState extends State<ClientPage> {
   List<bool> isCheckedList = []; // Lista para o estado dos checkboxes
   bool isLoading = true; // Indicador de carregamento
   String? errorMessage; // Mensagem de erro, se houver
-  
 
   // Função para buscar os dados dos clientes
   Future<void> fetchClientData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? UserId = prefs.getInt('userId');
-    final url = Uri.parse(
-        'http://localhost:8080/client-address-contact/all/${UserId}'); 
+    final url =
+        Uri.parse('http://localhost:8080/client-address-contact/all/$UserId');
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        //print('Fetched data: ${json.encode(data)}');
+        print('Fetched data: ${json.encode(data)}');
 
         setState(() {
-          clients = data['content']; // Obtém a lista de clientes
-          isCheckedList = List<bool>.filled(
-              clients.length, false); // Inicializa a lista de checkboxes
+          // Verifica se 'content' existe e é uma lista
+          if (data['content'] != null && data['content'] is List) {
+            clients = data['content'];
+            isCheckedList = List<bool>.filled(clients.length, false);
+          } else {
+            clients = []; // Caso 'content' seja nulo ou não seja uma lista
+            isCheckedList = []; // Inicializa como lista vazia
+          }
           isLoading = false;
         });
       } else {
@@ -108,12 +113,10 @@ class _ClientPageState extends State<ClientPage> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
-                          .withOpacity(0.3), 
-                      spreadRadius: 2, 
+                      color: Colors.black.withOpacity(0.3),
+                      spreadRadius: 2,
                       blurRadius: 10,
-                      offset: const Offset(0,
-                          4), 
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -144,7 +147,7 @@ class _ClientPageState extends State<ClientPage> {
                           fontWeight: FontWeight.bold, fontSize: 16)))),
           Expanded(
               child: Center(
-                  child: Text('Wsp',
+                  child: Text('Telefone',
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 16)))),
           Expanded(
@@ -159,8 +162,8 @@ class _ClientPageState extends State<ClientPage> {
 
   Widget _buildClientTile(
       BuildContext context, Map<String, dynamic> clientData, int index) {
-    final client = clientData['client'];
-    final contacts = clientData['contact'];
+    final client = clientData['client'] ?? {};
+    final contacts = clientData['contact'] ?? [];
 
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -191,21 +194,55 @@ class _ClientPageState extends State<ClientPage> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                contacts[1]['data'] ?? 'No CPF',
+                contacts.isNotEmpty && contacts[0]['data'] != null
+                    ? contacts[0]['data']
+                    : 'No CPF',
                 textAlign: TextAlign.left,
               ),
             ),
           ),
-          // Botão "Ver Mais" alinhado à esquerda e dividindo o espaço
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton(
-                onPressed: () => _showClientDetails(context, clientData),
-                child: const Text('Ver Mais'),
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.end, // Alinha os botões à direita
+            children: [
+              ElevatedButton(
+                onPressed: () => _openWhatsApp(contacts[0]['data']),
+                child: const Icon(
+                  Icons.whatshot,
+                  color: Color(0xffc8c8c8),
+                ),
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                  padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  )),
+                  minimumSize: MaterialStateProperty.all(
+                      Size(40, 40)), // Tamanho mínimo do botão
+                ),
               ),
-            ),
-          ),
+              SizedBox(width: 8.0), // Espaço entre os botões
+              ElevatedButton(
+                onPressed: () => _showClientDetails(context, clientData),
+                child: const Icon(
+                  Icons.add,
+                  color: Color(0xffc8c8c8),
+                ),
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                  padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  )),
+                  minimumSize: MaterialStateProperty.all(
+                      Size(40, 40)), 
+                ),
+              ),
+              SizedBox(width: 10.0),
+            ],
+          )
         ],
       ),
     );
@@ -214,9 +251,9 @@ class _ClientPageState extends State<ClientPage> {
   // Função para exibir um modal com mais informações
   void _showClientDetails(
       BuildContext context, Map<String, dynamic> clientData) {
-    final client = clientData['client'];
-    final address = clientData['address'];
-    final contacts = clientData['contact'];
+    final client = clientData['client'] ?? {};
+    final address = clientData['address'] ?? {};
+    final contacts = clientData['contact'] ?? [];
 
     showDialog(
       context: context,
@@ -249,16 +286,18 @@ class _ClientPageState extends State<ClientPage> {
                 const Text('Contacts:',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...contacts.map<Widget>((contact) {
-                  final type = contact['idTypeContact']?['type'] ?? 'Unknown';
-                  final data = contact['data'] ?? 'No data';
-                  return ListTile(
-                    leading: const Icon(Icons.contact_phone),
-                    title: Text('Type: $type'),
-                    subtitle: Text('Contact: $data'),
-                  );
-                }).toList(),
-                if (contacts.isEmpty) const Text('No contacts available'),
+                if (contacts.isNotEmpty)
+                  ...contacts.map<Widget>((contact) {
+                    final type = contact['idTypeContact']?['type'] ?? 'Unknown';
+                    final data = contact['data'] ?? 'No data';
+                    return ListTile(
+                      leading: const Icon(Icons.contact_phone),
+                      title: Text('Type: $type'),
+                      subtitle: Text('Contact: $data'),
+                    );
+                  }).toList()
+                else
+                  const Text('No contacts available'),
               ],
             ),
           ),
@@ -271,5 +310,16 @@ class _ClientPageState extends State<ClientPage> {
         );
       },
     );
+  }
+
+  void _openWhatsApp(String number) async {
+    String formattedNumber = number.replaceAll(RegExp(r'[\s\(\)\-]'), '');
+    print(formattedNumber);
+    final String url = 'https://wa.me/$formattedNumber';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Não foi possível abrir o WhatsApp';
+    }
   }
 }
