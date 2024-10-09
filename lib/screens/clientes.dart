@@ -68,9 +68,6 @@ class _ClientPageState extends State<ClientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Client List'),
-      ),
       body: Stack(
         children: [
           Column(
@@ -142,7 +139,7 @@ class _ClientPageState extends State<ClientPage> {
         children: [
           Expanded(
               child: Center(
-                  child: Text('Nome',
+                  child: Text('Cliente',
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 16)))),
           Expanded(
@@ -165,87 +162,78 @@ class _ClientPageState extends State<ClientPage> {
     final client = clientData['client'] ?? {};
     final contacts = clientData['contact'] ?? [];
 
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(right: 8.0),
-            child: Checkbox(
-              value: isCheckedList[index],
-              onChanged: (bool? newValue) {
-                if (newValue != null) {
-                  _updateCheckbox(index, newValue);
-                }
-              },
-            ),
+   return Container(
+  padding: const EdgeInsets.all(8.0),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Expanded(
+        flex: 1, // Proporção 1 para cada célula
+        child: Align(
+          alignment: Alignment.center,
+          child: Text(
+            client['name'] ?? 'No name',
+            textAlign: TextAlign.center,
           ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                client['name'] ?? 'No name',
-                textAlign: TextAlign.left,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                contacts.isNotEmpty && contacts[0]['data'] != null
-                    ? contacts[0]['data']
-                    : 'No CPF',
-                textAlign: TextAlign.left,
-              ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.end, // Alinha os botões à direita
-            children: [
-              ElevatedButton(
-                onPressed: () => _openWhatsApp(contacts[0]['data']),
-                child: const Icon(
-                  Icons.whatshot,
-                  color: Color(0xffc8c8c8),
-                ),
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                  padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  )),
-                  minimumSize: MaterialStateProperty.all(
-                      Size(40, 40)), // Tamanho mínimo do botão
-                ),
-              ),
-              SizedBox(width: 8.0), // Espaço entre os botões
-              ElevatedButton(
-                onPressed: () => _showClientDetails(context, clientData),
-                child: const Icon(
-                  Icons.add,
-                  color: Color(0xffc8c8c8),
-                ),
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                  padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  )),
-                  minimumSize: MaterialStateProperty.all(
-                      Size(40, 40)), 
-                ),
-              ),
-              SizedBox(width: 10.0),
-            ],
-          )
-        ],
+        ),
       ),
-    );
+      Expanded(
+        flex: 1, // Proporção 1 para cada célula
+        child: Align(
+          alignment: Alignment.center,
+          child: Text(
+            contacts.isNotEmpty && contacts[0]['data'] != null
+                ? contacts[0]['data']
+                : 'No CPF',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+      Expanded(
+        flex: 1, // Proporção 1 para cada célula
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => _openWhatsApp(contacts[0]['data']),
+              child: const Icon(
+                Icons.whatshot,
+                color: Color(0xffc8c8c8),
+              ),
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                )),
+                minimumSize: MaterialStateProperty.all(Size(40, 40)), // Tamanho mínimo do botão
+              ),
+            ),
+            SizedBox(width: 8.0), // Espaço entre os botões
+            ElevatedButton(
+              onPressed: () => _showClientDetails(context, clientData),
+              child: const Icon(
+                Icons.add,
+                color: Color(0xffc8c8c8),
+              ),
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                )),
+                minimumSize: MaterialStateProperty.all(Size(40, 40)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+);
+
   }
 
   // Função para exibir um modal com mais informações
