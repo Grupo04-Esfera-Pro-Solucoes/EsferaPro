@@ -16,7 +16,7 @@ class _ClientPageState extends State<ClientPage> {
 
   // Função para buscar os dados dos clientes
   Future<void> fetchClientData() async {
-    final url = Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/all/1'); // Use 10.0.2.2 para Android emulator
+    final url = Uri.parse('http://localhost:8080/client-address-contact/all/1'); // Use 10.0.2.2 para Android emulator
 
     try {
       final response = await http.get(url);
