@@ -1,4 +1,3 @@
-import 'package:esferapro/screens/stack_pages/stack_calls.dart';
 import 'package:flutter/material.dart';
 import 'screens/login.dart';
 
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
 
-      home: StackCalls(),
+      home: LoginScreen(),
 
     );
   }
