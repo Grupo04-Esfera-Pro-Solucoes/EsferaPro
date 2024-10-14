@@ -1,3 +1,4 @@
+import 'package:esferapro/screens/calls.dart';
 import 'package:esferapro/screens/dashbord.dart';
 import 'package:esferapro/screens/main_screen.dart';
 import 'package:esferapro/screens/proposal.dart';
@@ -97,7 +98,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   index: 2,
                   icon: Icons.phone,
                   text: 'Ligações',
-                  page: Container(),
+                  page: CallPage(),
                   title: 'Ligações',
                   context: context,
                 ),

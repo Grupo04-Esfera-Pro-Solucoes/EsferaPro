@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProposalService {
-  String baseUrl = 'http://localhost:8080';
+  String baseUrl = 'http://grupo04.duckdns.org:8080';
 
   Future<void> postNewProposal({
     required int idLead,
