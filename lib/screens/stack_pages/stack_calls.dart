@@ -22,12 +22,12 @@ class _StackCallsState extends State<StackCalls> {
   void _postNewCall() {
     _CallService.postNewCall(
       name: _clientName.text,
-      cpfCnpj:  _clientCpfCnpj.text,
+      cpfCnpj: _clientCpfCnpj.text,
       result: _callResult.text,
       duration: _callDuration.text,
       contactNumber: _contactNumber.text,
       date: _callDate.text,
-      time: _callTime .text,
+      time: _callTime.text,
       description: _callDescription.text,
     ).then((_) {
       Navigator.pop(context);
@@ -98,6 +98,7 @@ class _StackCallsState extends State<StackCalls> {
                         maxLines: 1,
                         controller: _clientCpfCnpj,
                         hintText: '123.456.789-00',
+                        keyboardType: TextInputType.number, // Para CPF ou CNPJ
                       ),
                     ],
                   ),
@@ -150,12 +151,13 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _contactNumber,
                         hintText: '99 999999999',
+                        keyboardType: TextInputType.phone, // Para número de telefone
                       ),
                     ],
                   ),
                 ),
               ]),
-             const SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(children: [
                 Expanded(
                   child: Column(
@@ -166,6 +168,7 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callDate,
                         hintText: '00/00/0000',
+                        keyboardType: TextInputType.datetime, // Para data
                       ),
                     ],
                   ),
@@ -180,6 +183,7 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callTime,
                         hintText: '00:00',
+                        keyboardType: TextInputType.datetime, // Para horário
                       ),
                     ],
                   ),
@@ -267,11 +271,14 @@ class _StackCallsState extends State<StackCalls> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
-    List<TextInputFormatter>? inputFormatters, required int maxLines,
+    List<TextInputFormatter>? inputFormatters,
+    required int maxLines,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return TextField(
       controller: controller,
       inputFormatters: inputFormatters,
+      keyboardType: keyboardType,
       style: const TextStyle(fontSize: 16),
       maxLines: maxLines,
       decoration: InputDecoration(
@@ -285,7 +292,7 @@ class _StackCallsState extends State<StackCalls> {
         contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         hintStyle: const TextStyle(
           color: Colors.grey,
-          fontSize: 12, 
+          fontSize: 12,
         ),
       ),
     );
@@ -295,10 +302,12 @@ class _StackCallsState extends State<StackCalls> {
     required TextEditingController controller,
     required String hintText,
     List<TextInputFormatter>? inputFormatters,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return TextField(
       controller: controller,
       inputFormatters: inputFormatters,
+      keyboardType: keyboardType,
       style: const TextStyle(fontSize: 16),
       decoration: InputDecoration(
         hintText: hintText,
