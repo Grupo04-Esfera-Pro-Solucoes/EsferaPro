@@ -48,7 +48,7 @@ class UserService {
         "country": country
       }
     };
-
+  print(dados);
     try {
       final response = await http.post(
         url,
