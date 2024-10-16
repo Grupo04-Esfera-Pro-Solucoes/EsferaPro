@@ -30,13 +30,12 @@ class _ClientPageState extends State<ClientPage> {
         print('Fetched data: ${json.encode(data)}');
 
         setState(() {
-          // Verifica se 'content' existe e é uma lista
           if (data['content'] != null && data['content'] is List) {
             clients = data['content'];
             isCheckedList = List<bool>.filled(clients.length, false);
           } else {
-            clients = []; // Caso 'content' seja nulo ou não seja uma lista
-            isCheckedList = []; // Inicializa como lista vazia
+            clients = []; 
+            isCheckedList = []; 
           }
           isLoading = false;
         });
@@ -47,7 +46,7 @@ class _ClientPageState extends State<ClientPage> {
       print('Error: $e');
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to load client data'; // Mensagem de erro
+        errorMessage = 'Failed to load client data'; 
       });
     }
   }
@@ -72,6 +71,7 @@ class _ClientPageState extends State<ClientPage> {
         children: [
           Column(
             children: [
+              _buildSearchBar(), // Barra de pesquisa
               _buildHeader(), // Cabeçalho
               Expanded(
                 child: isLoading
@@ -129,29 +129,72 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  // Widget para exibir o cabeçalho com os títulos das colunas
+  Widget _buildSearchBar() {
+    TextEditingController searchController = TextEditingController();
+
+    return Container(
+      color: const Color(0xFFEAECF0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Digite sua pesquisa',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide:
+                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                ),
+                filled: true,
+                fillColor: Colors.white, 
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.purple),
+            onPressed: () {
+              // Aqui você pode implementar a lógica de busca usando o texto de searchController
+              String searchQuery = searchController.text;
+              print('Buscar: $searchQuery'); // Exemplo de uso
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Container(
-      color: Colors.blueGrey[100],
+      color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-              child: Center(
-                  child: Text('Cliente',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)))),
+            child: Center(
+              child: Text('Cliente', style: TextStyle(fontSize: 18)),
+            ),
+          ),
           Expanded(
-              child: Center(
-                  child: Text('Telefone',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)))),
+            child: Center(
+              child: Text('Telefone', style: TextStyle(fontSize: 18)),
+            ),
+          ),
           Expanded(
-              child: Center(
-                  child: Text('Opções',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)))),
+            child: Center(
+              child: Text('Opções', style: TextStyle(fontSize: 18)),
+            ),
+          ),
         ],
       ),
     );
@@ -162,78 +205,83 @@ class _ClientPageState extends State<ClientPage> {
     final client = clientData['client'] ?? {};
     final contacts = clientData['contact'] ?? [];
 
-   return Container(
-  padding: const EdgeInsets.all(8.0),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Expanded(
-        flex: 1, // Proporção 1 para cada célula
-        child: Align(
-          alignment: Alignment.center,
-          child: Text(
-            client['name'] ?? 'No name',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-      Expanded(
-        flex: 1, // Proporção 1 para cada célula
-        child: Align(
-          alignment: Alignment.center,
-          child: Text(
-            contacts.isNotEmpty && contacts[0]['data'] != null
-                ? contacts[0]['data']
-                : 'No CPF',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-      Expanded(
-        flex: 1, // Proporção 1 para cada célula
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () => _openWhatsApp(contacts[0]['data']),
-              child: const Icon(
-                Icons.whatshot,
-                color: Color(0xffc8c8c8),
-              ),
-              style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                )),
-                minimumSize: MaterialStateProperty.all(Size(40, 40)), // Tamanho mínimo do botão
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 1, // Proporção 1 para cada célula
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                client['name'] ?? 'No name',
+                textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(width: 8.0), // Espaço entre os botões
-            ElevatedButton(
-              onPressed: () => _showClientDetails(context, clientData),
-              child: const Icon(
-                Icons.add,
-                color: Color(0xffc8c8c8),
-              ),
-              style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                )),
-                minimumSize: MaterialStateProperty.all(Size(40, 40)),
+          ),
+          Expanded(
+            flex: 1, // Proporção 1 para cada célula
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                contacts.isNotEmpty && contacts[0]['data'] != null
+                    ? contacts[0]['data']
+                    : 'No CPF',
+                textAlign: TextAlign.center,
               ),
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/zap.png',
+                        height: 24,
+                      ),
+                    ],
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: MaterialStateProperty.all(
+                        Size(40, 40)), // Tamanho mínimo do botão
+                  ),
+                ),
+                SizedBox(width: 8.0), // Espaço entre os botões
+                ElevatedButton(
+                  onPressed: () => _showClientDetails(context, clientData),
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.black,
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: MaterialStateProperty.all(Size(40, 40)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-    ],
-  ),
-);
-
+    );
   }
 
   // Função para exibir um modal com mais informações
