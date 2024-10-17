@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CallService {
-  final String baseUrl = "http://grupo04.duckdns.org:8080";
+  final String baseUrl = "http://localhost:8080";
 
   Future<void> postNewCall({
     required String name,
@@ -42,6 +42,24 @@ class CallService {
       }
     } catch (e) {
       print('Erro ao fazer requisição: $e');
+    }
+  }
+
+  Future<List<dynamic>> fetchAllClients() async {
+    final url = Uri.parse('$baseUrl/client/all');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); 
+      } else {
+        print('Falha ao buscar clientes: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Erro ao fazer requisição: $e');
+      return [];
     }
   }
 }

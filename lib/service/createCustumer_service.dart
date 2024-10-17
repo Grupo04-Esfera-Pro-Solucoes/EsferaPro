@@ -21,7 +21,7 @@ class UserService {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
-    final url = Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/add');
+    final url = Uri.parse('http://localhost:8080/client-address-contact/add');
 
     final Map<String, dynamic> dados = {
       "client": {

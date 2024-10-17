@@ -17,10 +17,18 @@ class _StackCallsState extends State<StackCalls> {
   final TextEditingController _callTime = TextEditingController();
   final TextEditingController _callDescription = TextEditingController();
 
-  final CallService _CallService = CallService();
+  final CallService _callService = CallService();
+  List<dynamic> clients = [];
+  String? selectedClient;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAllClients();
+  }
 
   void _postNewCall() {
-    _CallService.postNewCall(
+    _callService.postNewCall(
       name: _clientName.text,
       cpfCnpj: _clientCpfCnpj.text,
       result: _callResult.text,
@@ -31,6 +39,13 @@ class _StackCallsState extends State<StackCalls> {
       description: _callDescription.text,
     ).then((_) {
       Navigator.pop(context);
+    });
+  }
+
+  Future<void> fetchAllClients() async {
+    List<dynamic> fetchedClients = await _callService.fetchAllClients();
+    setState(() {
+      clients = fetchedClients;
     });
   }
 
@@ -98,7 +113,6 @@ class _StackCallsState extends State<StackCalls> {
                         maxLines: 1,
                         controller: _clientCpfCnpj,
                         hintText: '123.456.789-00',
-                        keyboardType: TextInputType.number, // Para CPF ou CNPJ
                       ),
                     ],
                   ),
@@ -110,10 +124,31 @@ class _StackCallsState extends State<StackCalls> {
                     children: [
                       _buildTitle('Selecione o Cliente', isRequired: true),
                       const SizedBox(height: 5),
-                      _buildHalfWidthTextField(
-                        controller: _clientName,
-                        hintText: '',
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F7),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: DropdownButton<String>(
+                          hint: Text(selectedClient ?? 'Selecione um Cliente'),
+                          isExpanded: true,
+                          underline: SizedBox(), 
+                          icon: const Icon(Icons.arrow_drop_down),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedClient = newValue;
+                              _clientName.text = selectedClient ?? ''; 
+                            });
+                          },
+                          items: clients.map<DropdownMenuItem<String>>((client) {
+                            return DropdownMenuItem<String>(
+                              value: client['name'], 
+                              child: Text(client['name']),
+                            );
+                          }).toList(),
+                        ),
                       ),
+                      const SizedBox(height: 5),
                     ],
                   ),
                 ),
@@ -151,7 +186,6 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _contactNumber,
                         hintText: '99 999999999',
-                        keyboardType: TextInputType.phone, // Para número de telefone
                       ),
                     ],
                   ),
@@ -168,7 +202,6 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callDate,
                         hintText: '00/00/0000',
-                        keyboardType: TextInputType.datetime, // Para data
                       ),
                     ],
                   ),
@@ -183,7 +216,6 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callTime,
                         hintText: '00:00',
-                        keyboardType: TextInputType.datetime, // Para horário
                       ),
                     ],
                   ),
@@ -287,12 +319,7 @@ class _StackCallsState extends State<StackCalls> {
         fillColor: const Color(0xFFF0F0F7),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.black),
-        ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-          fontSize: 12,
+          borderSide: BorderSide.none,
         ),
       ),
     );
@@ -301,26 +328,20 @@ class _StackCallsState extends State<StackCalls> {
   Widget _buildHalfWidthTextField({
     required TextEditingController controller,
     required String hintText,
-    List<TextInputFormatter>? inputFormatters,
-    TextInputType keyboardType = TextInputType.text,
   }) {
-    return TextField(
-      controller: controller,
-      inputFormatters: inputFormatters,
-      keyboardType: keyboardType,
-      style: const TextStyle(fontSize: 16),
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xFFF0F0F7),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.black),
-        ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-          fontSize: 12,
+    return Container(
+      height: 58,
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(fontSize: 16),
+        decoration: InputDecoration(
+          hintText: hintText,
+          filled: true,
+          fillColor: const Color(0xFFF0F0F7),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );
@@ -332,10 +353,10 @@ class CustomSizedElevatedButton extends StatelessWidget {
   final String text;
 
   const CustomSizedElevatedButton({
-    super.key,
+    Key? key,
     required this.onPressed,
     required this.text,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -345,14 +366,13 @@ class CustomSizedElevatedButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: Color(0xff6502D4)),
+          side: const BorderSide(color: Color(0xff6502D4), width: 2),
         ),
         backgroundColor: const Color(0xff6502D4),
       ),
       child: Text(
         text,
         style: const TextStyle(
-          color: Colors.white,
           fontSize: 20,
         ),
       ),
