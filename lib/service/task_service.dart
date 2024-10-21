@@ -4,7 +4,7 @@ import '../model/task_model.dart';
 import 'package:logging/logging.dart';
 
 class TaskService {
-  final String baseUrl = 'http://grupo04.duckdns.org:8080/task';
+  final String baseUrl = 'http://localhost:8080/task';
   final Logger logger = Logger('TaskService');
 
   Future<List<Task>> fetchTasks(int userId) async {
