@@ -239,6 +239,16 @@ class _ClientPageState extends State<ClientPage> {
               children: [
                 ElevatedButton(
                   onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(
+                        Size(40, 40)), // Tamanho mínimo do botão
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -248,32 +258,22 @@ class _ClientPageState extends State<ClientPage> {
                       ),
                     ],
                   ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    )),
-                    minimumSize: MaterialStateProperty.all(
-                        Size(40, 40)), // Tamanho mínimo do botão
-                  ),
                 ),
                 SizedBox(width: 8.0), // Espaço entre os botões
                 ElevatedButton(
                   onPressed: () => _showClientDetails(context, clientData),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(Size(40, 40)),
+                  ),
                   child: const Icon(
                     Icons.add,
                     color: Colors.black,
-                  ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    )),
-                    minimumSize: MaterialStateProperty.all(Size(40, 40)),
                   ),
                 ),
               ],
