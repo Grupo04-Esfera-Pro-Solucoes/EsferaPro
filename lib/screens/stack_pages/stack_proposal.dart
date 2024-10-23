@@ -75,7 +75,7 @@
               value: double.parse(_value.text),
               idStatusProposal: _selectedStatus!, 
               clientId: _clientId.text,
-              // file: _selectedFile != null ? _selectedFile! : File(''),
+              file: _selectedFile != null ? _selectedFile! : File(''),
             )
             .then((_) {
           Navigator.pop(context);
