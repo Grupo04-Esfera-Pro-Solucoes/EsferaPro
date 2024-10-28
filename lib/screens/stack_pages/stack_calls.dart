@@ -320,6 +320,7 @@ class _StackCallsState extends State<StackCalls> {
     );
   }
 
+
   Widget _buildTitle(String title, {bool isRequired = false}) {
     return Row(
       children: [
@@ -389,7 +390,6 @@ class _StackCallsState extends State<StackCalls> {
     );
   }
 }
-
 
 class CustomSizedElevatedButton extends StatelessWidget {
   final VoidCallback onPressed;

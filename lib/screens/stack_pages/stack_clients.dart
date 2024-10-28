@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../../widgets/input_formatters.dart';
 import 'package:esferapro/service/createCustumer_service.dart';
 
@@ -26,7 +27,8 @@ class _StackClientsState extends State<StackClients> {
   final UserService _userService = UserService();
 
   void _postNewUser() {
-    _userService.postNewUser(
+    _userService
+        .postNewUser(
       name: _clientName.text,
       cpfCnpj: _clientCpfCnpj.text,
       company: _clientCompany.text,
@@ -40,10 +42,39 @@ class _StackClientsState extends State<StackClients> {
       state: _addressState.text,
       city: _addressCity.text,
       country: _addressCountry.text,
-    ).then((_) {
+    )
+        .then((_) {
       Navigator.pop(context);
     });
   }
+
+  Future<void> _selectDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(1900),
+    lastDate: DateTime(2100),
+  );
+  
+  if (picked != null) {
+    // Obter a hora atual
+    final now = DateTime.now();
+    
+    // Combinar a data escolhida com a hora atual
+    final combinedDateTime = DateTime(
+      picked.year,
+      picked.month,
+      picked.day,
+      now.hour,
+      now.minute,
+    );
+
+    setState(() {
+      // Exibir apenas a data
+      _clientDate.text = DateFormat('yyyy-MM-dd').format(combinedDateTime);
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -128,10 +159,15 @@ class _StackClientsState extends State<StackClients> {
               const SizedBox(height: 10),
               _buildTitle('Data de Nascimento', isRequired: false),
               const SizedBox(height: 5),
-              _buildTextField(
-                controller: _clientDate,
-                hintText: '00/00/0000',
-                inputFormatters: [DateInputFormatter()],
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: _buildTextField(
+                    controller: _clientDate,
+                    hintText: '00/00/0000',
+                    inputFormatters: [], // Remova o formatter se você não precisar
+                  ),
+                ),
               ),
               const SizedBox(height: 15),
               const Text(
@@ -264,10 +300,12 @@ class _StackClientsState extends State<StackClients> {
                         Navigator.of(context).pop();
                       },
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 25, vertical: 20),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(color: Color(0xff6502D4), width: 2),
+                          side: const BorderSide(
+                              color: Color(0xff6502D4), width: 2),
                         ),
                         backgroundColor: Colors.white,
                       ),
@@ -337,10 +375,11 @@ class _StackClientsState extends State<StackClients> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.black),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         hintStyle: const TextStyle(
           color: Colors.grey,
-          fontSize: 12, 
+          fontSize: 12,
         ),
       ),
     );
@@ -363,7 +402,8 @@ class _StackClientsState extends State<StackClients> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.black),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         hintStyle: const TextStyle(
           color: Colors.grey,
           fontSize: 12,

@@ -2,6 +2,8 @@ import 'dart:convert'; // Para decodificar a resposta JSON
 import 'package:esferapro/screens/stack_pages/stack_clients.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -16,7 +18,10 @@ class _ClientPageState extends State<ClientPage> {
 
   // Função para buscar os dados dos clientes
   Future<void> fetchClientData() async {
-    final url = Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/all/1'); // Use 10.0.2.2 para Android emulator
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? UserId = prefs.getInt('userId');
+    final url =
+        Uri.parse('http://localhost:8080/client-address-contact/all/$UserId');
 
     try {
       final response = await http.get(url);
@@ -25,9 +30,13 @@ class _ClientPageState extends State<ClientPage> {
         print('Fetched data: ${json.encode(data)}');
 
         setState(() {
-          clients = data['content']; // Obtém a lista de clientes
-          isCheckedList = List<bool>.filled(
-              clients.length, false); // Inicializa a lista de checkboxes
+          if (data['content'] != null && data['content'] is List) {
+            clients = data['content'];
+            isCheckedList = List<bool>.filled(clients.length, false);
+          } else {
+            clients = []; 
+            isCheckedList = []; 
+          }
           isLoading = false;
         });
       } else {
@@ -37,7 +46,7 @@ class _ClientPageState extends State<ClientPage> {
       print('Error: $e');
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to load client data'; // Mensagem de erro
+        errorMessage = 'Failed to load client data'; 
       });
     }
   }
@@ -45,7 +54,7 @@ class _ClientPageState extends State<ClientPage> {
   @override
   void initState() {
     super.initState();
-    fetchClientData(); // Busca os dados ao iniciar a página
+    fetchClientData();
   }
 
   // Função para atualizar o estado do checkbox
@@ -58,13 +67,11 @@ class _ClientPageState extends State<ClientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Client List'),
-      ),
       body: Stack(
         children: [
           Column(
             children: [
+              _buildSearchBar(), // Barra de pesquisa
               _buildHeader(), // Cabeçalho
               Expanded(
                 child: isLoading
@@ -103,12 +110,10 @@ class _ClientPageState extends State<ClientPage> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
-                          .withOpacity(0.3), 
-                      spreadRadius: 2, 
+                      color: Colors.black.withOpacity(0.3),
+                      spreadRadius: 2,
                       blurRadius: 10,
-                      offset: const Offset(0,
-                          4), 
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -124,29 +129,72 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  // Widget para exibir o cabeçalho com os títulos das colunas
+  Widget _buildSearchBar() {
+    TextEditingController searchController = TextEditingController();
+
+    return Container(
+      color: const Color(0xFFEAECF0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Digite sua pesquisa',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide:
+                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                ),
+                filled: true,
+                fillColor: Colors.white, 
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.purple),
+            onPressed: () {
+              // Aqui você pode implementar a lógica de busca usando o texto de searchController
+              String searchQuery = searchController.text;
+              print('Buscar: $searchQuery'); // Exemplo de uso
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Container(
-      color: Colors.blueGrey[100],
+      color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-              child: Center(
-                  child: Text('Nome',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)))),
+            child: Center(
+              child: Text('Cliente', style: TextStyle(fontSize: 18)),
+            ),
+          ),
           Expanded(
-              child: Center(
-                  child: Text('Wsp',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)))),
+            child: Center(
+              child: Text('Telefone', style: TextStyle(fontSize: 18)),
+            ),
+          ),
           Expanded(
-              child: Center(
-                  child: Text('Opções',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)))),
+            child: Center(
+              child: Text('Opções', style: TextStyle(fontSize: 18)),
+            ),
+          ),
         ],
       ),
     );
@@ -154,51 +202,81 @@ class _ClientPageState extends State<ClientPage> {
 
   Widget _buildClientTile(
       BuildContext context, Map<String, dynamic> clientData, int index) {
-    final client = clientData['client'];
-    final contacts = clientData['contact'];
+    final client = clientData['client'] ?? {};
+    final contacts = clientData['contact'] ?? [];
 
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            margin: const EdgeInsets.only(right: 8.0),
-            child: Checkbox(
-              value: isCheckedList[index],
-              onChanged: (bool? newValue) {
-                if (newValue != null) {
-                  _updateCheckbox(index, newValue);
-                }
-              },
-            ),
-          ),
           Expanded(
+            flex: 1, // Proporção 1 para cada célula
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               child: Text(
                 client['name'] ?? 'No name',
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
           Expanded(
+            flex: 1, // Proporção 1 para cada célula
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               child: Text(
-                contacts[1]['data'] ?? 'No CPF',
-                textAlign: TextAlign.left,
+                contacts.isNotEmpty && contacts[0]['data'] != null
+                    ? contacts[0]['data']
+                    : 'No CPF',
+                textAlign: TextAlign.center,
               ),
             ),
           ),
-          // Botão "Ver Mais" alinhado à esquerda e dividindo o espaço
           Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton(
-                onPressed: () => _showClientDetails(context, clientData),
-                child: const Text('Ver Mais'),
-              ),
+            flex: 1,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/zap.png',
+                        height: 24,
+                      ),
+                    ],
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: MaterialStateProperty.all(
+                        Size(40, 40)), // Tamanho mínimo do botão
+                  ),
+                ),
+                SizedBox(width: 8.0), // Espaço entre os botões
+                ElevatedButton(
+                  onPressed: () => _showClientDetails(context, clientData),
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.black,
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: MaterialStateProperty.all(Size(40, 40)),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -209,9 +287,9 @@ class _ClientPageState extends State<ClientPage> {
   // Função para exibir um modal com mais informações
   void _showClientDetails(
       BuildContext context, Map<String, dynamic> clientData) {
-    final client = clientData['client'];
-    final address = clientData['address'];
-    final contacts = clientData['contact'];
+    final client = clientData['client'] ?? {};
+    final address = clientData['address'] ?? {};
+    final contacts = clientData['contact'] ?? [];
 
     showDialog(
       context: context,
@@ -244,16 +322,18 @@ class _ClientPageState extends State<ClientPage> {
                 const Text('Contacts:',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...contacts.map<Widget>((contact) {
-                  final type = contact['idTypeContact']?['type'] ?? 'Unknown';
-                  final data = contact['data'] ?? 'No data';
-                  return ListTile(
-                    leading: const Icon(Icons.contact_phone),
-                    title: Text('Type: $type'),
-                    subtitle: Text('Contact: $data'),
-                  );
-                }).toList(),
-                if (contacts.isEmpty) const Text('No contacts available'),
+                if (contacts.isNotEmpty)
+                  ...contacts.map<Widget>((contact) {
+                    final type = contact['idTypeContact']?['type'] ?? 'Unknown';
+                    final data = contact['data'] ?? 'No data';
+                    return ListTile(
+                      leading: const Icon(Icons.contact_phone),
+                      title: Text('Type: $type'),
+                      subtitle: Text('Contact: $data'),
+                    );
+                  }).toList()
+                else
+                  const Text('No contacts available'),
               ],
             ),
           ),
@@ -266,5 +346,16 @@ class _ClientPageState extends State<ClientPage> {
         );
       },
     );
+  }
+
+  void _openWhatsApp(String number) async {
+    String formattedNumber = number.replaceAll(RegExp(r'[\s\(\)\-]'), '');
+    print(formattedNumber);
+    final String url = 'https://wa.me/$formattedNumber';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Não foi possível abrir o WhatsApp';
+    }
   }
 }
