@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'stack_pages/stack_page1.dart';
 
 
-class Page2 extends StatelessWidget {
+class Calls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
