@@ -1,5 +1,8 @@
+import 'package:esferapro/screens/ligacoes.dart';
+import 'package:esferapro/widgets/hybridCpfCnpj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import '../../service/call_service.dart';
 
 class StackCalls extends StatefulWidget {
@@ -9,7 +12,6 @@ class StackCalls extends StatefulWidget {
 
 class _StackCallsState extends State<StackCalls> {
   final TextEditingController _clientName = TextEditingController();
-  final TextEditingController _callResult = TextEditingController();
   final TextEditingController _clientCpfCnpj = TextEditingController();
   final TextEditingController _callDuration = TextEditingController();
   final TextEditingController _contactNumber = TextEditingController();
@@ -19,26 +21,36 @@ class _StackCallsState extends State<StackCalls> {
 
   final CallService _callService = CallService();
   List<dynamic> clients = [];
+  List<dynamic> leadResults = [];
   String? selectedClient;
+  String? selectedResult;
 
   @override
   void initState() {
     super.initState();
     fetchAllClients();
+    fetchLeadResults();
   }
 
   void _postNewCall() {
     _callService.postNewCall(
       name: _clientName.text,
       cpfCnpj: _clientCpfCnpj.text,
-      result: _callResult.text,
+      idLeadResult: selectedResult ?? '',
       duration: _callDuration.text,
       contactNumber: _contactNumber.text,
       date: _callDate.text,
       time: _callTime.text,
       description: _callDescription.text,
     ).then((_) {
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Calls()),
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro')),
+      );
     });
   }
 
@@ -46,6 +58,13 @@ class _StackCallsState extends State<StackCalls> {
     List<dynamic> fetchedClients = await _callService.fetchAllClients();
     setState(() {
       clients = fetchedClients;
+    });
+  }
+
+  Future<void> fetchLeadResults() async {
+    List<dynamic> fetchedResults = await _callService.fetchLeadResults();
+    setState(() {
+      leadResults = fetchedResults;
     });
   }
 
@@ -109,10 +128,9 @@ class _StackCallsState extends State<StackCalls> {
                       const SizedBox(height: 5),
                       _buildTitle('CPF ou CNPJ'),
                       const SizedBox(height: 5),
-                      _buildTextField(
-                        maxLines: 1,
+                      HybridCpfCnpjInput(
                         controller: _clientCpfCnpj,
-                        hintText: '123.456.789-00',
+                        hintText: 'Digite CPF ou CNPJ',
                       ),
                     ],
                   ),
@@ -122,44 +140,80 @@ class _StackCallsState extends State<StackCalls> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle('Selecione o Cliente', isRequired: true),
+                      const SizedBox(height: 5),
+                      _buildTitle('Nome do Cliente', isRequired: true),
                       const SizedBox(height: 5),
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFF0F0F7),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.black),
                         ),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
                         child: DropdownButton<String>(
-                          hint: Text(selectedClient ?? 'Selecione um Cliente'),
+                          hint: Text(
+                            selectedClient ?? 'Selecione um Cliente',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                           isExpanded: true,
-                          underline: SizedBox(), 
+                          underline: SizedBox(),
                           icon: const Icon(Icons.arrow_drop_down),
                           onChanged: (String? newValue) {
                             setState(() {
                               selectedClient = newValue;
-                              _clientName.text = selectedClient ?? ''; 
                             });
                           },
                           items: clients.map<DropdownMenuItem<String>>((client) {
                             return DropdownMenuItem<String>(
-                              value: client['name'], 
-                              child: Text(client['name']),
+                              value: client['name'],
+                              child: Text(
+                                client['name'],
+                              ),
                             );
                           }).toList(),
                         ),
                       ),
-                      const SizedBox(height: 5),
                     ],
                   ),
                 ),
               ]),
               const SizedBox(height: 10),
-              _buildTitle('Resultado'),
+              _buildTitle('Resultado', isRequired: true),
               const SizedBox(height: 5),
-              _buildTextField(
-                maxLines: 1,
-                controller: _callResult,
-                hintText: 'Escolha o Resultado',
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F0F7),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.black),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: DropdownButton<String>(
+                  value: selectedResult,
+                  hint: Text(
+                    selectedResult ?? 'Escolha o Resultado',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                  isExpanded: true,
+                  underline: SizedBox(),
+                  icon: const Icon(Icons.arrow_drop_down),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedResult = newValue;
+                    });
+                  },
+                  items: leadResults.map<DropdownMenuItem<String>>((result) {
+                    return DropdownMenuItem<String>(
+                      value: result['idLeadResult'].toString(),
+                      child: Text(result['result']),
+                    );
+                  }).toList(),
+                ),
               ),
               const SizedBox(height: 10),
               Row(children: [
@@ -172,6 +226,8 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callDuration,
                         hintText: '--:--',
+                        inputFormatters: [MaskedInputFormatter('00:00')],
+                        keyboardType: TextInputType.datetime,
                       ),
                     ],
                   ),
@@ -186,6 +242,8 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _contactNumber,
                         hintText: '99 999999999',
+                        inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
+                        keyboardType: TextInputType.phone,
                       ),
                     ],
                   ),
@@ -202,6 +260,8 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callDate,
                         hintText: '00/00/0000',
+                        inputFormatters: [MaskedInputFormatter('00/00/0000')],
+                        keyboardType: TextInputType.datetime,
                       ),
                     ],
                   ),
@@ -216,62 +276,43 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _callTime,
                         hintText: '00:00',
+                        inputFormatters: [MaskedInputFormatter('00:00')],
+                        keyboardType: TextInputType.datetime,
                       ),
                     ],
                   ),
                 ),
               ]),
-              const SizedBox(height: 15),
-              const Text(
-                'Descrição',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               const SizedBox(height: 10),
+              _buildTitle('Descrição', isRequired: false),
+              const SizedBox(height: 5),
               _buildTextField(
+                maxLines: 5,
                 controller: _callDescription,
-                maxLines: 7,
-                hintText: 'Informações da ligação',
+                hintText: 'Digite uma descrição...',
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: const BorderSide(color: Color(0xff6502D4), width: 2),
-                        ),
-                        backgroundColor: Colors.white,
-                      ),
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(
-                          color: Color(0xff6502D4),
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
                   Expanded(
                     child: CustomSizedElevatedButton(
                       onPressed: () {
-                        _postNewCall();
+                        Navigator.pop(context);
                       },
-                      text: 'Salvar',
+                      text: 'Cancelar',
+                      isCancelButton: true,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: CustomSizedElevatedButton(
+                      onPressed: _postNewCall,
+                      text: 'Cadastrar',
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -279,22 +320,14 @@ class _StackCallsState extends State<StackCalls> {
     );
   }
 
-  Widget _buildTitle(String title, {bool isRequired = true}) {
+  Widget _buildTitle(String title, {bool isRequired = false}) {
     return Row(
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-          ),
-        ),
+        Text(title, style: const TextStyle(fontSize: 14)),
         if (isRequired)
           const Text(
-            '*',
-            style: TextStyle(
-              color: Colors.red,
-              fontSize: 14,
-            ),
+            ' *',
+            style: TextStyle(color: Colors.red),
           ),
       ],
     );
@@ -303,24 +336,28 @@ class _StackCallsState extends State<StackCalls> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
+    int maxLines = 1,
     List<TextInputFormatter>? inputFormatters,
-    required int maxLines,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType? keyboardType,
   }) {
-    return TextField(
-      controller: controller,
-      inputFormatters: inputFormatters,
-      keyboardType: keyboardType,
-      style: const TextStyle(fontSize: 16),
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xFFF0F0F7),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F0F7),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.black),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.black),
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(15),
         ),
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
       ),
     );
   }
@@ -328,35 +365,43 @@ class _StackCallsState extends State<StackCalls> {
   Widget _buildHalfWidthTextField({
     required TextEditingController controller,
     required String hintText,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
   }) {
     return Container(
-      height: 58,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F0F7),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.black),
+      ),
       child: TextField(
         controller: controller,
-        style: const TextStyle(fontSize: 16),
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
-          filled: true,
-          fillColor: const Color(0xFFF0F0F7),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
-          ),
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(15),
         ),
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
       ),
     );
   }
 }
 
+
 class CustomSizedElevatedButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
+  final bool isCancelButton;
 
   const CustomSizedElevatedButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.text,
-  }) : super(key: key);
+    this.isCancelButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -366,14 +411,18 @@ class CustomSizedElevatedButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: Color(0xff6502D4), width: 2),
+          side: isCancelButton
+              ? const BorderSide(color: Color(0xff6502D4), width: 2)
+              : BorderSide.none,
         ),
-        backgroundColor: const Color(0xff6502D4),
+        backgroundColor: isCancelButton ? Colors.transparent : const Color(0xff6502D4),
+        elevation: isCancelButton ? 0 : 2,
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 20,
+          color: isCancelButton ? const Color(0xff6502D4) : Colors.white, 
         ),
       ),
     );
