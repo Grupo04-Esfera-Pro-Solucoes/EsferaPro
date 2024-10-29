@@ -9,7 +9,7 @@ class RegisterService {
     required String phone,
     required String role,
   }) async {
-    final url = Uri.parse('http://localhost:8080/register');
+    final url = Uri.parse('http://10.0.2.2:8080/register');
 
     final Map<String, dynamic> dados = {
       'username': username,

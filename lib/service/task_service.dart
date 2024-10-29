@@ -1,11 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../model/task_model.dart';
-import 'package:logging/logging.dart';
 
 class TaskService {
-  final String baseUrl = 'http://localhost:8080/task';
-  final Logger logger = Logger('TaskService');
+  final String baseUrl = 'http://10.0.2.2:8080/task';
 
   Future<List<Task>> fetchTasks(int userId) async {
     final url = Uri.parse('$baseUrl/all/$userId');
@@ -18,7 +16,7 @@ class TaskService {
         return Task.fromJson(taskJson);
       }).toList();
     } else {
-      throw Exception('Failed to load tasks. Status code: ${response.statusCode}');
+      throw Exception('Erro ao carregar tarefas: ${response.statusCode}');
     }
   }
 
@@ -51,7 +49,7 @@ class TaskService {
       userId: task.userId, 
     );
   } else {
-    throw Exception('Failed to create task');
+    throw Exception('Erro ao criar tarefa');
   }
 }
 
@@ -67,7 +65,7 @@ class TaskService {
       final Map<String, dynamic> body = json.decode(response.body);
       return Task.fromJson(body);
     } else {
-      throw Exception('Failed to update task status. Status code: ${response.statusCode}');
+      throw Exception('Erro ao atualizar status da tarefa: ${response.statusCode}');
     }
   }
 
@@ -81,7 +79,7 @@ class TaskService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to update task. Status code: ${response.statusCode}');
+      throw Exception('Erro ao atualizar tarefa: ${response.statusCode}');
     }
   }
 
@@ -94,7 +92,7 @@ class TaskService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to delete task. Status code: ${response.statusCode}');
+      throw Exception('Erro ao excluir tarefa: ${response.statusCode}');
     }
   }
 }

@@ -331,7 +331,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: Text(
                               'Cadastrar',
                               style: TextStyle(
-                                color: _termsAccepted ? Colors.white : Colors.grey, // Cor do texto cinza quando desativado
+                                color: _termsAccepted ? Colors.white : Colors.grey, 
                               ),
                             ),
                           ),

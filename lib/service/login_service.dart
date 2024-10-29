@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String _baseUrl = 'http://localhost:8080';
+  final String _baseUrl = 'http://10.0.2.2:8080';
 
   Future<bool> login(String email, String password) async {
     final url = Uri.parse('$_baseUrl/login');
@@ -24,7 +24,6 @@ class AuthService {
         return false;
       }
     } catch (e) {
-      print('Erro: $e');
       return false;
     }
   }

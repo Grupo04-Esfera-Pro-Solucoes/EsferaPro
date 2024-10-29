@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
+  final String baseUrl = 'http://10.0.2.2:8080';
+
   Future<void> postNewUser({
     required String name,
     required String cpfCnpj,
@@ -21,7 +23,7 @@ class UserService {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
-    final url = Uri.parse('http://10.0.2.2:8080/client-address-contact/add');
+    final url = Uri.parse('$baseUrl/client-address-contact/add');
 
     final Map<String, dynamic> dados = {
       "client": {
@@ -48,7 +50,7 @@ class UserService {
         "country": country
       }
     };
-  print(dados);
+
     try {
       final response = await http.post(
         url,
@@ -58,13 +60,12 @@ class UserService {
         body: jsonEncode(dados),
       );
 
-      if (response.statusCode == 200) {
-        print('Sucesso: ${utf8.decode(response.bodyBytes)}');
-      } else {
-        print('Erro: ${utf8.decode(response.bodyBytes)}');
+      if (response.statusCode != 200) {
+        throw Exception('Erro: ${utf8.decode(response.bodyBytes)}');
       }
+
     } catch (e) {
-      print('Erro ao enviar: $e');
+      throw Exception('Erro: $e');
     }
   }
 }

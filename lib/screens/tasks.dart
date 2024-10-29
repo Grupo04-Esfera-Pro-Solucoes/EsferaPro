@@ -80,7 +80,7 @@ class _TasksPageState extends State<TasksPage> {
         tasks.removeWhere((task) => task.id == taskId);
       });
     } catch (e) {
-      print('Erro ao excluir a tarefa: $e');
+      throw Exception('Erro: $e');
     }
   }
 
@@ -90,17 +90,6 @@ class _TasksPageState extends State<TasksPage> {
         (s) => s.toString().split('.').last == task.status,
         orElse: () => TaskStatus.todo,
       ) == status;
-    }).toList().reversed.toList();
-  }
-
-  List<Task> get _filteredTasks {
-    return tasks.where((task) {
-      final taskStatus = TaskStatus.values.firstWhere(
-        (status) => status.toString().split('.').last == task.status,
-        orElse: () => TaskStatus.todo,
-      );
-
-      return taskStatus == selectedStatus;
     }).toList().reversed.toList();
   }
 

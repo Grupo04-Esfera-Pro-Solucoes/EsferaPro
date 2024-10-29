@@ -1,4 +1,4 @@
-import 'package:esferapro/screens/ligacoes.dart';
+import 'package:esferapro/screens/call.dart';
 import 'package:esferapro/widgets/hybridCpfCnpj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +56,7 @@ class _StackCallsState extends State<StackCalls> {
     ).then((_) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Calls()),
+        MaterialPageRoute(builder: (context) => CallPage()),
       );
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,6 +83,7 @@ class _StackCallsState extends State<StackCalls> {
           }
         });
       } catch (e) {
+        throw Exception('Erro na requisição: $e');
       }
     }
   }
@@ -152,7 +153,7 @@ class _StackCallsState extends State<StackCalls> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 5),
-                      _buildTitle('CPF ou CNPJ'),
+                      _buildTitle('CPF ou CNPJ', isRequired: true),
                       const SizedBox(height: 5),
                       HybridCpfCnpjInput(
                         controller: _clientCpfCnpj,
@@ -244,7 +245,7 @@ class _StackCallsState extends State<StackCalls> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle('Duração da ligação', isRequired: false),
+                      _buildTitle('Duração da ligação', isRequired: true),
                       const SizedBox(height: 5),
                       _buildHalfWidthTextField(
                         controller: _callDuration,
@@ -260,7 +261,7 @@ class _StackCallsState extends State<StackCalls> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle('Contato', isRequired: false),
+                      _buildTitle('Contato', isRequired: true),
                       const SizedBox(height: 5),
                       _buildHalfWidthTextField(
                         controller: _contactNumber,
@@ -278,7 +279,7 @@ class _StackCallsState extends State<StackCalls> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle('Data da Ligação', isRequired: false),
+                      _buildTitle('Data da Ligação', isRequired: true),
                       const SizedBox(height: 5),
                       _buildHalfWidthTextField(
                         controller: _callDate,
@@ -294,7 +295,7 @@ class _StackCallsState extends State<StackCalls> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle('Horário da Ligação', isRequired: false),
+                      _buildTitle('Horário da Ligação', isRequired: true),
                       const SizedBox(height: 5),
                       _buildHalfWidthTextField(
                         controller: _callTime,
@@ -307,7 +308,7 @@ class _StackCallsState extends State<StackCalls> {
                 ),
               ]),
               const SizedBox(height: 10),
-              _buildTitle('Descrição', isRequired: false),
+              _buildTitle('Descrição', isRequired: true),
               const SizedBox(height: 5),
               _buildTextField(
                 maxLines: 5,

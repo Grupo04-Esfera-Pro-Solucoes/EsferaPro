@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CallService {
-  final String baseUrl = "http://localhost:8080";
+  final String baseUrl = "http://10.0.2.2:8080";
 
   Future<void> postNewCall({
     required String name,
@@ -38,7 +38,7 @@ class CallService {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Falha ao criar lead: ${response.body}');
+        throw Exception('Falha ao cadastrar ligação: ${response.body}');
       }
     } catch (e) {
       throw Exception('Erro na requisição: $e');
@@ -73,7 +73,7 @@ class CallService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Falha ao buscar resultados: ${response.body}');
+        throw Exception('Erro ao buscar resultados: ${response.body}');
       }
     } catch (e) {
       throw Exception('Erro na requisição: $e');

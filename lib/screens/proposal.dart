@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'stack_pages/stack_proposal.dart';
+import 'stacks/stack_proposal.dart';
 
 class Proposal extends StatefulWidget {
   @override
@@ -133,7 +133,6 @@ class _ProposalState extends State<Proposal> {
                                   IconButton(
                                     icon: Icon(Icons.edit),
                                     onPressed: () {
-                                      // Adicione a lógica de edição aqui
                                     },
                                   ),
                                   IconButton(

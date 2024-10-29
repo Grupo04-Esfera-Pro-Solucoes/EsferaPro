@@ -1,7 +1,7 @@
 import 'package:esferapro/service/login_service.dart';
 import 'package:flutter/material.dart';
 import 'package:esferapro/screens/main_screen.dart';
-import 'package:esferapro/screens/stack_pages/register_screen.dart';// Importa o AuthService
+import 'package:esferapro/screens/stacks/register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -234,4 +234,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
