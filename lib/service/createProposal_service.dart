@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProposalService {
-  String baseUrl = 'http://grupo04.duckdns.org:8080';
+  String baseUrl = 'http://localhost:8080';
 
   Future<void> postNewProposal({
     required int idLead,
@@ -47,9 +47,9 @@ class ProposalService {
 
     request.fields['user'] = jsonEncode({"idUser": userId});
 
-    // if (file != null) {
-    //   request.files.add(await http.MultipartFile.fromPath('file', file.path));
-    // }
+    if (file != null) {
+      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    }
 
     try {
       final response = await request.send();
@@ -92,7 +92,7 @@ class ProposalService {
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
+        return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       } else {
         throw Exception('Erro ao buscar proposta: ${response.statusCode}');
       }
