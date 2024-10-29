@@ -15,13 +15,17 @@ class _ClientPageState extends State<ClientPage> {
   List<bool> isCheckedList = []; // Lista para o estado dos checkboxes
   bool isLoading = true; // Indicador de carregamento
   String? errorMessage; // Mensagem de erro, se houver
+  TextEditingController searchController = TextEditingController(); // Controlador do TextField
 
   // Função para buscar os dados dos clientes
-  Future<void> fetchClientData() async {
+  Future<void> fetchClientData({String? searchQuery}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? UserId = prefs.getInt('userId');
-    final url =
-        Uri.parse('http://localhost:8080/client-address-contact/all/$UserId');
+    
+    // URL da requisição
+    final url = searchQuery != null && searchQuery.isNotEmpty
+        ? Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/name/$searchQuery/$UserId')
+        : Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/all/$UserId');
 
     try {
       final response = await http.get(url);
@@ -37,7 +41,7 @@ class _ClientPageState extends State<ClientPage> {
             clients = []; 
             isCheckedList = []; 
           }
-          isLoading = false;
+          isLoading = false; // Atualiza o estado de carregamento
         });
       } else {
         throw Exception('Failed to load client data');
@@ -54,7 +58,16 @@ class _ClientPageState extends State<ClientPage> {
   @override
   void initState() {
     super.initState();
-    fetchClientData();
+    fetchClientData(); // Carrega dados inicialmente
+  }
+
+  // Função para buscar clientes quando o botão de pesquisa é pressionado
+  void _searchClients() {
+    setState(() {
+      clients = []; // Limpa a lista de clientes
+      isLoading = true; // Inicia o carregamento
+    });
+    fetchClientData(searchQuery: searchController.text.trim()); // Chama a função com a query
   }
 
   // Função para atualizar o estado do checkbox
@@ -130,8 +143,6 @@ class _ClientPageState extends State<ClientPage> {
   }
 
   Widget _buildSearchBar() {
-    TextEditingController searchController = TextEditingController();
-
     return Container(
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -144,16 +155,15 @@ class _ClientPageState extends State<ClientPage> {
                 hintText: 'Digite sua pesquisa',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 filled: true,
                 fillColor: Colors.white, 
@@ -161,12 +171,8 @@ class _ClientPageState extends State<ClientPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.purple),
-            onPressed: () {
-              // Aqui você pode implementar a lógica de busca usando o texto de searchController
-              String searchQuery = searchController.text;
-              print('Buscar: $searchQuery'); // Exemplo de uso
-            },
+            icon: const Icon(Icons.search, color: Color(0xff6502d4)),
+            onPressed: _searchClients, // Chama a função de busca
           ),
         ],
       ),

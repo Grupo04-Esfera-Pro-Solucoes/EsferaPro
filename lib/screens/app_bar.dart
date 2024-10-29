@@ -19,21 +19,15 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
           iconSize: 30,
           onPressed: () async {
             final SharedPreferences prefs = await SharedPreferences.getInstance();
-            int? userId = prefs.getInt('userId');
+int userId = prefs.getInt('userId') ?? 0; 
 
-            if (userId != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ConfigurationPage(userId: userId),
-                ),
-              );
-            } else {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-            }
-          },
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ConfigurationPage(userId: userId),
+              ),
+            );
+                    },
         ),
        const SizedBox(width: 10),
       IconButton(
