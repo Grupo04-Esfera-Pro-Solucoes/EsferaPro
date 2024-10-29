@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CallService {
-  final String baseUrl = "http://10.0.2.2:8080";
+  final String baseUrl = "http://localhost:8080";
 
   Future<void> postNewCall({
     required String name,
@@ -45,8 +45,11 @@ class CallService {
     }
   }
 
-  Future<List<dynamic>> fetchAllClients() async {
-    final url = Uri.parse('$baseUrl/client/all');
+  Future<List<dynamic>> fetchClients({
+    required String cpfCnpj,
+    required String idUser,
+  }) async {
+    final url = Uri.parse('$baseUrl/client/cpf/$cpfCnpj/$idUser');
 
     try {
       final response = await http.get(url);

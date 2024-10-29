@@ -4,20 +4,34 @@ import 'package:flutter/services.dart';
 class HybridCpfCnpjInput extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
+  final ValueChanged<String>? onChanged;
 
   const HybridCpfCnpjInput({
     super.key,
     required this.controller,
     required this.hintText,
+    this.onChanged,
   });
 
   void _onChanged(String value) {
     String digits = value.replaceAll(RegExp(r'\D'), '');
 
     if (digits.length <= 11) {
-      controller.value = TextEditingValue(text: _formatCpf(digits));
+      String formattedCpf = _formatCpf(digits);
+      controller.value = TextEditingValue(
+        text: formattedCpf,
+        selection: TextSelection.fromPosition(TextPosition(offset: formattedCpf.length)),
+      );
     } else if (digits.length <= 14) {
-      controller.value = TextEditingValue(text: _formatCnpj(digits));
+      String formattedCnpj = _formatCnpj(digits);
+      controller.value = TextEditingValue(
+        text: formattedCnpj,
+        selection: TextSelection.fromPosition(TextPosition(offset: formattedCnpj.length)),
+      );
+    }
+
+    if (onChanged != null) {
+      onChanged!(value);
     }
   }
 

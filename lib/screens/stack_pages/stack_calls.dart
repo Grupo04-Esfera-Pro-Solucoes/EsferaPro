@@ -3,6 +3,7 @@ import 'package:esferapro/widgets/hybridCpfCnpj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../service/call_service.dart';
 
 class StackCalls extends StatefulWidget {
@@ -24,15 +25,25 @@ class _StackCallsState extends State<StackCalls> {
   List<dynamic> leadResults = [];
   String? selectedClient;
   String? selectedResult;
+  int? userId;
 
   @override
   void initState() {
     super.initState();
-    fetchAllClients();
+    _loadUserId();
     fetchLeadResults();
   }
 
+  Future<void> _loadUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getInt('userId');
+    });
+  }
+
   void _postNewCall() {
+    if (userId == null) return;
+
     _callService.postNewCall(
       name: _clientName.text,
       cpfCnpj: _clientCpfCnpj.text,
@@ -54,11 +65,26 @@ class _StackCallsState extends State<StackCalls> {
     });
   }
 
-  Future<void> fetchAllClients() async {
-    List<dynamic> fetchedClients = await _callService.fetchAllClients();
-    setState(() {
-      clients = fetchedClients;
-    });
+  Future<void> fetchClients() async {
+    if (userId != null && _clientCpfCnpj.text.isNotEmpty) {
+      String formattedCpf = _clientCpfCnpj.text.replaceAll(RegExp(r'[^\d]'), '');
+
+      try {
+        List<dynamic> fetchedClients = await _callService.fetchClients(
+          cpfCnpj: formattedCpf,
+          idUser: userId.toString(),
+        );
+
+        setState(() {
+          clients = fetchedClients;
+
+          if (clients.isNotEmpty) {
+            _clientName.text = clients[0]['name']; 
+          }
+        });
+      } catch (e) {
+      }
+    }
   }
 
   Future<void> fetchLeadResults() async {
@@ -131,90 +157,87 @@ class _StackCallsState extends State<StackCalls> {
                       HybridCpfCnpjInput(
                         controller: _clientCpfCnpj,
                         hintText: 'Digite CPF ou CNPJ',
+                        onChanged: (value) {
+                          fetchClients();
+                        },
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 20),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 5),
-                      _buildTitle('Nome do Cliente', isRequired: true),
-                      const SizedBox(height: 5),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0F0F7),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.black),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: DropdownButton<String>(
-                          hint: Text(
-                            selectedClient ?? 'Selecione um Cliente',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                          isExpanded: true,
-                          underline: SizedBox(),
-                          icon: const Icon(Icons.arrow_drop_down),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              selectedClient = newValue;
-                            });
-                          },
-                          items: clients.map<DropdownMenuItem<String>>((client) {
-                            return DropdownMenuItem<String>(
-                              value: client['name'],
-                              child: Text(
-                                client['name'],
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 5),
+                    _buildTitle('Resultado', isRequired: true),
+                    const SizedBox(height: 5),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F0F7),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black),
                       ),
-                    ],
-                  ),
-                ),
-              ]),
-              const SizedBox(height: 10),
-              _buildTitle('Resultado', isRequired: true),
-              const SizedBox(height: 5),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0F0F7),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.black),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: DropdownButton<String>(
-                  value: selectedResult,
-                  hint: Text(
-                    selectedResult ?? 'Escolha o Resultado',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16,
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: DropdownButton<String>(
+                        value: selectedResult,
+                        hint: Text(
+                          selectedResult ?? 'Escolha o Resultado',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
+                        isExpanded: true,
+                        underline: SizedBox(),
+                        icon: const Icon(Icons.arrow_drop_down),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedResult = newValue;
+                          });
+                        },
+                        items: leadResults.map<DropdownMenuItem<String>>((result) {
+                          return DropdownMenuItem<String>(
+                            value: result['idLeadResult'].toString(),
+                            child: Text(result['result']),
+                          );
+                        }).toList(),
+                      ),
                     ),
-                  ),
-                  isExpanded: true,
-                  underline: SizedBox(),
-                  icon: const Icon(Icons.arrow_drop_down),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedResult = newValue;
-                    });
-                  },
-                  items: leadResults.map<DropdownMenuItem<String>>((result) {
-                    return DropdownMenuItem<String>(
-                      value: result['idLeadResult'].toString(),
-                      child: Text(result['result']),
-                    );
-                  }).toList(),
+                  ],
                 ),
               ),
+            ]),
+              const SizedBox(height: 10),
+              Row(children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 5),
+                    _buildTitle('Nome do Cliente', isRequired: true),
+                    const SizedBox(height: 5),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F0F7),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      alignment: Alignment.centerLeft,
+                      height: 50,
+                      child: Text(
+                        _clientName.text.isNotEmpty ? _clientName.text : 'Selecione um Cliente',
+                        style: TextStyle(
+                          color: _clientName.text.isNotEmpty ? Colors.black : Colors.grey,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ]),
               const SizedBox(height: 10),
               Row(children: [
                 Expanded(
