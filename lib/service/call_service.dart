@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CallService {
-  final String baseUrl = "http://localhost:8080";
+  final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
 
   Future<void> postNewCall({
     required String name,

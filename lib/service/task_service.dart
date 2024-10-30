@@ -2,9 +2,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../model/task_model.dart';
 import 'package:logging/logging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class TaskService {
-  final String baseUrl = 'http://localhost:8080/task';
+  final String baseUrl = '${dotenv.env['API_URL'] ?? 'http://localhost:8080'}/task';
+
+  //final String baseUrl = '$initialUrl/task';
   final Logger logger = Logger('TaskService');
 
   Future<List<Task>> fetchTasks(int userId) async {

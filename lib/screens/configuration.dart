@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'app_bar.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfigurationPage extends StatefulWidget {
   final int userId;
@@ -56,7 +57,9 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   }
 
   Future<void> _fetchUserData() async {
-    final url = Uri.parse('http://grupo04.duckdns.org:8080/user/${widget.userId}');
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
+    final url = Uri.parse('$baseUrl/user/${widget.userId}');
     try {
       final response = await http.get(url);
 
