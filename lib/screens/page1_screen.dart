@@ -1,6 +1,7 @@
 
 import 'dart:convert'; // Para decodificar a resposta JSON
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class ClientPage extends StatefulWidget {
@@ -16,7 +17,9 @@ class _ClientPageState extends State<ClientPage> {
 
   // Função para buscar os dados dos clientes
   Future<void> fetchClientData() async {
-    final url = Uri.parse('http://localhost:8080/client-address-contact/all/1'); // Use 10.0.2.2 para Android emulator
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
+    final url = Uri.parse('$baseUrl/client-address-contact/all/1'); // Use 10.0.2.2 para Android emulator
 
     try {
       final response = await http.get(url);

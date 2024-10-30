@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-//import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 
@@ -27,8 +27,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String phone = _phone.text;
     String role = _role.text;
 
-    //final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final url = Uri.parse('http://localhost:8080/register');
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+    
+    final url = Uri.parse('$baseUrl/register');
 
     final Map<String, dynamic> dados = {
       'username': username,

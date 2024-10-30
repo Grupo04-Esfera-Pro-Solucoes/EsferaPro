@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -11,11 +12,11 @@ class ClientPage extends StatefulWidget {
 }
 
 class _ClientPageState extends State<ClientPage> {
-  List<dynamic> clients = []; // Lista de clientes
-  List<bool> isCheckedList = []; // Lista para o estado dos checkboxes
-  bool isLoading = true; // Indicador de carregamento
-  String? errorMessage; // Mensagem de erro, se houver
-  TextEditingController searchController = TextEditingController(); // Controlador do TextField
+  List<dynamic> clients = []; 
+  List<bool> isCheckedList = []; 
+  bool isLoading = true; 
+  String? errorMessage; 
+  TextEditingController searchController = TextEditingController(); 
 
   // Função para buscar os dados dos clientes
   Future<void> fetchClientData({String? searchQuery}) async {
@@ -23,9 +24,11 @@ class _ClientPageState extends State<ClientPage> {
     final int? UserId = prefs.getInt('userId');
     
     // URL da requisição
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
     final url = searchQuery != null && searchQuery.isNotEmpty
-        ? Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/name/$searchQuery/$UserId')
-        : Uri.parse('http://grupo04.duckdns.org:8080/client-address-contact/all/$UserId');
+        ? Uri.parse('$baseUrl/client-address-contact/name/$searchQuery/$UserId')
+        : Uri.parse('$baseUrl/client-address-contact/all/$UserId');
 
     try {
       final response = await http.get(url);
