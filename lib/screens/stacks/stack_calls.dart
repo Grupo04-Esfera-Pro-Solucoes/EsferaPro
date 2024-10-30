@@ -3,6 +3,7 @@ import 'package:esferapro/widgets/hybridCpfCnpj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../service/call_service.dart';
 
@@ -26,6 +27,7 @@ class _StackCallsState extends State<StackCalls> {
   String? selectedClient;
   String? selectedResult;
   int? userId;
+  String? selectedClientId;
 
   @override
   void initState() {
@@ -41,28 +43,33 @@ class _StackCallsState extends State<StackCalls> {
     });
   }
 
-  void _postNewCall() {
-    if (userId == null) return;
+ void _postNewCall() {
+    if (userId == null || selectedClientId == null) return;
+    try {
+      final dateFormatter = DateFormat('dd/MM/yyyy');
+      final formattedDate = DateFormat('yyyy-MM-dd').format(dateFormatter.parse(_callDate.text));
 
-    _callService.postNewCall(
-      name: _clientName.text,
-      cpfCnpj: _clientCpfCnpj.text,
-      idLeadResult: selectedResult ?? '',
-      duration: _callDuration.text,
-      contactNumber: _contactNumber.text,
-      date: _callDate.text,
-      time: _callTime.text,
-      description: _callDescription.text,
-    ).then((_) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => CallPage()),
-      );
-    }).catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro')),
-      );
+      _callService.postNewCall(
+        idLeadResult: selectedResult ?? '',
+        idClient: selectedClientId!,
+        duration: _callDuration.text,
+        contactNumber: _contactNumber.text,
+        date: formattedDate,
+        time: _callTime.text,
+        description: _callDescription.text,
+      ).then((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => CallPage()),
+        );
+      }).catchError((error) {
+      print('Erro no POST: $error'); 
     });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro de formatação de data: $e')),
+      );
+    }
   }
 
   Future<void> fetchClients() async {
@@ -80,6 +87,7 @@ class _StackCallsState extends State<StackCalls> {
 
           if (clients.isNotEmpty) {
             _clientName.text = clients[0]['name']; 
+            selectedClientId = clients[0]['idClient'].toString(); // Armazena o ID do cliente selecionado
           }
         });
       } catch (e) {
@@ -183,7 +191,7 @@ class _StackCallsState extends State<StackCalls> {
                       child: DropdownButton<String>(
                         value: selectedResult,
                         hint: Text(
-                          selectedResult ?? 'Escolha o Resultado',
+                          selectedResult ?? '',
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 16,

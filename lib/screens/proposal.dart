@@ -28,7 +28,7 @@ class _ProposalState extends State<Proposal> {
     }
 
     try {
-      final response = await http.get(Uri.parse('http://localhost:8080/proposal/all/$userId?page=0&size=20&sort=idProposal'));
+      final response = await http.get(Uri.parse('http://10.0.2.2:8080/proposal/all/$userId?page=0&size=20&sort=idProposal'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['content'];
         setState(() {
@@ -123,8 +123,8 @@ class _ProposalState extends State<Proposal> {
                                 ],
                               ),
                             ),
-                            Expanded(child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center), flex: 2),
-                            Expanded(child: Text(_formatDate(proposal['proposalDate']), textAlign: TextAlign.center), flex: 2),
+                            Expanded(flex: 2, child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center)),
+                            Expanded(flex: 2, child: Text(_formatDate(proposal['proposalDate']), textAlign: TextAlign.center)),
                             Expanded(
                               flex: 2,
                               child: Row(
