@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProposalService {
-  String baseUrl = 'http://localhost:8080';
+  String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
 
   Future<void> postNewProposal({
     required int idLead,

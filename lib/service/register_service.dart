@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class RegisterService {
   static Future<http.Response> postNewUser({
@@ -9,7 +10,9 @@ class RegisterService {
     required String phone,
     required String role,
   }) async {
-    final url = Uri.parse('http://localhost:8080/register');
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
+    final url = Uri.parse('$baseUrl/register');
 
     final Map<String, dynamic> dados = {
       'username': username,

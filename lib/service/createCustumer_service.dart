@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserService {
   Future<void> postNewUser({
@@ -20,8 +21,9 @@ class UserService {
   }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
 
-    final url = Uri.parse('http://10.0.2.2:8080/client-address-contact/add');
+    final url = Uri.parse('$baseUrl/client-address-contact/add');
 
     final Map<String, dynamic> dados = {
       "client": {
