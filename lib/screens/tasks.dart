@@ -176,15 +176,15 @@ Widget _buildTaskCard(Task task) {
     );
   }
 
-  DismissDirection getDismissDirection(Task task) {
+DismissDirection getDismissDirection(Task task) {
     return task.status == 'done'
-        ? DismissDirection.endToStart
+        ? DismissDirection.startToEnd
         : DismissDirection.horizontal;
-  }
+}
 
-  return Dismissible(
+return Dismissible(
     key: ValueKey(task.id),
-    background: buildDismissBackground(Alignment.centerLeft, Icons.change_circle_outlined),
+    background: buildDismissBackground(Alignment.centerLeft, Icons.delete),
     secondaryBackground: task.status == 'todo'
         ? buildDismissBackground(Alignment.centerRight, Icons.delete)
         : buildDismissBackground(Alignment.centerRight, Icons.change_circle_outlined),
@@ -201,7 +201,20 @@ Widget _buildTaskCard(Task task) {
             tasks.add(task);
           });
         }
-      } else if (direction == DismissDirection.startToEnd) {
+      } 
+      else if (task.status == 'done' && direction == DismissDirection.startToEnd) {
+        try {
+          await _taskService.deleteTask(task.id);
+          setState(() {
+            tasks.remove(task);
+          });
+        } catch (e) {
+          setState(() {
+            tasks.add(task);
+          });
+        }
+      }
+      else if (direction == DismissDirection.startToEnd) {
         final currentStatus = TaskStatus.values.firstWhere(
           (e) => e.toString().split('.').last == task.status,
           orElse: () => TaskStatus.todo,
