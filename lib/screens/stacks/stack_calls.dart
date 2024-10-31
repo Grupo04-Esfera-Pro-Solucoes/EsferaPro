@@ -87,7 +87,7 @@ class _StackCallsState extends State<StackCalls> {
 
           if (clients.isNotEmpty) {
             _clientName.text = clients[0]['name']; 
-            selectedClientId = clients[0]['idClient'].toString(); // Armazena o ID do cliente selecionado
+            selectedClientId = clients[0]['idClient'].toString(); 
           }
         });
       } catch (e) {
