@@ -43,13 +43,15 @@ class _StackCallsState extends State<StackCalls> {
     });
   }
 
- void _postNewCall() {
+  void _postNewCall() {
     if (userId == null || selectedClientId == null) return;
     try {
       final dateFormatter = DateFormat('dd/MM/yyyy');
-      final formattedDate = DateFormat('yyyy-MM-dd').format(dateFormatter.parse(_callDate.text));
+      final formattedDate =
+          DateFormat('yyyy-MM-dd').format(dateFormatter.parse(_callDate.text));
 
-      _callService.postNewCall(
+      _callService
+          .postNewCall(
         idLeadResult: selectedResult ?? '',
         idClient: selectedClientId!,
         duration: _callDuration.text,
@@ -57,24 +59,26 @@ class _StackCallsState extends State<StackCalls> {
         date: formattedDate,
         time: _callTime.text,
         description: _callDescription.text,
-      ).then((_) {
+      )
+          .then((_) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => CallPage()),
         );
       }).catchError((error) {
-      print('Erro no POST: $error'); 
-    });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => CallPage()),
+        );
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro de formatação de data: $e')),
-      );
     }
   }
 
   Future<void> fetchClients() async {
     if (userId != null && _clientCpfCnpj.text.isNotEmpty) {
-      String formattedCpf = _clientCpfCnpj.text.replaceAll(RegExp(r'[^\d]'), '');
+      String formattedCpf =
+          _clientCpfCnpj.text.replaceAll(RegExp(r'[^\d]'), '');
 
       try {
         List<dynamic> fetchedClients = await _callService.fetchClients(
@@ -86,8 +90,8 @@ class _StackCallsState extends State<StackCalls> {
           clients = fetchedClients;
 
           if (clients.isNotEmpty) {
-            _clientName.text = clients[0]['name']; 
-            selectedClientId = clients[0]['idClient'].toString(); 
+            _clientName.text = clients[0]['name'];
+            selectedClientId = clients[0]['idClient'].toString();
           }
         });
       } catch (e) {
@@ -175,78 +179,83 @@ class _StackCallsState extends State<StackCalls> {
                 ),
                 const SizedBox(width: 20),
                 Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 5),
-                    _buildTitle('Resultado', isRequired: true),
-                    const SizedBox(height: 5),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F0F7),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.black),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 5),
+                      _buildTitle('Resultado', isRequired: true),
+                      const SizedBox(height: 5),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F7),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.black),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: DropdownButton<String>(
+                          value: selectedResult,
+                          hint: Text(
+                            selectedResult ?? '',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                            ),
+                          ),
+                          isExpanded: true,
+                          underline: SizedBox(),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedResult = newValue;
+                            });
+                          },
+                          items: leadResults
+                              .map<DropdownMenuItem<String>>((result) {
+                            return DropdownMenuItem<String>(
+                              value: result['idLeadResult'].toString(),
+                              child: Text(result['result']),
+                            );
+                          }).toList(),
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: DropdownButton<String>(
-                        value: selectedResult,
-                        hint: Text(
-                          selectedResult ?? '',
-                          style: const TextStyle(
-                            color: Colors.grey,
+                    ],
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 10),
+              Row(children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 5),
+                      _buildTitle('Nome do Cliente', isRequired: true),
+                      const SizedBox(height: 5),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F7),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.black),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        alignment: Alignment.centerLeft,
+                        height: 50,
+                        child: Text(
+                          _clientName.text.isNotEmpty
+                              ? _clientName.text
+                              : 'Selecione um Cliente',
+                          style: TextStyle(
+                            color: _clientName.text.isNotEmpty
+                                ? Colors.black
+                                : Colors.grey,
                             fontSize: 16,
                           ),
                         ),
-                        isExpanded: true,
-                        underline: SizedBox(),
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedResult = newValue;
-                          });
-                        },
-                        items: leadResults.map<DropdownMenuItem<String>>((result) {
-                          return DropdownMenuItem<String>(
-                            value: result['idLeadResult'].toString(),
-                            child: Text(result['result']),
-                          );
-                        }).toList(),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ]),
-              const SizedBox(height: 10),
-              Row(children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 5),
-                    _buildTitle('Nome do Cliente', isRequired: true),
-                    const SizedBox(height: 5),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F0F7),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.black),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      alignment: Alignment.centerLeft,
-                      height: 50,
-                      child: Text(
-                        _clientName.text.isNotEmpty ? _clientName.text : 'Selecione um Cliente',
-                        style: TextStyle(
-                          color: _clientName.text.isNotEmpty ? Colors.black : Colors.grey,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ]),
+              ]),
               const SizedBox(height: 10),
               Row(children: [
                 Expanded(
@@ -274,7 +283,9 @@ class _StackCallsState extends State<StackCalls> {
                       _buildHalfWidthTextField(
                         controller: _contactNumber,
                         hintText: '99 999999999',
-                        inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
+                        inputFormatters: [
+                          MaskedInputFormatter('(00) 00000-0000')
+                        ],
                         keyboardType: TextInputType.phone,
                       ),
                     ],
@@ -289,11 +300,27 @@ class _StackCallsState extends State<StackCalls> {
                     children: [
                       _buildTitle('Data da Ligação', isRequired: true),
                       const SizedBox(height: 5),
-                      _buildHalfWidthTextField(
-                        controller: _callDate,
-                        hintText: '00/00/0000',
-                        inputFormatters: [MaskedInputFormatter('00/00/0000')],
-                        keyboardType: TextInputType.datetime,
+                      GestureDetector(
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (pickedDate != null) {
+                            String formattedDate =
+                                DateFormat('dd/MM/yyyy').format(pickedDate);
+                            _callDate.text = formattedDate;
+                          }
+                        },
+                        child: AbsorbPointer(
+                          child: _buildHalfWidthTextField(
+                            controller: _callDate,
+                            hintText: '00/00/0000',
+                            keyboardType: TextInputType.datetime,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -351,7 +378,6 @@ class _StackCallsState extends State<StackCalls> {
       ),
     );
   }
-
 
   Widget _buildTitle(String title, {bool isRequired = false}) {
     return Row(
@@ -447,14 +473,15 @@ class CustomSizedElevatedButton extends StatelessWidget {
               ? const BorderSide(color: Color(0xff6502D4), width: 2)
               : BorderSide.none,
         ),
-        backgroundColor: isCancelButton ? Colors.transparent : const Color(0xff6502D4),
+        backgroundColor:
+            isCancelButton ? Colors.transparent : const Color(0xff6502D4),
         elevation: isCancelButton ? 0 : 2,
       ),
       child: Text(
         text,
         style: TextStyle(
           fontSize: 20,
-          color: isCancelButton ? const Color(0xff6502D4) : Colors.white, 
+          color: isCancelButton ? const Color(0xff6502D4) : Colors.white,
         ),
       ),
     );

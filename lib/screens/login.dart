@@ -17,11 +17,21 @@ class _LoginScreenState extends State<LoginScreen> {
   Color borderColor = const Color.fromARGB(255, 132, 34, 244);
   String _error = '';
 
-  final AuthService _authService = AuthService(); 
-  
+  final AuthService _authService = AuthService();
+
   void _validateUser(BuildContext context) async {
     String email = _email.text;
     String password = _password.text;
+
+    bool isServerConnected = await _authService.serverConection();
+
+    if (!isServerConnected) {
+      setState(() {
+        _error = 'Servidor indisponível!';
+        borderColor = Colors.red;
+      });
+      return;
+    }
 
     bool success = await _authService.login(email, password);
 
@@ -32,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       setState(() {
-        _error = 'Email ou senha inválidos';
+        _error = 'Email ou senha incorretos! Tente novamente';
         borderColor = Colors.red;
       });
     }
