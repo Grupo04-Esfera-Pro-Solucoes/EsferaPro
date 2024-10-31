@@ -106,7 +106,39 @@ class CallService {
       final data = json.decode(response.body);
       return (data['content'] as List).cast<Map<String, dynamic>>();
     } else {
-      throw Exception('Erro ao buscar leads por nome: ${response.statusCode}');
+      throw Exception('Erro ao buscar leads: ${response.statusCode}');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchLeadResultById(String idLeadResult) async {
+    final url = Uri.parse('$baseUrl/leadResult/$idLeadResult');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        throw Exception('Erro ao buscar result: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição fetchLeadResultById: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchClientById(String idClient) async {
+    final url = Uri.parse('$baseUrl/client/$idClient');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        throw Exception('Erro ao buscar cliente: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição fetchClientById: $e');
     }
   }
 }

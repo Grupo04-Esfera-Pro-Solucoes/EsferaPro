@@ -39,6 +39,7 @@ class _CallPageState extends State<CallPage> {
     if (userId != null) {
       try {
         final data = await callService.fetchAllLeads(userId.toString());
+
         setState(() {
           calls = data;
           isLoading = false;
@@ -49,6 +50,29 @@ class _CallPageState extends State<CallPage> {
           errorMessage = 'Erro ao carregar ligações';
         });
       }
+    }
+  }
+
+  Future<Map<String, dynamic>?> _fetchLeadResultById(
+      String idLeadResult) async {
+    try {
+      return await callService.fetchLeadResultById(idLeadResult);
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Erro ao buscar resultado do lead';
+      });
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _fetchClientById(String idClient) async {
+    try {
+      return await callService.fetchClientById(idClient);
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Erro ao buscar cliente';
+      });
+      return null;
     }
   }
 
@@ -73,7 +97,8 @@ class _CallPageState extends State<CallPage> {
                     : errorMessage != null
                         ? Center(child: Text(errorMessage!))
                         : calls.isEmpty
-                            ? const Center(child: Text('Nenhuma ligação disponível!'))
+                            ? const Center(
+                                child: Text('Nenhuma ligação disponível!'))
                             : ListView.builder(
                                 itemCount: calls.length,
                                 itemBuilder: (context, index) {
@@ -116,7 +141,8 @@ class _CallPageState extends State<CallPage> {
                 hintText: 'Buscar ligação',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Color(0xff6502d4), width: 2.0),
+                  borderSide:
+                      const BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 filled: true,
                 fillColor: Colors.white,
@@ -125,8 +151,7 @@ class _CallPageState extends State<CallPage> {
           ),
           IconButton(
             icon: const Icon(Icons.search, color: Color(0xff6502d4)),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -140,10 +165,18 @@ class _CallPageState extends State<CallPage> {
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(child: Center(child: Text('Cliente', style: TextStyle(fontSize: 18)))),
-          Expanded(child: Center(child: Text('Resultado', style: TextStyle(fontSize: 18)))),
-          Expanded(child: Center(child: Text('Data', style: TextStyle(fontSize: 18)))),
-          Expanded(child: Center(child: Text('Info', style: TextStyle(fontSize: 18)))),
+          Expanded(
+              child: Center(
+                  child: Text('Cliente', style: TextStyle(fontSize: 18)))),
+          Expanded(
+              child: Center(
+                  child: Text('Resultado', style: TextStyle(fontSize: 18)))),
+          Expanded(
+              child:
+                  Center(child: Text('Data', style: TextStyle(fontSize: 18)))),
+          Expanded(
+              child:
+                  Center(child: Text('Info', style: TextStyle(fontSize: 18)))),
         ],
       ),
     );
@@ -162,7 +195,7 @@ class _CallPageState extends State<CallPage> {
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
-                    callData['name'] ?? 'Sem Nome',
+                    callData['idClient']['name'] ?? 'Sem Nome',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -172,7 +205,7 @@ class _CallPageState extends State<CallPage> {
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
-                    callData['idLeadResult']?.toString() ?? 'Sem ID Resultado',
+                    callData['result']['result'] ?? 'Sem Resultado',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -192,22 +225,46 @@ class _CallPageState extends State<CallPage> {
                 child: ElevatedButton(
                   onPressed: () => _showCallDetails(context, callData),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
                     padding: WidgetStateProperty.all(const EdgeInsets.all(8.0)),
                     shape: WidgetStateProperty.all(CircleBorder()),
                   ),
-                  child: const Icon(Icons.info_outline, color: Color(0xff6502d4)),
+                  child:
+                      const Icon(Icons.info_outline, color: Color(0xff6502d4)),
                 ),
               ),
             ],
           ),
-          const Divider(color: Colors.grey), 
+          const Divider(color: Colors.grey),
         ],
       ),
     );
   }
 
-  void _showCallDetails(BuildContext context, Map<String, dynamic> callData) {
+  void _showCallDetails(
+      BuildContext context, Map<String, dynamic> callData) async {
+    String clientName = 'Carregando...';
+    String resultDescription = 'Carregando...';
+
+    final clientId = callData['idClient']?.toString();
+    if (clientId != null) {
+      final clientData = await _fetchClientById(clientId);
+      if (clientData != null) {
+        clientName = clientData['name'] ?? 'N/A';
+      } else {
+        clientName = 'Cliente não encontrado';
+      }
+    }
+
+    final leadResultId = callData['idLeadResult']?.toString();
+    if (leadResultId != null) {
+      final leadResultData = await _fetchLeadResultById(leadResultId);
+      if (leadResultData != null) {
+        resultDescription = leadResultData['description'] ?? 'N/A';
+      }
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -218,12 +275,14 @@ class _CallPageState extends State<CallPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Detalhes da Ligação:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('Nome do Cliente: ${callData['name'] ?? 'N/A'}'),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('Nome do Cliente: $clientName'),
                 Text('Hora da Ligação: ${callData['callTime'] ?? 'N/A'}'),
                 Text('Duração: ${callData['duration'] ?? 'N/A'}'),
                 Text('Descrição: ${callData['description'] ?? 'N/A'}'),
                 Text('ID do Resultado: ${callData['idLeadResult'] ?? 'N/A'}'),
+                Text('Descrição do Resultado: $resultDescription'),
               ],
             ),
           ),
