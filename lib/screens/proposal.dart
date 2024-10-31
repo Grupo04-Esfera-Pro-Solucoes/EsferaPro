@@ -1,8 +1,9 @@
+import 'package:esferapro/screens/stacks/stack_proposal.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'stacks/stack_proposal.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Proposal extends StatefulWidget {
   @override
@@ -22,13 +23,15 @@ class _ProposalState extends State<Proposal> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
     if (userId == null) {
       _showErrorSnackBar('Usuário não autenticado.');
       return;
     }
 
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8080/proposal/all/$userId?page=0&size=20&sort=idProposal'));
+      final response = await http.get(Uri.parse('$baseUrl/proposal/all/$userId?page=0&size=20&sort=idProposal'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['content'];
         setState(() {
@@ -161,7 +164,7 @@ class _ProposalState extends State<Proposal> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProposalCadastro()), // Navegue para ProposalCadastro
+                MaterialPageRoute(builder: (context) => ProposalCadastro()),
               );
             },
             backgroundColor: Colors.purple,

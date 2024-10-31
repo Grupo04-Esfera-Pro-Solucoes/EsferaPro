@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -11,16 +12,21 @@ class ClientPage extends StatefulWidget {
 }
 
 class _ClientPageState extends State<ClientPage> {
-  List<dynamic> clients = [];
-  List<bool> isCheckedList = [];
-  bool isLoading = true;
-  String? errorMessage;
+  List<dynamic> clients = []; 
+  List<bool> isCheckedList = []; 
+  bool isLoading = true; 
+  String? errorMessage; 
+  TextEditingController searchController = TextEditingController(); 
 
-  Future<void> fetchClientData() async {
+  Future<void> fetchClientData({String? searchQuery}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? UserId = prefs.getInt('userId');
-    final url =
-        Uri.parse('http://10.0.2.2:8080/client-address-contact/all/$UserId');
+    
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
+    final url = searchQuery != null && searchQuery.isNotEmpty
+        ? Uri.parse('$baseUrl/client-address-contact/name/$searchQuery/$UserId')
+        : Uri.parse('$baseUrl/client-address-contact/all/$UserId');
 
     try {
       final response = await http.get(url);
@@ -52,6 +58,14 @@ class _ClientPageState extends State<ClientPage> {
   void initState() {
     super.initState();
     fetchClientData();
+  }
+
+  void _searchClients() {
+    setState(() {
+      clients = [];
+      isLoading = true;
+    });
+    fetchClientData(searchQuery: searchController.text.trim());
   }
 
   void _updateCheckbox(int index, bool newValue) {
@@ -127,8 +141,6 @@ class _ClientPageState extends State<ClientPage> {
   }
 
   Widget _buildSearchBar() {
-    TextEditingController searchController = TextEditingController();
-
     return Container(
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -141,16 +153,15 @@ class _ClientPageState extends State<ClientPage> {
                 hintText: 'Digite sua pesquisa',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 filled: true,
                 fillColor: Colors.white, 
@@ -158,9 +169,8 @@ class _ClientPageState extends State<ClientPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.purple),
-            onPressed: () {
-            },
+            icon: const Icon(Icons.search, color: Color(0xff6502d4)),
+            onPressed: _searchClients,
           ),
         ],
       ),
