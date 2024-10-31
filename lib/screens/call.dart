@@ -1,6 +1,8 @@
 import 'package:esferapro/screens/stacks/stack_calls.dart';
 import 'package:flutter/material.dart';
 import 'package:esferapro/service/call_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class CallPage extends StatefulWidget {
   @override
@@ -12,26 +14,47 @@ class _CallPageState extends State<CallPage> {
   List<dynamic> calls = [];
   bool isLoading = true;
   String? errorMessage;
-
-  Future<void> fetchCallData() async {
-    try {
-      final data = await callService.fetchCalls();
-      setState(() {
-        calls = data;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        errorMessage = 'Erro ao carregar ligações';
-      });
-    }
-  }
+  int? userId;
 
   @override
   void initState() {
     super.initState();
-    fetchCallData();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getInt('userId');
+      if (userId != null) {
+        _fetchCalls();
+      } else {
+        isLoading = false;
+        errorMessage = 'Usuário não encontrado';
+      }
+    });
+  }
+
+  Future<void> _fetchCalls() async {
+    if (userId != null) {
+      try {
+        final data = await callService.fetchAllLeads(userId.toString());
+        setState(() {
+          calls = data;
+          isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Erro ao carregar ligações';
+        });
+      }
+    }
+  }
+
+  String _formatDate(String date) {
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('dd/MM/yyyy').format(parsedDate);
   }
 
   @override
@@ -93,7 +116,7 @@ class _CallPageState extends State<CallPage> {
                 hintText: 'Buscar ligação',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: const BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 filled: true,
                 fillColor: Colors.white,
@@ -101,8 +124,9 @@ class _CallPageState extends State<CallPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.purple),
-            onPressed: () {},
+            icon: const Icon(Icons.search, color: Color(0xff6502d4)),
+            onPressed: () {
+            },
           ),
         ],
       ),
@@ -116,86 +140,90 @@ class _CallPageState extends State<CallPage> {
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(
-            child: Center(
-              child: Text('ID', style: TextStyle(fontSize: 18)),
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text('Descrição', style: TextStyle(fontSize: 18)),
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text('Opções', style: TextStyle(fontSize: 18)),
-            ),
-          ),
+          Expanded(child: Center(child: Text('Cliente', style: TextStyle(fontSize: 18)))),
+          Expanded(child: Center(child: Text('Resultado', style: TextStyle(fontSize: 18)))),
+          Expanded(child: Center(child: Text('Data', style: TextStyle(fontSize: 18)))),
+          Expanded(child: Center(child: Text('Info', style: TextStyle(fontSize: 18)))),
         ],
       ),
     );
   }
 
   Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
-    final lead = callData['lead'] ?? {};
-
     return Container(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Expanded(
-            flex: 1,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                lead['idLead']?.toString() ?? 'Sem ID',
-                textAlign: TextAlign.center,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    callData['name'] ?? 'Sem Nome',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                lead['description'] ?? 'Sem Descrição',
-                textAlign: TextAlign.center,
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    callData['idLeadResult']?.toString() ?? 'Sem ID Resultado',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: ElevatedButton(
-              onPressed: () => _showCallDetails(context, callData),
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(const Color(0xffe5e5e5)),
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    _formatDate(callData['date'] ?? '0000-00-00'),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-              child: const Icon(Icons.info, color: Colors.black),
-            ),
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  onPressed: () => _showCallDetails(context, callData),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(const EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(CircleBorder()),
+                  ),
+                  child: const Icon(Icons.info_outline, color: Color(0xff6502d4)),
+                ),
+              ),
+            ],
           ),
+          const Divider(color: Colors.grey), 
         ],
       ),
     );
   }
 
   void _showCallDetails(BuildContext context, Map<String, dynamic> callData) {
-    final lead = callData['lead'] ?? {};
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Call Details'),
+          title: const Text('Detalhes da Ligação'),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Lead Details:',
+                const Text('Detalhes da Ligação:',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('ID: ${lead['idLead'] ?? 'No ID'}'),
-                Text('Descrição: ${lead['description'] ?? 'Sem descrição'}'),
-                Text('Criado em: ${lead['creationDate'] ?? 'Sem data'}'),
+                Text('Nome do Cliente: ${callData['name'] ?? 'N/A'}'),
+                Text('Hora da Ligação: ${callData['callTime'] ?? 'N/A'}'),
+                Text('Duração: ${callData['duration'] ?? 'N/A'}'),
+                Text('Descrição: ${callData['description'] ?? 'N/A'}'),
+                Text('ID do Resultado: ${callData['idLeadResult'] ?? 'N/A'}'),
               ],
             ),
           ),

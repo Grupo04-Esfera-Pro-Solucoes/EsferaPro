@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CallService {
   final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
@@ -85,21 +84,29 @@ class CallService {
     }
   }
 
-  Future<List<dynamic>> fetchCalls() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
-    final url = Uri.parse('http://10.0.2.2:8080/lead/all/$userId');
+  Future<List<Map<String, dynamic>>> fetchAllLeads(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/lead/all/$userId'),
+    );
 
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['content'] is List ? data['content'] : [];
-      } else {
-        throw Exception('Erro ao carregar ligações');
-      }
-    } catch (e) {
-      throw Exception('Erro ao carregar ligações');
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (data['content'] as List).cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Erro ao carregar leads: ${response.statusCode}');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchLeadsByName(String name, String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/lead/name/$name/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (data['content'] as List).cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Erro ao buscar leads por nome: ${response.statusCode}');
     }
   }
 }
