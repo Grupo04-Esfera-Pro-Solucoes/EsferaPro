@@ -55,13 +55,11 @@ class ProposalService {
     try {
       final response = await request.send();
 
-      if (response.statusCode == 200) {
-        print('Proposta criada com sucesso.');
-      } else {
-        print('Erro ao criar proposta: ${response.statusCode}');
-      }
+      if (response.statusCode != 200) {
+      throw Exception('Erro ao excluir tarefa: ${response.statusCode}');
+    }
     } catch (e) {
-      print('Erro: $e');
+      throw Exception('Erro na requisição: $e');
     }
   }
 

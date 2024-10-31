@@ -1,8 +1,8 @@
+import 'package:esferapro/service/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/input_formatters.dart';
-import 'package:esferapro/service/createCustumer_service.dart';
 
 class StackClients extends StatefulWidget {
   @override
@@ -57,10 +57,8 @@ class _StackClientsState extends State<StackClients> {
   );
   
   if (picked != null) {
-    // Obter a hora atual
     final now = DateTime.now();
     
-    // Combinar a data escolhida com a hora atual
     final combinedDateTime = DateTime(
       picked.year,
       picked.month,
@@ -70,7 +68,6 @@ class _StackClientsState extends State<StackClients> {
     );
 
     setState(() {
-      // Exibir apenas a data
       _clientDate.text = DateFormat('yyyy-MM-dd').format(combinedDateTime);
     });
   }
@@ -165,7 +162,7 @@ class _StackClientsState extends State<StackClients> {
                   child: _buildTextField(
                     controller: _clientDate,
                     hintText: '00/00/0000',
-                    inputFormatters: [], // Remova o formatter se você não precisar
+                    inputFormatters: [],
                   ),
                 ),
               ),
