@@ -1,6 +1,7 @@
   import 'package:flutter/material.dart';
   import 'package:esferapro/service/createProposal_service.dart';
   import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
   import 'package:intl/intl.dart';
   import 'dart:io';
 
@@ -21,10 +22,8 @@
     File? _selectedFile;
 
     final ProposalService _createProposalService = ProposalService();
-
     List<Map<String, dynamic>> _statusOptions = [];
     int? _selectedStatus;
-
     final _formKey = GlobalKey<FormState>();
 
     @override
@@ -103,24 +102,6 @@
 
     @override
     Widget build(BuildContext context) {
-      final inputDecoration = InputDecoration(
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF9393C2)),
-        ),
-        fillColor: Color(0xFFF0F0F7),
-        filled: true,
-        labelStyle: TextStyle(color: Color(0xFF9393C2)),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF9393C2)),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red),
-        ),
-      );
-
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -163,120 +144,97 @@
                         ),
                         const SizedBox(height: 16.0),
                         Row(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: TextFormField(
-                                controller: _leadId,
-                                decoration: inputDecoration.copyWith(
-                                  labelText: 'ID da Ligação',
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5),
+                                _buildTitle('ID da Ligação'),
+                                const SizedBox(height: 5),
+                                _buildTextField(
+                                  controller: _leadId,
+                                  hintText: 'Digite ID da Ligação',
                                 ),
-                                style: const TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 22,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Campo obrigatório';
-                                  }
-                                  return null;
-                                },
-                              ),
+                              ],
                             ),
+                          ),
                             const SizedBox(width: 16.0),
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: _date,
-                                decoration: inputDecoration.copyWith(
-                                  labelText: 'Data de Conclusão',
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      Icons.calendar_today,
-                                      color: Color(0xFF9393C2),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5),
+                                _buildTitle('Data de Conclusão'),
+                                const SizedBox(height: 5),
+                                GestureDetector(
+                                  onTap: () => _selectDate(context),
+                                  child: AbsorbPointer(
+                                    child: _buildTextField(
+                                      controller: _date,
+                                      hintText: '00/00/0000',
                                     ),
-                                    onPressed: () {
-                                      _selectDate(context);
-                                    },
                                   ),
                                 ),
-                                style: const TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 22,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Campo obrigatório';
-                                  }
-                                  return null;
-                                },
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
                         const SizedBox(height: 16.0),
-                        TextFormField(
-                          controller: _value,
-                          decoration: inputDecoration.copyWith(
-                            labelText: 'Valor da Proposta',
-                            prefixText: 'R\$ ',
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 5),
+                          _buildTitle('Valor da Proposta'),
+                          const SizedBox(height: 5),
+                          _buildTextField(
+                            controller: _value,
+                            hintText: 'Digite o valor da proposta',
+                            keyboardType: TextInputType.number,
                           ),
-                          style: const TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 22,
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Campo obrigatório';
-                            }
-                            return null;
-                          },
-                        ),
+                        ],
+                      ),
                         const SizedBox(height: 16.0),
                         Row(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: TextFormField(
-                                controller: _clientId,
-                                decoration: inputDecoration.copyWith(
-                                  labelText: 'ID do Cliente',
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5),
+                                _buildTitle('ID do Cliente'),
+                                const SizedBox(height: 5),
+                                _buildTextField(
+                                  controller: _clientId,
+                                  hintText: 'Digite ID do Cliente',
                                 ),
-                                style: const TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 22,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Campo obrigatório';
-                                  }
-                                  return null;
-                                },
-                              ),
+                              ],
                             ),
+                          ),
                             const SizedBox(width: 16.0),
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: _clientName,
-                                decoration: inputDecoration.copyWith(
-                                  labelText: 'Nome do Cliente',
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5),
+                                _buildTitle('Nome do Cliente'),
+                                const SizedBox(height: 5),
+                                _buildTextField(
+                                  controller: _clientName,
+                                  hintText: 'Digite Nome do Cliente',
                                 ),
-                                style: const TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 22,
-                                ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
                         const SizedBox(height: 16.0),
                         DropdownButtonFormField<int>(
-                          decoration: inputDecoration.copyWith(
-                            labelText: 'Status da Proposta',
-                            contentPadding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 12.0),
-                          ),
                           value: _selectedStatus,
                           items: _statusOptions.map((status) {
                             return DropdownMenuItem<int>(
@@ -311,16 +269,18 @@
                           ),
                         ),
                         const SizedBox(height: 16.0),
-                        TextFormField(
-                          controller: _service,
-                          decoration: inputDecoration.copyWith(
-                            labelText: 'Solução',
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 5),
+                          _buildTitle('Solução'),
+                          const SizedBox(height: 5),
+                          _buildTextField(
+                            controller: _service,
+                            hintText: 'Digite a solução',
                           ),
-                          style: const TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 22,
-                          ),
-                        ),
+                        ],
+                      ),
                         const SizedBox(height: 32.0),
                         const Center(
                           child: Text(
@@ -395,64 +355,158 @@
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16.0),
-                        TextFormField(
-                          controller: _description,
-                          maxLines: 5,
-                          decoration: inputDecoration.copyWith(
-                            labelText: 'Descrição da Tarefa',
-                          ),
-                          style: const TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 22,
+                        const SizedBox(height: 32.0),
+                      const Center(
+                        child: Text(
+                          'Descrição da Tarefa',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      _buildTextField(
+                        controller: _description,
+                        hintText: 'Digite a descrição da tarefa',
+                        maxLines: 5,
+                      ),
                         const SizedBox(height: 16.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 140,
-                              height: 40,
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Color(0xFF475467)),
-                                  backgroundColor: Colors.white,
-                                ),
-                                child: const Text(
-                                  'Cancelar',
-                                  style: TextStyle(color: Color(0xFF475467)),
-                                ),
-                              ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Expanded(
+                            child: CustomSizedElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              text: 'Cancelar',
+                              isCancelButton: true,
                             ),
-                            const SizedBox(width: 10),
-                            SizedBox(
-                              width: 140,
-                              height: 40,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFF6502D4),
-                                ),
-                                onPressed: _postNewProposal,
-                                child: const Text(
-                                  'Salvar',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: CustomSizedElevatedButton(
+                              onPressed: _postNewProposal,
+                              text: 'Salvar',
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    }
+          ),
+        ],
+      ),
+    );
   }
+      Widget _buildTitle(String title, {bool isRequired = false}) {
+    return Row(
+      children: [
+        Text(title, style: const TextStyle(fontSize: 14)),
+        if (isRequired)
+          const Text(
+            ' *',
+            style: TextStyle(color: Colors.red),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    int maxLines = 1,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F0F7),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.black),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.black),
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(15),
+        ),
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
+      ),
+    );
+  }
+
+  Widget _buildHalfWidthTextField({
+    required TextEditingController controller,
+    required String hintText,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F0F7),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.black),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(15),
+        ),
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
+      ),
+    );
+  }
+}
+
+class CustomSizedElevatedButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String text;
+  final bool isCancelButton;
+
+  const CustomSizedElevatedButton({
+    super.key,
+    required this.onPressed,
+    required this.text,
+    this.isCancelButton = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: isCancelButton
+              ? const BorderSide(color: Color(0xff6502D4), width: 2)
+              : BorderSide.none,
+        ),
+        backgroundColor: isCancelButton ? Colors.transparent : const Color(0xff6502D4),
+        elevation: isCancelButton ? 0 : 2,
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 20,
+          color: isCancelButton ? const Color(0xff6502D4) : Colors.white, 
+        ),
+      ),
+    );
+  }
+}
