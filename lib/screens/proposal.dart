@@ -120,7 +120,6 @@ class _ProposalState extends State<Proposal> {
 
   Widget _buildSearchBar() {
     TextEditingController searchController = TextEditingController();
-
     return Container(
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -133,16 +132,16 @@ class _ProposalState extends State<Proposal> {
                 hintText: 'Digite sua pesquisa',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide:
-                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                      BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 filled: true,
                 fillColor: Colors.white, 
@@ -150,7 +149,7 @@ class _ProposalState extends State<Proposal> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.purple),
+            icon: const Icon(Icons.search, color: const Color.fromRGBO(101, 2, 212, 1)),
             onPressed: () {
               // Aqui você pode implementar a lógica de busca usando o texto de searchController
               String searchQuery = searchController.text;
@@ -161,79 +160,79 @@ class _ProposalState extends State<Proposal> {
       ),
     );
   }
+  
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(10.0),
-      color: Colors.grey[200],
+      color: const Color(0xFFEAECF0),
       child: Row(
         children: const [
-          Expanded(flex: 3, child: Text('Cliente', textAlign: TextAlign.left)),
-          Expanded(flex: 2, child: Text('Valor', textAlign: TextAlign.center)),
-          Expanded(flex: 1, child: Text('Data', textAlign: TextAlign.center)),
-          Expanded(flex: 2, child: Text('Ações', textAlign: TextAlign.center)),
+          Expanded(flex: 3, child: Text('Cliente', textAlign: TextAlign.left, style: TextStyle(fontSize: 18.0))),
+          Expanded(flex: 2, child: Text('Valor', textAlign: TextAlign.center, style: TextStyle(fontSize: 18.0))),
+          Expanded(flex: 1, child: Text('Data', textAlign: TextAlign.center, style: TextStyle(fontSize: 18.0))),
+          Expanded(flex: 2, child: Text('Ações', textAlign: TextAlign.center, style: TextStyle(fontSize: 18.0))),
         ],
       ),
     );
   }
 
   Widget _buildProposalItem(Map<String, dynamic> proposal) {
-  final client = proposal['idLead']?['idClient'];
-  final statusID = proposal['idStatusProposal']?['idStatusProposal'] ?? 0;
+    final client = proposal['idLead']?['idClient'];
+    final statusID = proposal['idStatusProposal']?['idStatusProposal'] ?? 0;
 
-  return Container(
-    margin: const EdgeInsets.symmetric(vertical: 5.0),
-    padding: const EdgeInsets.all(10.0),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border(
-        bottom: BorderSide(color: Colors.grey[300]!),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[300]!),
+        ),
       ),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Row(
-            children: [
-              _getStatusIcon(statusID),
-              const SizedBox(width: 8.0),
-              Flexible(
-                child: Text(
-                  client?['name'] ?? 'N/A',
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+      padding: const EdgeInsets.all(14.0), 
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Row(
+              children: [
+                _getStatusIcon(statusID),
+                const SizedBox(width: 8.0),
+                Flexible(
+                  child: Text(
+                    client?['name'] ?? 'N/A',
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Expanded(flex: 2, child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center)),
-        Expanded(flex: 1, child: Text(_formatDayMonth(proposal['proposalDate']), textAlign: TextAlign.center)),
-        Expanded(
-          flex: 2,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  // Adicione a lógica de edição aqui
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.visibility),
-                onPressed: () {
-                  _showProposalDetails(context, proposal);
-                },
-              ),
-            ],
+          Expanded(flex: 2, child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center)),
+          Expanded(flex: 1, child: Text(_formatDayMonth(proposal['proposalDate']), textAlign: TextAlign.center)),
+          Expanded(
+            flex: 2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    // Adicione a lógica de edição aqui
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.visibility),
+                  onPressed: () {
+                    _showProposalDetails(context, proposal);
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) {
   final proposal = proposalData;
