@@ -103,21 +103,42 @@ import 'package:flutter/services.dart';
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Row(
-            children: const [
-              Icon(Icons.description, color: Color(0xFFF7BD2E)),
-              SizedBox(width: 8.0),
-              Text(
-                'Cadastro de Propostas',
-                style: TextStyle(color: Colors.white),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: const Color(0xff6502d4),
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: const [
+                  Icon(
+                    Icons.description_outlined,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                  SizedBox(width: 20),
+                  Text(
+                    'Cadastro de Propostas',
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),
-          backgroundColor: Color(0xFF6502D4),
-          automaticallyImplyLeading: false,
         ),
+      ),
         body: Column(
           children: [
             Container(
@@ -345,17 +366,7 @@ import 'package:flutter/services.dart';
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32.0),
-                        const Center(
-                          child: Text(
-                            'Descrição da Tarefa',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 32.0),
+                      const SizedBox(height: 32.0),
                       const Center(
                         child: Text(
                           'Descrição da Tarefa',
@@ -403,7 +414,8 @@ import 'package:flutter/services.dart';
       ),
     );
   }
-      Widget _buildTitle(String title, {bool isRequired = false}) {
+  
+    Widget _buildTitle(String title, {bool isRequired = false}) {
     return Row(
       children: [
         Text(title, style: const TextStyle(fontSize: 14)),
@@ -416,7 +428,7 @@ import 'package:flutter/services.dart';
     );
   }
 
-  Widget _buildTextField({
+    Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
     int maxLines = 1,
@@ -443,35 +455,7 @@ import 'package:flutter/services.dart';
         keyboardType: keyboardType,
       ),
     );
-  }
-
-  Widget _buildHalfWidthTextField({
-    required TextEditingController controller,
-    required String hintText,
-    List<TextInputFormatter>? inputFormatters,
-    TextInputType? keyboardType,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F7),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black),
-      ),
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(color: Colors.black),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(15),
-        ),
-        inputFormatters: inputFormatters,
-        keyboardType: keyboardType,
-      ),
-    );
-  }
-}
+  }}
 
 class CustomSizedElevatedButton extends StatelessWidget {
   final VoidCallback onPressed;

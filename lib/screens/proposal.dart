@@ -70,119 +70,172 @@ class _ProposalState extends State<Proposal> {
     final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}/${parsedDate.year}";
     return formattedDate;
   }
+  
+  String _formatDayMonth(String date) {
+  final DateTime parsedDate = DateTime.parse(date);
+  final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}";
+  return formattedDate;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Listagem de Propostas'),
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            color: Colors.grey[200],
-            child: Row(
-              children: const [
-                Expanded(child: Text('Cliente', textAlign: TextAlign.center)),
-                Expanded(child: Text('Valor', textAlign: TextAlign.center)),
-                Expanded(child: Text('Data', textAlign: TextAlign.center)),
-                Expanded(child: Text('Ações', textAlign: TextAlign.center)),
-              ],
-            ),
+          Column(
+            children: [
+              _buildSearchBar(),
+              _buildHeader(),
+              Expanded(
+                child: proposals.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: proposals.length,
+                        itemBuilder: (context, index) {
+                          final proposal = proposals[index];
+                          return _buildProposalItem(proposal);
+                        },
+                      ),
+              ),
+            ],
           ),
-          Expanded(
-            child: proposals.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: proposals.length,
-                    itemBuilder: (context, index) {
-                      final proposal = proposals[index];
-                      final client = proposal['idLead']?['idClient'];
-                      final statusID = proposal['idStatusProposal']?['idStatusProposal'] ?? 0;
-
-                      return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 5.0),
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border(
-                            bottom: BorderSide(color: Colors.grey[300]!),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _getStatusIcon(statusID),
-                                  const SizedBox(width: 8.0),
-                                  Text(client?['name'] ?? 'N/A', textAlign: TextAlign.center),
-                                ],
-                              ),
-                            ),
-                            Expanded(child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center), flex: 2),
-                            Expanded(child: Text(_formatDate(proposal['proposalDate']), textAlign: TextAlign.center), flex: 2),
-                            Expanded(
-                              flex: 2,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.edit),
-                                    onPressed: () {
-                                      // Adicione a lógica de edição aqui
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.visibility),
-                                    onPressed: () {
-                                      _showProposalDetails(context, proposal);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProposalCadastro()),
+                );
+              },
+              backgroundColor:  const Color.fromRGBO(101, 2, 212, 1),
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
           ),
         ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: SizedBox(
-          width: 70,
-          height: 70,
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProposalCadastro()), // Navegue para ProposalCadastro
-              );
-            },
-            backgroundColor: Colors.purple,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            child: const Icon(
-              Icons.add,
-              size: 40,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
+
+  Widget _buildSearchBar() {
+    TextEditingController searchController = TextEditingController();
+
+    return Container(
+      color: const Color(0xFFEAECF0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Digite sua pesquisa',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide:
+                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                ),
+                filled: true,
+                fillColor: Colors.white, 
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.purple),
+            onPressed: () {
+              // Aqui você pode implementar a lógica de busca usando o texto de searchController
+              String searchQuery = searchController.text;
+              debugPrint('Buscar: $searchQuery'); // Exemplo de uso
+            },
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(10.0),
+      color: Colors.grey[200],
+      child: Row(
+        children: const [
+          Expanded(flex: 3, child: Text('Cliente', textAlign: TextAlign.left)),
+          Expanded(flex: 2, child: Text('Valor', textAlign: TextAlign.center)),
+          Expanded(flex: 1, child: Text('Data', textAlign: TextAlign.center)),
+          Expanded(flex: 2, child: Text('Ações', textAlign: TextAlign.center)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProposalItem(Map<String, dynamic> proposal) {
+  final client = proposal['idLead']?['idClient'];
+  final statusID = proposal['idStatusProposal']?['idStatusProposal'] ?? 0;
+
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 5.0),
+    padding: const EdgeInsets.all(10.0),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border(
+        bottom: BorderSide(color: Colors.grey[300]!),
+      ),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Row(
+            children: [
+              _getStatusIcon(statusID),
+              const SizedBox(width: 8.0),
+              Flexible(
+                child: Text(
+                  client?['name'] ?? 'N/A',
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(flex: 2, child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center)),
+        Expanded(flex: 1, child: Text(_formatDayMonth(proposal['proposalDate']), textAlign: TextAlign.center)),
+        Expanded(
+          flex: 2,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  // Adicione a lógica de edição aqui
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.visibility),
+                onPressed: () {
+                  _showProposalDetails(context, proposal);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
-void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) {
+  void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) {
   final proposal = proposalData;
   final client = proposal['idLead']?['idClient'];
   final status = proposal['idStatusProposal'];
@@ -214,4 +267,6 @@ void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalDat
       );
     },
   );
+}
+
 }
