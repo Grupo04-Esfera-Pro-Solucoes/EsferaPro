@@ -136,23 +136,30 @@ class _CallPageState extends State<CallPage> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar ligação',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      const BorderSide(color: Color(0xff6502d4), width: 2.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+                border: Border.all(color: const Color(0xff6502d4), width: 2.0),
+              ),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Pesquisar',
+                  hintStyle: TextStyle(
+                    color: Color(0xff6502d4),
+                    fontSize: 14,
+                  ),
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search, color: Color(0xff6502d4)),
+                    onPressed: () {},
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 20.0),
                 ),
-                filled: true,
-                fillColor: Colors.white,
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xff6502d4)),
-            onPressed: () {},
           ),
         ],
       ),
@@ -160,141 +167,201 @@ class _CallPageState extends State<CallPage> {
   }
 
   Widget _buildHeader() {
-  return Container(
-    color: const Color(0xFFEAECF0),
-    padding: const EdgeInsets.symmetric(vertical: 10.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Container(
+      color: const Color(0xFFEAECF0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: const [
+          Expanded(
+            child: Column(
+              children: [
+                Text('Cliente', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 4),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text('Resultado', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 4),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text('Data     ', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 4),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text('Info        ', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 4),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
+    return Column(
       children: [
-        Expanded(
-          child: Center(child: Text('Cliente', style: TextStyle(fontSize: 18))),
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Text(
+                      callData['idClient']['name'] ?? 'Sem Nome',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Text(
+                      callData['result']['result'] ?? 'Sem Resultado',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Text(
+                      _formatDate(callData['date'] ?? '0000-00-00'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () => _showCallDialog(context, callData),
+                      icon: const Icon(Icons.edit, color: Colors.black),
+                      padding: EdgeInsets.zero,
+                    ),
+                    IconButton(
+                      onPressed: () => _showCallDetails(context, callData),
+                      icon: const Icon(Icons.visibility, color: Colors.black),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        Expanded(
-          child: Center(child: Text('Resultado', style: TextStyle(fontSize: 18))),
-        ),
-        Expanded(
-          child: Center(child: Text('Data', style: TextStyle(fontSize: 18))),
-        ),
-        Expanded(
-          child: Center(child: Text('Infor', style: TextStyle(fontSize: 18))),
+        const Divider(
+          color: Color(0xffD3D3D3),
+          thickness: 1.0,
+          height: 1.0,
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
-  return Container(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Ajustar para evitar overflow
-          children: [
-            Expanded(
-              flex: 1,
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  callData['idClient']['name'] ?? 'Sem Nome',
-                  textAlign: TextAlign.center,
+  void _showCallDetails(BuildContext context, Map<String, dynamic> callData) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Center(
+            child: Text(
+              'Detalhes da Ligação',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow('Resultado:', callData['result']['result'] ?? 'N/A'),
+                _buildDetailRow('Data:', _formatDate(callData['date'] ?? '0000-00-00')),
+                _buildDetailRow('Hora:', callData['callTime'] ?? 'N/A'),
+                _buildDetailRow('Duração:', callData['duration'] ?? 'N/A'),
+                _buildDetailRow('Descrição:', callData['description'] ?? 'N/A'),
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: Color(0xff6502d4), width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                ),
+                child: const Text(
+                  'Fechar',
+                  style: TextStyle(color: Color(0xff6502d4), fontSize: 18),
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  callData['result']['result'] ?? 'Sem Resultado',
-                  textAlign: TextAlign.center,
-                ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text: '$title ',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 16,
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  _formatDate(callData['date'] ?? '0000-00-00'),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            // Container para os botões
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xffe5e5e5),
-                borderRadius: BorderRadius.circular(20.0), // Bordas arredondadas
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 8.0), // Ajustar padding horizontal
-              child: Row(
-                mainAxisSize: MainAxisSize.min, // Ajusta a largura do Row
-                mainAxisAlignment: MainAxisAlignment.center, // Centraliza os botões
-                children: [
-                  IconButton(
-                    onPressed: () => _showCallDetails(context, callData),
-                    icon: const Icon(Icons.info_outline, color: Color(0xff6502d4)),
-                    padding: EdgeInsets.zero,
-                  ),
-                  const SizedBox(width: 8), // Espaço entre os botões
-                  IconButton(
-                    onPressed: () => _showCallDialog(context, callData),
-                    icon: const Icon(Icons.edit, color: Color(0xff6502d4)),
-                    padding: EdgeInsets.zero,
-                  ),
-                ],
+            TextSpan(
+              text: value,
+              style: const TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+                fontSize: 18,
               ),
             ),
           ],
         ),
-        const Divider(color: Colors.grey, thickness: 1.0), // Espessura da linha
-      ],
-    ),
-  );
-}
-
-void _showCallDetails(BuildContext context, Map<String, dynamic> callData) async {
-  String resultDescription = 'Carregando...';
-
-
-  final leadResultId = callData['idLeadResult']?.toString();
-  if (leadResultId != null) {
-    final leadResultData = await _fetchLeadResultById(leadResultId);
-    resultDescription = leadResultData != null
-        ? leadResultData['description'] ?? 'N/A'
-        : 'N/A';
+      ),
+    );
   }
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Detalhes da Ligação'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Detalhes da Ligação:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text('Hora da Ligação: ${callData['callTime'] ?? 'N/A'}'),
-              Text('Duração: ${callData['duration'] ?? 'N/A'}'),
-              Text('Descrição: ${callData['description'] ?? 'N/A'}'),
-              Text('ID do Resultado: ${callData['idLeadResult'] ?? 'N/A'}'),
-              Text('Descrição do Resultado: $resultDescription'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      );
-    },
-  );
-}
 
   void _showCallDialog(BuildContext context, Map<String, dynamic> callData) {
     showDialog(

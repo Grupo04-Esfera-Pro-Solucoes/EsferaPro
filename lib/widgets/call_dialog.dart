@@ -24,14 +24,14 @@ class CallDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       title: const Center(
         child: Text(
           "Editar Lead",
           style: TextStyle(
             color: Color(0xFF6502D4),
-            fontSize: 18,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -59,7 +59,7 @@ class CallDialog extends StatelessWidget {
               ),
               readOnly: true,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -104,7 +104,7 @@ class CallDialog extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -148,7 +148,7 @@ class CallDialog extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             TextField(
               controller: descriptionController,
               decoration: InputDecoration(
@@ -172,30 +172,29 @@ class CallDialog extends StatelessWidget {
       ),
       actions: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            Expanded(
               child: TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
                 style: TextButton.styleFrom(
                   side: const BorderSide(width: 1, color: Color(0xFF6502D4)),
+                  minimumSize: const Size(80, 40),
                 ),
                 child: const Text("Cancelar", style: TextStyle(color: Color(0xFF6502D4))),
               ),
             ),
             const SizedBox(width: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            Expanded(
               child: TextButton(
                 onPressed: () {
                   final updatedCallData = {
                     'idClient': {'name': clientController.text},
                     'result': {'result': resultController.text},
                     'description': descriptionController.text,
-                    'date': DateFormat('yyyy-MM-dd').format(DateTime.parse(dateController.text)),
+                    'date': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(dateController.text)),
                     'callTime': timeController.text,
                     'duration': durationController.text,
                   };
@@ -205,28 +204,32 @@ class CallDialog extends StatelessWidget {
                 style: TextButton.styleFrom(
                   backgroundColor: const Color(0xFF6502D4),
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(80, 40),
                 ),
                 child: const Text("Editar"),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Align(
           alignment: Alignment.center,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextButton(
+            child: ElevatedButton(
               onPressed: () {
                 onDelete();
                 Navigator.pop(context);
               },
-              style: TextButton.styleFrom(
-                side: const BorderSide(width: 1, color: Color(0xFF6502D4)),
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                side: const BorderSide(width: 1, color: Colors.red),
+                padding: const EdgeInsets.all(16),
+                backgroundColor: Colors.white,
               ),
               child: const Icon(
                 Icons.delete,
-                color: Color(0xFF6502D4),
+                color: Colors.red,
               ),
             ),
           ),

@@ -195,7 +195,7 @@ class _StackCallsState extends State<StackCalls> {
                         child: DropdownButton<String>(
                           value: selectedResult,
                           hint: Text(
-                            selectedResult ?? '',
+                            selectedResult ?? 'Selecione',
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 16,
