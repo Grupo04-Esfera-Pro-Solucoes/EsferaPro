@@ -39,8 +39,7 @@ class _CallPageState extends State<CallPage> {
   Future<void> _fetchCalls() async {
     if (userId != null) {
       try {
-        final data = await callService.fetchAllLeads(userId.toString());
-
+        final data = await callService.fetchAllLeads(userId.toString(),1);
         setState(() {
           calls = data;
           isLoading = false;
@@ -54,8 +53,7 @@ class _CallPageState extends State<CallPage> {
     }
   }
 
-  Future<Map<String, dynamic>?> _fetchLeadResultById(
-      String idLeadResult) async {
+  Future<Map<String, dynamic>?> _fetchLeadResultById(String idLeadResult) async {
     try {
       return await callService.fetchLeadResultById(idLeadResult);
     } catch (e) {
@@ -98,8 +96,7 @@ class _CallPageState extends State<CallPage> {
                     : errorMessage != null
                         ? Center(child: Text(errorMessage!))
                         : calls.isEmpty
-                            ? const Center(
-                                child: Text('Nenhuma ligação disponível!'))
+                            ? const Center(child: Text('Nenhuma ligação disponível!'))
                             : ListView.builder(
                                 itemCount: calls.length,
                                 itemBuilder: (context, index) {
@@ -113,16 +110,18 @@ class _CallPageState extends State<CallPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => StackCalls()),
-          );
-        },
-        backgroundColor: const Color(0xFF6502D4),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => StackCalls()),
+    ).then((_) {
+      _fetchCalls();
+    });
+  },
+  backgroundColor: const Color(0xFF6502D4),
+  foregroundColor: Colors.white,
+  child: const Icon(Icons.add),
+),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -155,8 +154,7 @@ class _CallPageState extends State<CallPage> {
                     icon: const Icon(Icons.search, color: Color(0xff6502d4)),
                     onPressed: () {},
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 20.0),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                 ),
               ),
             ),
@@ -371,8 +369,7 @@ class _CallPageState extends State<CallPage> {
           callData: callData,
           onEdit: (updatedCallData) {
             setState(() {
-              final index =
-                  calls.indexWhere((call) => call['id'] == callData['id']);
+              final index = calls.indexWhere((call) => call['id'] == callData['id']);
               if (index != -1) {
                 calls[index] = {...calls[index], ...updatedCallData};
               }

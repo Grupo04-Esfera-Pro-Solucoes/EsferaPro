@@ -61,12 +61,12 @@ class _StackCallsState extends State<StackCalls> {
         description: _callDescription.text,
       )
           .then((_) {
-        Navigator.pushReplacement(
+        Navigator.pop(
           context,
           MaterialPageRoute(builder: (context) => CallPage()),
         );
       }).catchError((error) {
-        Navigator.pushReplacement(
+        Navigator.pop(
           context,
           MaterialPageRoute(builder: (context) => CallPage()),
         );
