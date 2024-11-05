@@ -1,5 +1,6 @@
-import 'package:esferapro/screens/stacks/stack_calls.dart';
+import 'package:esferapro/widgets/call_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:esferapro/screens/stacks/stack_calls.dart';
 import 'package:esferapro/service/call_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -78,7 +79,7 @@ class _CallPageState extends State<CallPage> {
 
   String _formatDate(String date) {
     DateTime parsedDate = DateTime.parse(date);
-    return DateFormat('dd/MM/yyyy').format(parsedDate);
+    return DateFormat('dd/MM').format(parsedDate);
   }
 
   @override
@@ -228,10 +229,27 @@ class _CallPageState extends State<CallPage> {
                     backgroundColor:
                         WidgetStateProperty.all(const Color(0xffe5e5e5)),
                     padding: WidgetStateProperty.all(const EdgeInsets.all(8.0)),
-                    shape: WidgetStateProperty.all(CircleBorder()),
+                    shape: WidgetStateProperty.all(const CircleBorder()),
                   ),
                   child:
                       const Icon(Icons.info_outline, color: Color(0xff6502d4)),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => _showCallDialog(context, callData),
+                style: ButtonStyle(
+                  backgroundColor:
+                      WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                  padding: WidgetStateProperty.all(const EdgeInsets.all(8.0)),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50)),
+                  ),
+                  minimumSize: WidgetStateProperty.all(const Size(40, 40)),
+                ),
+                child: const Icon(
+                  Icons.edit,
+                  color: Color(0xff6502d4),
                 ),
               ),
             ],
@@ -292,6 +310,34 @@ class _CallPageState extends State<CallPage> {
               child: const Text('Fechar'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showCallDialog(BuildContext context, Map<String, dynamic> callData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CallDialog(
+          callData: callData,
+          onEdit: (updatedCallData) {
+            setState(() {
+              final index =
+                  calls.indexWhere((call) => call['id'] == callData['id']);
+              if (index != -1) {
+                calls[index] = {
+                  ...calls[index],
+                  ...updatedCallData 
+                };
+              }
+            });
+          },
+          onDelete: () {
+            setState(() {
+              calls.removeWhere((call) => call['id'] == callData['id']);
+            });
+          },
         );
       },
     );

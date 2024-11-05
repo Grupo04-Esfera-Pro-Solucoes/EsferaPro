@@ -141,4 +141,56 @@ class CallService {
       throw Exception('Erro na requisição fetchClientById: $e');
     }
   }
+
+  Future<void> updateCall({
+    required String id,
+    required String duration,
+    required String date,
+    required String time,
+    required String description,
+    required String idLeadResult,
+  }) async {
+    final url = Uri.parse('$baseUrl/lead/$id');
+    final Map<String, dynamic> callData = {
+      'date': date,
+      'callTime': time,
+      'duration': duration,
+      'description': description,
+      'result': {
+        'idLeadResult': idLeadResult,
+      },
+    };
+
+    debugPrint('Dados enviados para updateCall: ${jsonEncode(callData)}');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(callData),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao atualizar ligação: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição put: $e');
+    }
+  }
+
+  Future<void> deleteCall(String id) async {
+    final url = Uri.parse('$baseUrl/lead/delete/$id');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao deletar ligação: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição delete: $e');
+    }
+  }
 }
