@@ -1,7 +1,7 @@
   import 'package:flutter/material.dart';
   import 'package:esferapro/service/createProposal_service.dart';
   import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
+  import 'package:flutter/services.dart';
   import 'package:intl/intl.dart';
   import 'dart:io';
 
@@ -71,8 +71,8 @@ import 'package:flutter/services.dart';
                   .format(DateFormat('dd/MM/yyyy').parse(_date.text)),
               description: _description.text,
               service: _service.text,
-              value: double.parse(_value.text),
-              idStatusProposal: _selectedStatus!, 
+              value: double.parse(_value.text.replaceAll('R\$ ', '')),
+              idStatusProposal: _selectedStatus!,
               clientId: _clientId.text,
               file: _selectedFile != null ? _selectedFile! : File(''),
             )
@@ -103,42 +103,42 @@ import 'package:flutter/services.dart';
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color(0xff6502d4),
-        automaticallyImplyLeading: false,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: const [
-                  Icon(
-                    Icons.description_outlined,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                  SizedBox(width: 20),
-                  Text(
-                    'Cadastro de Propostas',
-                    style: TextStyle(
-                      fontSize: 22,
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: const Color(0xff6502d4),
+          automaticallyImplyLeading: false,
+          title: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: const [
+                    Icon(
+                      Icons.description_outlined,
                       color: Colors.white,
+                      size: 32,
                     ),
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+                    SizedBox(width: 20),
+                    Text(
+                      'Cadastro de Propostas',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
         body: Column(
           children: [
             Container(
@@ -165,143 +165,189 @@ import 'package:flutter/services.dart';
                         ),
                         const SizedBox(height: 16.0),
                         Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 5),
-                                _buildTitle('ID da Ligação'),
-                                const SizedBox(height: 5),
-                                _buildTextField(
-                                  controller: _leadId,
-                                  hintText: 'Digite ID da Ligação',
-                                ),
-                              ],
-                            ),
-                          ),
-                            const SizedBox(width: 16.0),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 5),
-                                _buildTitle('Data de Conclusão'),
-                                const SizedBox(height: 5),
-                                GestureDetector(
-                                  onTap: () => _selectDate(context),
-                                  child: AbsorbPointer(
-                                    child: _buildTextField(
-                                      controller: _date,
-                                      hintText: '00/00/0000',
-                                    ),
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  _buildTitle('ID da Ligação'),
+                                  const SizedBox(height: 5),
+                                  _buildTextField(
+                                    controller: _leadId,
+                                    hintText: 'Digite ID da Ligação',
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                        const SizedBox(height: 16.0),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 5),
-                          _buildTitle('Valor da Proposta'),
-                          const SizedBox(height: 5),
-                          _buildTextField(
-                            controller: _value,
-                            hintText: 'Digite o valor da proposta',
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                        const SizedBox(height: 16.0),
-                        Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 5),
-                                _buildTitle('ID do Cliente'),
-                                const SizedBox(height: 5),
-                                _buildTextField(
-                                  controller: _clientId,
-                                  hintText: 'Digite ID do Cliente',
-                                ),
-                              ],
-                            ),
-                          ),
-                            const SizedBox(width: 16.0),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 5),
-                                _buildTitle('Nome do Cliente'),
-                                const SizedBox(height: 5),
-                                _buildTextField(
-                                  controller: _clientName,
-                                  hintText: 'Digite Nome do Cliente',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                        const SizedBox(height: 16.0),
-                        DropdownButtonFormField<int>(
-                          value: _selectedStatus,
-                          items: _statusOptions.map((status) {
-                            return DropdownMenuItem<int>(
-                              value: status['idStatusProposal'],
-                              child: Text(
-                                status['name'],
-                                style: const TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 22,
-                                  color: Color(0xFF475467),
-                                ),
+                                ],
                               ),
-                            );
-                          }).toList(),
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              _selectedStatus = newValue;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Campo obrigatório';
-                            }
-                            return null;
-                          },
-                          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF9393C2)),
-                          dropdownColor: const Color(0xFFF0F0F7),
-                          style: const TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 22,
-                            color: Color(0xFF475467),
-                          ),
+                            ),
+                            const SizedBox(width: 16.0),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  _buildTitle('Data de Conclusão'),
+                                  const SizedBox(height: 5),
+                                  Stack(
+                                    children: [
+                                      _buildTextField(
+                                        controller: _date,
+                                        hintText: '00/00/0000',
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly,
+                                          DateInputFormatter(),
+                                        ],
+                                      ),
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        bottom: 0,
+                                        child: IconButton(
+                                          icon: Icon(Icons.calendar_today, color: Colors.grey),
+                                          onPressed: () => _selectDate(context),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16.0),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 5),
-                          _buildTitle('Solução'),
-                          const SizedBox(height: 5),
-                          _buildTextField(
-                            controller: _service,
-                            hintText: 'Digite a solução',
-                          ),
-                        ],
-                      ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 5),
+                            _buildTitle('Valor da Proposta'),
+                            const SizedBox(height: 5),
+                            _buildTextField(
+                              controller: _value,
+                              hintText: 'Digite o valor da proposta',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                CurrencyInputFormatter(),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  _buildTitle('ID do Cliente'),
+                                  const SizedBox(height: 5),
+                                  _buildTextField(
+                                    controller: _clientId,
+                                    hintText: 'Digite ID do Cliente',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16.0),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  _buildTitle('Nome do Cliente'),
+                                  const SizedBox(height: 5),
+                                  _buildTextField(
+                                    controller: _clientName,
+                                    hintText: 'Digite Nome do Cliente',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  _buildTitle('Status da Proposta', isRequired: true),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF0F0F7),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.black),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                                    child: DropdownButtonFormField<int>(
+                                      value: _selectedStatus,
+                                      hint: const Text(
+                                        'Escolha o status da proposta',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                      items: _statusOptions.map((status) {
+                                        return DropdownMenuItem<int>(
+                                          value: status['idStatusProposal'],
+                                          child: Text(
+                                            status['name'],
+                                            style: const TextStyle(
+                                              fontFamily: 'Roboto',
+                                              fontSize: 16,
+                                              color: Color(0xFF475467),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (int? newValue) {
+                                        setState(() {
+                                          _selectedStatus = newValue;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null) {
+                                          return 'Campo obrigatório';
+                                        }
+                                        return null;
+                                      },
+                                      icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF9393C2)),
+                                      dropdownColor: const Color(0xFFF0F0F7),
+                                      style: const TextStyle(
+                                        fontFamily: 'Roboto',
+                                        fontSize: 16,
+                                        color: Color(0xFF475467),
+                                      ),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 5),
+                            _buildTitle('Solução'),
+                            const SizedBox(height: 5),
+                            _buildTextField(
+                              controller: _service,
+                              hintText: 'Digite a solução',
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 32.0),
                         const Center(
                           child: Text(
@@ -366,131 +412,162 @@ import 'package:flutter/services.dart';
                             ),
                           ),
                         ),
-                      const SizedBox(height: 32.0),
-                      const Center(
-                        child: Text(
-                          'Descrição da Tarefa',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(height: 32.0),
+                        const Center(
+                          child: Text(
+                            'Descrição da Tarefa',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      _buildTextField(
-                        controller: _description,
-                        hintText: 'Digite a descrição da tarefa',
-                        maxLines: 5,
-                      ),
                         const SizedBox(height: 16.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Expanded(
-                            child: CustomSizedElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              text: 'Cancelar',
-                              isCancelButton: true,
+                        _buildTextField(
+                          controller: _description,
+                          hintText: 'Digite a descrição da tarefa',
+                          maxLines: 5,
+                        ),
+                        const SizedBox(height: 16.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Expanded(
+                              child: CustomSizedElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                text: 'Cancelar',
+                                isCancelButton: true,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: CustomSizedElevatedButton(
-                              onPressed: _postNewProposal,
-                              text: 'Salvar',
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: CustomSizedElevatedButton(
+                                onPressed: _postNewProposal,
+                                text: 'Salvar',
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-  
+          ],
+        ),
+      );
+    }
+
     Widget _buildTitle(String title, {bool isRequired = false}) {
-    return Row(
-      children: [
-        Text(title, style: const TextStyle(fontSize: 14)),
-        if (isRequired)
-          const Text(
-            ' *',
-            style: TextStyle(color: Colors.red),
-          ),
-      ],
-    );
-  }
+      return Row(
+        children: [
+          Text(title, style: const TextStyle(fontSize: 14)),
+          if (isRequired)
+            const Text(
+              ' *',
+              style: TextStyle(color: Colors.red),
+            ),
+        ],
+      );
+    }
 
     Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    int maxLines = 1,
-    List<TextInputFormatter>? inputFormatters,
-    TextInputType? keyboardType,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F7),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black),
-      ),
-      child: TextField(
-        controller: controller,
-        style: const TextStyle(color: Colors.black),
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(15),
-        ),
-        inputFormatters: inputFormatters,
-        keyboardType: keyboardType,
-      ),
-    );
-  }}
-
-class CustomSizedElevatedButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final String text;
-  final bool isCancelButton;
-
-  const CustomSizedElevatedButton({
-    super.key,
-    required this.onPressed,
-    required this.text,
-    this.isCancelButton = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-        shape: RoundedRectangleBorder(
+      required TextEditingController controller,
+      required String hintText,
+      int maxLines = 1,
+      List<TextInputFormatter>? inputFormatters,
+      TextInputType? keyboardType,
+    }) {
+      return Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F0F7),
           borderRadius: BorderRadius.circular(10),
-          side: isCancelButton
-              ? const BorderSide(color: Color(0xff6502D4), width: 2)
-              : BorderSide.none,
+          border: Border.all(color: Colors.black),
         ),
-        backgroundColor: isCancelButton ? Colors.transparent : const Color(0xff6502D4),
-        elevation: isCancelButton ? 0 : 2,
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 20,
-          color: isCancelButton ? const Color(0xff6502D4) : Colors.white, 
+        child: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.black),
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(color: Colors.grey),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.all(15),
+          ),
+          inputFormatters: inputFormatters,
+          keyboardType: keyboardType,
         ),
-      ),
-    );
+      );
+    }
   }
-}
+
+  class CustomSizedElevatedButton extends StatelessWidget {
+    final VoidCallback onPressed;
+    final String text;
+    final bool isCancelButton;
+
+    const CustomSizedElevatedButton({
+      super.key,
+      required this.onPressed,
+      required this.text,
+      this.isCancelButton = false,
+    });
+
+    @override
+    Widget build(BuildContext context) {
+      return ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: isCancelButton
+                ? const BorderSide(color: Color(0xff6502D4), width: 2)
+                : BorderSide.none,
+          ),
+          backgroundColor: isCancelButton ? Colors.transparent : const Color(0xff6502D4),
+          elevation: isCancelButton ? 0 : 2,
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 20,
+            color: isCancelButton ? const Color(0xff6502D4) : Colors.white,
+          ),
+        ),
+      );
+    }
+  }
+
+  class DateInputFormatter extends TextInputFormatter {
+    @override
+    TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+      final text = newValue.text;
+      if (text.length == 2 || text.length == 5) {
+        if (oldValue.text.length < newValue.text.length) {
+          return TextEditingValue(
+            text: '$text/',
+            selection: TextSelection.collapsed(offset: text.length + 1),
+          );
+        }
+      }
+      return newValue;
+    }
+  }
+
+  class CurrencyInputFormatter extends TextInputFormatter {
+    @override
+    TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+      String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (newText.isNotEmpty) {
+        newText = 'R\$ ' + newText;
+      }
+      return TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      );
+    }
+  }
