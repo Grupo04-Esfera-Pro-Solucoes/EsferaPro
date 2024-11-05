@@ -32,6 +32,8 @@ class CallService {
 
     debugPrint('Dados enviados para postNewCall: ${jsonEncode(callData)}');
 
+    debugPrint('Dados enviados para postNewCall: ${jsonEncode(callData)}');
+
     try {
       final response = await http.post(
         url,
