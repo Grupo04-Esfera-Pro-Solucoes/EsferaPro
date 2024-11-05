@@ -160,160 +160,141 @@ class _CallPageState extends State<CallPage> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      color: const Color(0xFFEAECF0),
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Expanded(
-              child: Center(
-                  child: Text('Cliente', style: TextStyle(fontSize: 18)))),
-          Expanded(
-              child: Center(
-                  child: Text('Resultado', style: TextStyle(fontSize: 18)))),
-          Expanded(
-              child:
-                  Center(child: Text('Data', style: TextStyle(fontSize: 18)))),
-          Expanded(
-              child:
-                  Center(child: Text('Info', style: TextStyle(fontSize: 18)))),
-        ],
-      ),
-    );
-  }
+  return Container(
+    color: const Color(0xFFEAECF0),
+    padding: const EdgeInsets.symmetric(vertical: 10.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Expanded(
+          child: Center(child: Text('Cliente', style: TextStyle(fontSize: 18))),
+        ),
+        Expanded(
+          child: Center(child: Text('Resultado', style: TextStyle(fontSize: 18))),
+        ),
+        Expanded(
+          child: Center(child: Text('Data', style: TextStyle(fontSize: 18))),
+        ),
+        Expanded(
+          child: Center(child: Text('Infor', style: TextStyle(fontSize: 18))),
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    callData['idClient']['name'] ?? 'Sem Nome',
-                    textAlign: TextAlign.center,
-                  ),
+Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
+  return Container(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Ajustar para evitar overflow
+          children: [
+            Expanded(
+              flex: 1,
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  callData['idClient']['name'] ?? 'Sem Nome',
+                  textAlign: TextAlign.center,
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    callData['result']['result'] ?? 'Sem Resultado',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    _formatDate(callData['date'] ?? '0000-00-00'),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: ElevatedButton(
-                  onPressed: () => _showCallDetails(context, callData),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: WidgetStateProperty.all(const EdgeInsets.all(8.0)),
-                    shape: WidgetStateProperty.all(const CircleBorder()),
-                  ),
-                  child:
-                      const Icon(Icons.info_outline, color: Color(0xff6502d4)),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () => _showCallDialog(context, callData),
-                style: ButtonStyle(
-                  backgroundColor:
-                      WidgetStateProperty.all(const Color(0xffe5e5e5)),
-                  padding: WidgetStateProperty.all(const EdgeInsets.all(8.0)),
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50)),
-                  ),
-                  minimumSize: WidgetStateProperty.all(const Size(40, 40)),
-                ),
-                child: const Icon(
-                  Icons.edit,
-                  color: Color(0xff6502d4),
-                ),
-              ),
-            ],
-          ),
-          const Divider(color: Colors.grey),
-        ],
-      ),
-    );
-  }
-
-  void _showCallDetails(
-      BuildContext context, Map<String, dynamic> callData) async {
-    String clientName = 'Carregando...';
-    String resultDescription = 'Carregando...';
-
-    final clientId = callData['idClient']?.toString();
-    if (clientId != null) {
-      final clientData = await _fetchClientById(clientId);
-      if (clientData != null) {
-        clientName = clientData['name'] ?? 'N/A';
-      } else {
-        clientName = 'Cliente não encontrado';
-      }
-    }
-
-    final leadResultId = callData['idLeadResult']?.toString();
-    if (leadResultId != null) {
-      final leadResultData = await _fetchLeadResultById(leadResultId);
-      if (leadResultData != null) {
-        resultDescription = leadResultData['description'] ?? 'N/A';
-      }
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Detalhes da Ligação'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Detalhes da Ligação:',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('Nome do Cliente: $clientName'),
-                Text('Hora da Ligação: ${callData['callTime'] ?? 'N/A'}'),
-                Text('Duração: ${callData['duration'] ?? 'N/A'}'),
-                Text('Descrição: ${callData['description'] ?? 'N/A'}'),
-                Text('ID do Resultado: ${callData['idLeadResult'] ?? 'N/A'}'),
-                Text('Descrição do Resultado: $resultDescription'),
-              ],
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fechar'),
+            Expanded(
+              flex: 1,
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  callData['result']['result'] ?? 'Sem Resultado',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  _formatDate(callData['date'] ?? '0000-00-00'),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            // Container para os botões
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xffe5e5e5),
+                borderRadius: BorderRadius.circular(20.0), // Bordas arredondadas
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0), // Ajustar padding horizontal
+              child: Row(
+                mainAxisSize: MainAxisSize.min, // Ajusta a largura do Row
+                mainAxisAlignment: MainAxisAlignment.center, // Centraliza os botões
+                children: [
+                  IconButton(
+                    onPressed: () => _showCallDetails(context, callData),
+                    icon: const Icon(Icons.info_outline, color: Color(0xff6502d4)),
+                    padding: EdgeInsets.zero,
+                  ),
+                  const SizedBox(width: 8), // Espaço entre os botões
+                  IconButton(
+                    onPressed: () => _showCallDialog(context, callData),
+                    icon: const Icon(Icons.edit, color: Color(0xff6502d4)),
+                    padding: EdgeInsets.zero,
+                  ),
+                ],
+              ),
             ),
           ],
-        );
-      },
-    );
+        ),
+        const Divider(color: Colors.grey, thickness: 1.0), // Espessura da linha
+      ],
+    ),
+  );
+}
+
+void _showCallDetails(BuildContext context, Map<String, dynamic> callData) async {
+  String resultDescription = 'Carregando...';
+
+
+  final leadResultId = callData['idLeadResult']?.toString();
+  if (leadResultId != null) {
+    final leadResultData = await _fetchLeadResultById(leadResultId);
+    resultDescription = leadResultData != null
+        ? leadResultData['description'] ?? 'N/A'
+        : 'N/A';
   }
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Detalhes da Ligação'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Detalhes da Ligação:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Hora da Ligação: ${callData['callTime'] ?? 'N/A'}'),
+              Text('Duração: ${callData['duration'] ?? 'N/A'}'),
+              Text('Descrição: ${callData['description'] ?? 'N/A'}'),
+              Text('ID do Resultado: ${callData['idLeadResult'] ?? 'N/A'}'),
+              Text('Descrição do Resultado: $resultDescription'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _showCallDialog(BuildContext context, Map<String, dynamic> callData) {
     showDialog(
@@ -326,10 +307,7 @@ class _CallPageState extends State<CallPage> {
               final index =
                   calls.indexWhere((call) => call['id'] == callData['id']);
               if (index != -1) {
-                calls[index] = {
-                  ...calls[index],
-                  ...updatedCallData 
-                };
+                calls[index] = {...calls[index], ...updatedCallData};
               }
             });
           },

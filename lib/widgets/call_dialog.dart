@@ -28,7 +28,7 @@ class CallDialog extends StatelessWidget {
       ),
       title: const Center(
         child: Text(
-          "Excluir Lead",
+          "Editar Lead",
           style: TextStyle(
             color: Color(0xFF6502D4),
             fontSize: 18,
@@ -212,19 +212,22 @@ class CallDialog extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: TextButton(
-            onPressed: () {
-              onDelete();
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(
-              side: const BorderSide(width: 1, color: Color(0xFF6502D4)),
-            ),
-            child: const Icon(
-              Icons.delete,
-              color: Color(0xFF6502D4),
+        Align(
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextButton(
+              onPressed: () {
+                onDelete();
+                Navigator.pop(context);
+              },
+              style: TextButton.styleFrom(
+                side: const BorderSide(width: 1, color: Color(0xFF6502D4)),
+              ),
+              child: const Icon(
+                Icons.delete,
+                color: Color(0xFF6502D4),
+              ),
             ),
           ),
         ),
