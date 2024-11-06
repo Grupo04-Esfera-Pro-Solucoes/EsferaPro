@@ -272,7 +272,24 @@ class _ClientPageState extends State<ClientPage> {
                 ElevatedButton(
                   onPressed: () => _showClientDetails(context, clientData),
                   child: const Icon(
-                    Icons.add,
+                    Icons.visibility,
+                    color: Colors.black,
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: MaterialStateProperty.all(Size(40, 40)),
+                  ),
+                ),
+                SizedBox(width: 8.0), // Espaço entre os botões
+                ElevatedButton(
+                  onPressed: () => null,
+                  child: const Icon(
+                    Icons.edit,
                     color: Colors.black,
                   ),
                   style: ButtonStyle(
