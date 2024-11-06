@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'stack_pages/stack_proposal.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Proposal extends StatefulWidget {

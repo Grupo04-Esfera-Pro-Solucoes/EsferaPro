@@ -280,6 +280,10 @@ class _ClientPageState extends State<ClientPage> {
                     Icons.visibility,
                     color: Colors.black,
                   ),
+                  ),
+                SizedBox(width: 8.0), // Espaço entre os botões
+                ElevatedButton(
+                  onPressed: () => null,
                   style: ButtonStyle(
                     backgroundColor:
                         MaterialStateProperty.all(const Color(0xffe5e5e5)),
@@ -289,10 +293,6 @@ class _ClientPageState extends State<ClientPage> {
                     )),
                     minimumSize: MaterialStateProperty.all(Size(40, 40)),
                   ),
-                ),
-                SizedBox(width: 8.0), // Espaço entre os botões
-                ElevatedButton(
-                  onPressed: () => null,
                   child: const Icon(
                     Icons.edit,
                     color: Colors.black,
