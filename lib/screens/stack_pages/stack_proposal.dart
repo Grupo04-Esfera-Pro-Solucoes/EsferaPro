@@ -243,7 +243,7 @@
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 5),
-                                  _buildTitle('ID do Cliente'),
+                                  _buildTitle('ID do Cliente', isRequired: true),
                                   const SizedBox(height: 5),
                                   _buildTextField(
                                     controller: _clientId,
@@ -415,7 +415,7 @@
                         const SizedBox(height: 32.0),
                         const Center(
                           child: Text(
-                            'Descrição da Tarefa',
+                            'Descrição da Proposta',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -425,7 +425,7 @@
                         const SizedBox(height: 16.0),
                         _buildTextField(
                           controller: _description,
-                          hintText: 'Digite a descrição da tarefa',
+                          hintText: 'Digite a descrição da Proposta',
                           maxLines: 5,
                         ),
                         const SizedBox(height: 16.0),
@@ -545,16 +545,25 @@
   class DateInputFormatter extends TextInputFormatter {
     @override
     TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-      final text = newValue.text;
-      if (text.length == 2 || text.length == 5) {
-        if (oldValue.text.length < newValue.text.length) {
-          return TextEditingValue(
-            text: '$text/',
-            selection: TextSelection.collapsed(offset: text.length + 1),
-          );
+      var text = newValue.text.replaceAll(RegExp(r'[^0-9/]'), '');
+      if (text.length > 10) {
+        text = text.substring(0, 10);
+      }
+      final buffer = StringBuffer();
+      for (int i = 0; i < text.length; i++) {
+        buffer.write(text[i]);
+        if ((i == 1 || i == 3) && i != text.length - 1) {
+          buffer.write('/');
         }
       }
-      return newValue;
+      var formattedText = buffer.toString();
+      if (formattedText.length > 10) {
+        formattedText = formattedText.substring(0, 10);
+      }
+      return TextEditingValue(
+        text: formattedText,
+        selection: TextSelection.collapsed(offset: formattedText.length),
+      );
     }
   }
 
@@ -563,7 +572,7 @@
     TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
       String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
       if (newText.isNotEmpty) {
-        newText = 'R\$ ' + newText;
+        newText = 'R\$ $newText';
       }
       return TextEditingValue(
         text: newText,
