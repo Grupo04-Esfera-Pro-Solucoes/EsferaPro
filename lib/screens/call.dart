@@ -53,25 +53,11 @@ class _CallPageState extends State<CallPage> {
     }
   }
 
-  Future<Map<String, dynamic>?> _fetchLeadResultById(String idLeadResult) async {
+  Future<void> updateLead(Map<String, dynamic> updatedCallData) async {
     try {
-      return await callService.fetchLeadResultById(idLeadResult);
+      await callService.updateLead(updatedCallData);
     } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao buscar resultado do lead';
-      });
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> _fetchClientById(String idClient) async {
-    try {
-      return await callService.fetchClientById(idClient);
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao buscar cliente';
-      });
-      return null;
+      print('Erro ao atualizar lead: $e');
     }
   }
 
@@ -260,7 +246,7 @@ class _CallPageState extends State<CallPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: () => _showCallDialog(context, callData),
+                      onPressed: () => showCallDialog(context, callData),
                       icon: const Icon(Icons.edit, color: Colors.black),
                       padding: EdgeInsets.zero,
                     ),
@@ -361,20 +347,24 @@ class _CallPageState extends State<CallPage> {
     );
   }
 
-  void _showCallDialog(BuildContext context, Map<String, dynamic> callData) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CallDialog(
-          callData: callData,
-          onEdit: (updatedCallData) {
-            setState(() {
-              final index = calls.indexWhere((call) => call['id'] == callData['id']);
-              if (index != -1) {
-                calls[index] = {...calls[index], ...updatedCallData};
-              }
-            });
-          },
+void showCallDialog(BuildContext context, Map<String, dynamic> callData) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return CallDialog(
+        callData: callData,
+        onEdit: (updatedCallData) async {
+          try {
+            await updateLead(updatedCallData);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lead atualizado com sucesso!')),
+            );
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro ao atualizar o lead')),
+            );
+          }
+        },
           onDelete: () {
             setState(() {
               calls.removeWhere((call) => call['id'] == callData['id']);

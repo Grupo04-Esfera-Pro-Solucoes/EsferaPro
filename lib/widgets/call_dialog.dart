@@ -1,26 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class CallDialog extends StatelessWidget {
+class CallDialog extends StatefulWidget {
   final Map<String, dynamic> callData;
-  final void Function(Map<String, dynamic> updatedCallData) onEdit;
+  final Future<void> Function(Map<String, dynamic> updatedCallData) onEdit;
   final VoidCallback onDelete;
 
-  CallDialog({
+  const CallDialog({
     required this.callData,
     required this.onEdit,
     required this.onDelete,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController descriptionController = TextEditingController(text: callData['description'] ?? '');
-    final TextEditingController clientController = TextEditingController(text: callData['idClient']['name'] ?? '');
-    final TextEditingController resultController = TextEditingController(text: callData['result']['result'] ?? '');
-    final TextEditingController dateController = TextEditingController(text: DateFormat('dd/MM/yyyy').format(DateTime.parse(callData['date'] ?? DateTime.now().toString())));
-    final TextEditingController timeController = TextEditingController(text: callData['callTime'] ?? '');
-    final TextEditingController durationController = TextEditingController(text: callData['duration'] ?? '');
+  _CallDialogState createState() => _CallDialogState();
+}
 
+class _CallDialogState extends State<CallDialog> {
+  late TextEditingController descriptionController;
+  late TextEditingController clientController;
+  late TextEditingController resultController;
+  late TextEditingController dateController;
+  late TextEditingController timeController;
+  late TextEditingController durationController;
+  late TextEditingController contactController;
+
+  int selectedResultId = 1;  // Default to 'Atendido' with ID 1
+
+  @override
+  void initState() {
+    super.initState();
+
+    descriptionController = TextEditingController(text: widget.callData['description'] ?? '');
+    clientController = TextEditingController(text: widget.callData['idClient']['name'] ?? '');
+    resultController = TextEditingController(text: widget.callData['result']['result'] ?? '');
+    dateController = TextEditingController(text: DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.callData['date'] ?? DateTime.now().toString())));
+    timeController = TextEditingController(text: widget.callData['callTime'] ?? '');
+    durationController = TextEditingController(text: widget.callData['duration'] ?? '');
+    contactController = TextEditingController(text: widget.callData['contact'] ?? '');
+
+    // Setting the initial selected result ID based on the passed data
+    selectedResultId = widget.callData['result']['idLeadResult'] ?? 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -43,62 +67,91 @@ class CallDialog extends StatelessWidget {
           children: [
             TextField(
               controller: clientController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Cliente',
-                labelStyle: const TextStyle(color: Color(0xFF6502D4)),
-                border: const OutlineInputBorder(
+                labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                border: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                enabledBorder: const OutlineInputBorder(
+                enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
               readOnly: true,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: contactController,
+              decoration: const InputDecoration(
+                labelText: 'Contato',
+                labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6502D4)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6502D4)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6502D4)),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              readOnly: true,
+            ),
+            const SizedBox(height: 16),
+            // Dropdown for selecting result
+            DropdownButtonFormField<int>(
+              value: selectedResultId,
+              decoration: const InputDecoration(
+                labelText: 'Resultado',
+                labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6502D4)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6502D4)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF6502D4)),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              items: const [
+                DropdownMenuItem(value: 1, child: Text('Atendido')),
+                DropdownMenuItem(value: 2, child: Text('Desligado')),
+                DropdownMenuItem(value: 3, child: Text('Cx. Postal')),
+                DropdownMenuItem(value: 4, child: Text('Ocupado')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  selectedResultId = value ?? 1;  // Default to 1 if null
+                });
+              },
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: TextField(
-                    controller: resultController,
-                    decoration: InputDecoration(
-                      labelText: 'Resultado',
-                      labelStyle: const TextStyle(color: Color(0xFF6502D4)),
-                      border: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF6502D4)),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF6502D4)),
-                      ),
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFF6502D4)),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
                     controller: dateController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Data',
                       hintText: 'dd/MM/yyyy',
-                      labelStyle: const TextStyle(color: Color(0xFF6502D4)),
-                      border: const OutlineInputBorder(
+                      labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                      border: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      focusedBorder: const OutlineInputBorder(
+                      focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      enabledBorder: const OutlineInputBorder(
+                      enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
@@ -110,19 +163,19 @@ class CallDialog extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: timeController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Hora',
-                      labelStyle: const TextStyle(color: Color(0xFF6502D4)),
-                      border: const OutlineInputBorder(
+                      labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                      border: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      focusedBorder: const OutlineInputBorder(
+                      focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      enabledBorder: const OutlineInputBorder(
+                      enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
@@ -130,19 +183,19 @@ class CallDialog extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: durationController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Duração',
-                      labelStyle: const TextStyle(color: Color(0xFF6502D4)),
-                      border: const OutlineInputBorder(
+                      labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                      border: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      focusedBorder: const OutlineInputBorder(
+                      focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      enabledBorder: const OutlineInputBorder(
+                      enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
@@ -151,19 +204,19 @@ class CallDialog extends StatelessWidget {
             const SizedBox(height: 16),
             TextField(
               controller: descriptionController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Descrição',
-                labelStyle: const TextStyle(color: Color(0xFF6502D4)),
-                border: const OutlineInputBorder(
+                labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                border: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                enabledBorder: const OutlineInputBorder(
+                enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
               maxLines: 3,
             ),
@@ -189,50 +242,34 @@ class CallDialog extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: TextButton(
-                onPressed: () {
-                  final updatedCallData = {
-                    'idClient': {'name': clientController.text},
-                    'result': {'result': resultController.text},
-                    'description': descriptionController.text,
-                    'date': DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(dateController.text)),
-                    'callTime': timeController.text,
-                    'duration': durationController.text,
-                  };
-                  onEdit(updatedCallData);
-                  Navigator.pop(context);
+                onPressed: () async {
+                  try {
+                    final updatedCallData = {
+                      'contact': contactController.text,
+                      'date': DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(DateFormat('dd/MM/yyyy').parse(dateController.text)),
+                      'duration': durationController.text,
+                      'description': descriptionController.text,
+                      'result': {
+                        'idLeadResult': selectedResultId,
+                      },
+                      'callTime': timeController.text,
+                    };
+                    print("Dados enviados para atualização: $updatedCallData");
+
+                    await widget.onEdit(updatedCallData); 
+                    Navigator.pop(context);
+                  } catch (e) {
+                    print("Erro ao salvar: $e");
+                  }
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: const Color(0xFF6502D4),
-                  foregroundColor: Colors.white,
                   minimumSize: const Size(80, 40),
                 ),
-                child: const Text("Editar"),
+                child: const Text("Salvar", style: TextStyle(color: Colors.white)),
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 16),
-        Align(
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                onDelete();
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                side: const BorderSide(width: 1, color: Colors.red),
-                padding: const EdgeInsets.all(16),
-                backgroundColor: Colors.white,
-              ),
-              child: const Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
-            ),
-          ),
         ),
       ],
     );

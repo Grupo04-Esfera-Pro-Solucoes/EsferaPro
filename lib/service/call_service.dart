@@ -144,41 +144,30 @@ class CallService {
     }
   }
 
-  Future<void> updateCall({
-    required String id,
-    required String duration,
-    required String date,
-    required String time,
-    required String description,
-    required String idLeadResult,
-  }) async {
-    final url = Uri.parse('$baseUrl/lead/$id');
-    final Map<String, dynamic> callData = {
-      'date': date,
-      'callTime': time,
-      'duration': duration,
-      'description': description,
-      'result': {
-        'idLeadResult': idLeadResult,
-      },
-    };
-
-    debugPrint('Dados enviados para updateCall: ${jsonEncode(callData)}');
-
+  Future<void> updateLead(Map<String, dynamic> updatedCallData) async {
     try {
       final response = await http.put(
-        url,
-        headers: {
+        Uri.parse('$baseUrl/lead/${updatedCallData['idLead']}'),
+        headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(callData),
+        body: jsonEncode({
+          'contact': updatedCallData['contact'],
+          'date': updatedCallData['date'],
+          'duration': updatedCallData['duration'],
+          'description': updatedCallData['description'],
+          'result': updatedCallData['result'],
+          'callTime': updatedCallData['callTime'],
+        }),
       );
 
-      if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Falha ao atualizar ligação: ${response.body}');
+      if (response.statusCode == 200) {
+        print('Lead atualizado com sucesso');
+      } else {
+        throw Exception('Falha ao atualizar o lead: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Erro na requisição put: $e');
+      print('Erro: $e');
     }
   }
 
