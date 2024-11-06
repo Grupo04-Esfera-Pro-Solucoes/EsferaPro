@@ -39,7 +39,7 @@ class _CallPageState extends State<CallPage> {
   Future<void> _fetchCalls() async {
     if (userId != null) {
       try {
-        final data = await callService.fetchAllLeads(userId.toString(),1);
+        final data = await callService.fetchAllLeads(userId.toString(), 1);
         setState(() {
           calls = data;
           isLoading = false;
@@ -82,7 +82,8 @@ class _CallPageState extends State<CallPage> {
                     : errorMessage != null
                         ? Center(child: Text(errorMessage!))
                         : calls.isEmpty
-                            ? const Center(child: Text('Nenhuma ligação disponível!'))
+                            ? const Center(
+                                child: Text('Nenhuma ligação disponível!'))
                             : ListView.builder(
                                 itemCount: calls.length,
                                 itemBuilder: (context, index) {
@@ -96,18 +97,18 @@ class _CallPageState extends State<CallPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => StackCalls()),
-    ).then((_) {
-      _fetchCalls();
-    });
-  },
-  backgroundColor: const Color(0xFF6502D4),
-  foregroundColor: Colors.white,
-  child: const Icon(Icons.add),
-),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => StackCalls()),
+          ).then((_) {
+            _fetchCalls();
+          });
+        },
+        backgroundColor: const Color(0xFF6502D4),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -140,7 +141,8 @@ class _CallPageState extends State<CallPage> {
                     icon: const Icon(Icons.search, color: Color(0xff6502d4)),
                     onPressed: () {},
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 20.0),
                 ),
               ),
             ),
@@ -270,7 +272,8 @@ class _CallPageState extends State<CallPage> {
     );
   }
 
-  void _showCallDetails(BuildContext context, Map<String, dynamic> callData) async {
+  void _showCallDetails(
+      BuildContext context, Map<String, dynamic> callData) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -289,8 +292,10 @@ class _CallPageState extends State<CallPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailRow('Resultado:', callData['result']['result'] ?? 'N/A'),
-                _buildDetailRow('Data:', _formatDate(callData['date'] ?? '0000-00-00')),
+                _buildDetailRow(
+                    'Resultado:', callData['result']['result'] ?? 'N/A'),
+                _buildDetailRow(
+                    'Data:', _formatDate(callData['date'] ?? '0000-00-00')),
                 _buildDetailRow('Hora:', callData['callTime'] ?? 'N/A'),
                 _buildDetailRow('Duração:', callData['duration'] ?? 'N/A'),
                 _buildDetailRow('Descrição:', callData['description'] ?? 'N/A'),
@@ -305,7 +310,8 @@ class _CallPageState extends State<CallPage> {
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.white,
                   side: BorderSide(color: Color(0xff6502d4), width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
                 ),
                 child: const Text(
                   'Fechar',
@@ -347,27 +353,32 @@ class _CallPageState extends State<CallPage> {
     );
   }
 
-void showCallDialog(BuildContext context, Map<String, dynamic> callData) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return CallDialog(
-        callData: callData,
-        onEdit: (updatedCallData) async {
-          try {
-            await updateLead(updatedCallData);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lead atualizado com sucesso!')),
-            );
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erro ao atualizar o lead')),
-            );
-          }
-        },
+  void showCallDialog(BuildContext context, Map<String, dynamic> callData) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CallDialog(
+          callData: callData,
+          onEdit: (updatedCallData) async {
+            try {
+              updatedCallData['idLead'] = callData['idLead'];
+              print(
+                  "Atualizando lead com idLead: ${updatedCallData['idLead']}");
+              await updateLead(updatedCallData);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Lead atualizado com sucesso!')),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erro ao atualizar o lead')),
+              );
+              print("Erro ao atualizar lead: $e");
+            }
+          },
           onDelete: () {
             setState(() {
               calls.removeWhere((call) => call['id'] == callData['id']);
+              print('Lead com id ${callData['id']} removido');
             });
           },
         );

@@ -25,7 +25,7 @@ class _CallDialogState extends State<CallDialog> {
   late TextEditingController durationController;
   late TextEditingController contactController;
 
-  int selectedResultId = 1;  // Default to 'Atendido' with ID 1
+  int selectedResultId = 1;
 
   @override
   void initState() {
@@ -39,7 +39,6 @@ class _CallDialogState extends State<CallDialog> {
     durationController = TextEditingController(text: widget.callData['duration'] ?? '');
     contactController = TextEditingController(text: widget.callData['contact'] ?? '');
 
-    // Setting the initial selected result ID based on the passed data
     selectedResultId = widget.callData['result']['idLeadResult'] ?? 1;
   }
 
@@ -103,7 +102,6 @@ class _CallDialogState extends State<CallDialog> {
               readOnly: true,
             ),
             const SizedBox(height: 16),
-            // Dropdown for selecting result
             DropdownButtonFormField<int>(
               value: selectedResultId,
               decoration: const InputDecoration(
@@ -128,7 +126,7 @@ class _CallDialogState extends State<CallDialog> {
               ],
               onChanged: (value) {
                 setState(() {
-                  selectedResultId = value ?? 1;  // Default to 1 if null
+                  selectedResultId = value ?? 1;
                 });
               },
             ),
@@ -245,6 +243,7 @@ class _CallDialogState extends State<CallDialog> {
                 onPressed: () async {
                   try {
                     final updatedCallData = {
+                      'idLead': widget.callData['id'],
                       'contact': contactController.text,
                       'date': DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(DateFormat('dd/MM/yyyy').parse(dateController.text)),
                       'duration': durationController.text,
@@ -254,7 +253,6 @@ class _CallDialogState extends State<CallDialog> {
                       },
                       'callTime': timeController.text,
                     };
-                    print("Dados enviados para atualização: $updatedCallData");
 
                     await widget.onEdit(updatedCallData); 
                     Navigator.pop(context);
