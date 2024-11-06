@@ -1,9 +1,10 @@
-import 'dart:convert'; // Para decodificar a resposta JSON
-import 'package:esferapro/screens/stack_pages/stack_clients.dart';
+import 'dart:convert';
+import 'package:esferapro/screens/stacks/stack_clients.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -11,23 +12,26 @@ class ClientPage extends StatefulWidget {
 }
 
 class _ClientPageState extends State<ClientPage> {
-  List<dynamic> clients = []; // Lista de clientes
-  List<bool> isCheckedList = []; // Lista para o estado dos checkboxes
-  bool isLoading = true; // Indicador de carregamento
-  String? errorMessage; // Mensagem de erro, se houver
+  List<dynamic> clients = []; 
+  List<bool> isCheckedList = []; 
+  bool isLoading = true; 
+  String? errorMessage; 
+  TextEditingController searchController = TextEditingController(); 
 
-  // Função para buscar os dados dos clientes
-  Future<void> fetchClientData() async {
+  Future<void> fetchClientData({String? searchQuery}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? UserId = prefs.getInt('userId');
-    final url =
-        Uri.parse('http://localhost:8080/client-address-contact/all/$UserId');
+    
+    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
+
+    final url = searchQuery != null && searchQuery.isNotEmpty
+        ? Uri.parse('$baseUrl/client-address-contact/name/$searchQuery/$UserId')
+        : Uri.parse('$baseUrl/client-address-contact/all/$UserId');
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Fetched data: ${json.encode(data)}');
 
         setState(() {
           if (data['content'] != null && data['content'] is List) {
@@ -43,7 +47,6 @@ class _ClientPageState extends State<ClientPage> {
         throw Exception('Failed to load client data');
       }
     } catch (e) {
-      print('Error: $e');
       setState(() {
         isLoading = false;
         errorMessage = 'Failed to load client data'; 
@@ -57,7 +60,14 @@ class _ClientPageState extends State<ClientPage> {
     fetchClientData();
   }
 
-  // Função para atualizar o estado do checkbox
+  void _searchClients() {
+    setState(() {
+      clients = [];
+      isLoading = true;
+    });
+    fetchClientData(searchQuery: searchController.text.trim());
+  }
+
   void _updateCheckbox(int index, bool newValue) {
     setState(() {
       isCheckedList[index] = newValue;
@@ -67,28 +77,29 @@ class _ClientPageState extends State<ClientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
             children: [
-              _buildSearchBar(), // Barra de pesquisa
-              _buildHeader(), // Cabeçalho
-              Expanded(
-                child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : errorMessage != null
-                        ? Center(child: Text(errorMessage!))
-                        : clients.isEmpty
-                            ? const Center(
-                                child: Text('No client data available'))
-                            : ListView.builder(
-                                itemCount: clients.length,
-                                itemBuilder: (context, index) {
-                                  final clientData = clients[index];
-                                  return _buildClientTile(
-                                      context, clientData, index);
-                                },
-                              ),
+              _buildSearchBar(),
+              _buildHeader(),
+            Expanded(
+              child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : errorMessage != null
+              ? Center(child: Text(errorMessage!))
+              : clients.isEmpty
+              ? const Center(
+                child: Text('No client data available'))
+              : ListView.builder(
+                  itemCount: clients.length,
+                  itemBuilder: (context, index) {
+                    final clientData = clients[index];
+                    return _buildClientTile(
+                      context, clientData, index);
+                    },
+                  ),
               ),
             ],
           ),
@@ -130,8 +141,6 @@ class _ClientPageState extends State<ClientPage> {
   }
 
   Widget _buildSearchBar() {
-    TextEditingController searchController = TextEditingController();
-
     return Container(
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -144,16 +153,15 @@ class _ClientPageState extends State<ClientPage> {
                 hintText: 'Digite sua pesquisa',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      BorderSide(color: Colors.purpleAccent, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(color: Colors.purple, width: 2.0),
+                  borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 filled: true,
                 fillColor: Colors.white, 
@@ -161,12 +169,8 @@ class _ClientPageState extends State<ClientPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.purple),
-            onPressed: () {
-              // Aqui você pode implementar a lógica de busca usando o texto de searchController
-              String searchQuery = searchController.text;
-              print('Buscar: $searchQuery'); // Exemplo de uso
-            },
+            icon: const Icon(Icons.search, color: Color(0xff6502d4)),
+            onPressed: _searchClients,
           ),
         ],
       ),
@@ -211,7 +215,7 @@ class _ClientPageState extends State<ClientPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 1, // Proporção 1 para cada célula
+            flex: 1,
             child: Align(
               alignment: Alignment.center,
               child: Text(
@@ -221,7 +225,7 @@ class _ClientPageState extends State<ClientPage> {
             ),
           ),
           Expanded(
-            flex: 1, // Proporção 1 para cada célula
+            flex: 1,
             child: Align(
               alignment: Alignment.center,
               child: Text(
@@ -239,6 +243,16 @@ class _ClientPageState extends State<ClientPage> {
               children: [
                 ElevatedButton(
                   onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(
+                        Size(40, 40)),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -248,32 +262,22 @@ class _ClientPageState extends State<ClientPage> {
                       ),
                     ],
                   ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    )),
-                    minimumSize: MaterialStateProperty.all(
-                        Size(40, 40)), // Tamanho mínimo do botão
-                  ),
                 ),
-                SizedBox(width: 8.0), // Espaço entre os botões
+                SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: () => _showClientDetails(context, clientData),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(Size(40, 40)),
+                  ),
                   child: const Icon(
                     Icons.add,
                     color: Colors.black,
-                  ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    )),
-                    minimumSize: MaterialStateProperty.all(Size(40, 40)),
                   ),
                 ),
               ],
@@ -284,7 +288,7 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  // Função para exibir um modal com mais informações
+
   void _showClientDetails(
       BuildContext context, Map<String, dynamic> clientData) {
     final client = clientData['client'] ?? {};

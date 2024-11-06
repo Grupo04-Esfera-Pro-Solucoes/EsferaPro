@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProposalService {
-  String baseUrl = 'http://localhost:8080';
+  String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
 
   Future<void> postNewProposal({
     required int idLead,
@@ -54,13 +55,11 @@ class ProposalService {
     try {
       final response = await request.send();
 
-      if (response.statusCode == 200) {
-        print('Proposta criada com sucesso.');
-      } else {
-        print('Erro ao criar proposta: ${response.statusCode}');
-      }
+      if (response.statusCode != 200) {
+      throw Exception('Erro ao excluir tarefa: ${response.statusCode}');
+    }
     } catch (e) {
-      print('Erro: $e');
+      throw Exception('Erro na requisição: $e');
     }
   }
 
