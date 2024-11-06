@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 class CallDialog extends StatefulWidget {
   final Map<String, dynamic> callData;
   final Future<void> Function(Map<String, dynamic> updatedCallData) onEdit;
-  final VoidCallback onDelete;
+  final Future<void> Function(String) onDelete;
 
   const CallDialog({
     required this.callData,
@@ -31,13 +31,21 @@ class _CallDialogState extends State<CallDialog> {
   void initState() {
     super.initState();
 
-    descriptionController = TextEditingController(text: widget.callData['description'] ?? '');
-    clientController = TextEditingController(text: widget.callData['idClient']['name'] ?? '');
-    resultController = TextEditingController(text: widget.callData['result']['result'] ?? '');
-    dateController = TextEditingController(text: DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.callData['date'] ?? DateTime.now().toString())));
-    timeController = TextEditingController(text: widget.callData['callTime'] ?? '');
-    durationController = TextEditingController(text: widget.callData['duration'] ?? '');
-    contactController = TextEditingController(text: widget.callData['contact'] ?? '');
+    descriptionController =
+        TextEditingController(text: widget.callData['description'] ?? '');
+    clientController =
+        TextEditingController(text: widget.callData['idClient']['name'] ?? '');
+    resultController =
+        TextEditingController(text: widget.callData['result']['result'] ?? '');
+    dateController = TextEditingController(
+        text: DateFormat('dd/MM/yyyy').format(DateTime.parse(
+            widget.callData['date'] ?? DateTime.now().toString())));
+    timeController =
+        TextEditingController(text: widget.callData['callTime'] ?? '');
+    durationController =
+        TextEditingController(text: widget.callData['duration'] ?? '');
+    contactController =
+        TextEditingController(text: widget.callData['contact'] ?? '');
 
     selectedResultId = widget.callData['result']['idLeadResult'] ?? 1;
   }
@@ -78,7 +86,8 @@ class _CallDialogState extends State<CallDialog> {
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
               readOnly: true,
             ),
@@ -97,7 +106,8 @@ class _CallDialogState extends State<CallDialog> {
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
               readOnly: true,
             ),
@@ -116,7 +126,8 @@ class _CallDialogState extends State<CallDialog> {
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
               items: const [
                 DropdownMenuItem(value: 1, child: Text('Atendido')),
@@ -149,7 +160,8 @@ class _CallDialogState extends State<CallDialog> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
@@ -173,7 +185,8 @@ class _CallDialogState extends State<CallDialog> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
@@ -193,7 +206,8 @@ class _CallDialogState extends State<CallDialog> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFF6502D4)),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
@@ -214,7 +228,8 @@ class _CallDialogState extends State<CallDialog> {
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF6502D4)),
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
               maxLines: 3,
             ),
@@ -234,7 +249,8 @@ class _CallDialogState extends State<CallDialog> {
                   side: const BorderSide(width: 1, color: Color(0xFF6502D4)),
                   minimumSize: const Size(80, 40),
                 ),
-                child: const Text("Cancelar", style: TextStyle(color: Color(0xFF6502D4))),
+                child: const Text("Cancelar",
+                    style: TextStyle(color: Color(0xFF6502D4))),
               ),
             ),
             const SizedBox(width: 8),
@@ -245,7 +261,8 @@ class _CallDialogState extends State<CallDialog> {
                     final updatedCallData = {
                       'idLead': widget.callData['id'],
                       'contact': contactController.text,
-                      'date': DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(DateFormat('dd/MM/yyyy').parse(dateController.text)),
+                      'date': DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(
+                          DateFormat('dd/MM/yyyy').parse(dateController.text)),
                       'duration': durationController.text,
                       'description': descriptionController.text,
                       'result': {
@@ -254,7 +271,7 @@ class _CallDialogState extends State<CallDialog> {
                       'callTime': timeController.text,
                     };
 
-                    await widget.onEdit(updatedCallData); 
+                    await widget.onEdit(updatedCallData);
                     Navigator.pop(context);
                   } catch (e) {
                     print("Erro ao salvar: $e");
@@ -264,11 +281,34 @@ class _CallDialogState extends State<CallDialog> {
                   backgroundColor: const Color(0xFF6502D4),
                   minimumSize: const Size(80, 40),
                 ),
-                child: const Text("Salvar", style: TextStyle(color: Colors.white)),
+                child:
+                    const Text("Salvar", style: TextStyle(color: Colors.white)),
               ),
             ),
           ],
         ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: TextButton(
+              onPressed: () async {
+                await widget.onDelete(widget.callData['idLead'].toString());
+                Navigator.pop(context);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Color(0xFF6502D4),
+                shape: CircleBorder(),
+                padding: EdgeInsets.all(16),
+              ),
+              child: const Icon(
+                Icons.delete,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+          ),
+        )
       ],
     );
   }

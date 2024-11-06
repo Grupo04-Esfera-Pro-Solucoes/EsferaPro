@@ -171,8 +171,8 @@ class CallService {
     }
   }
 
-  Future<void> deleteCall(String id) async {
-    final url = Uri.parse('$baseUrl/lead/delete/$id');
+  Future<void> deleteCall(String idLead) async {
+    final url = Uri.parse('$baseUrl/lead/delete/$idLead');
 
     try {
       final response = await http.delete(url);

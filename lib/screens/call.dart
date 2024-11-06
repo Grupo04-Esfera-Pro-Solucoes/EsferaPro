@@ -53,14 +53,6 @@ class _CallPageState extends State<CallPage> {
     }
   }
 
-  Future<void> updateLead(Map<String, dynamic> updatedCallData) async {
-    try {
-      await callService.updateLead(updatedCallData);
-    } catch (e) {
-      print('Erro ao atualizar lead: $e');
-    }
-  }
-
   String _formatDate(String date) {
     DateTime parsedDate = DateTime.parse(date);
     return DateFormat('dd/MM').format(parsedDate);
@@ -362,9 +354,7 @@ class _CallPageState extends State<CallPage> {
           onEdit: (updatedCallData) async {
             try {
               updatedCallData['idLead'] = callData['idLead'];
-              print(
-                  "Atualizando lead com idLead: ${updatedCallData['idLead']}");
-              await updateLead(updatedCallData);
+              await callService.updateLead(updatedCallData);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Lead atualizado com sucesso!')),
               );
@@ -372,14 +362,19 @@ class _CallPageState extends State<CallPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Erro ao atualizar o lead')),
               );
-              print("Erro ao atualizar lead: $e");
             }
           },
-          onDelete: () {
-            setState(() {
-              calls.removeWhere((call) => call['id'] == callData['id']);
-              print('Lead com id ${callData['id']} removido');
-            });
+          onDelete: (String idLead) async {
+            try {
+              await callService.deleteCall(idLead);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Lead excluído com sucesso!')),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erro ao excluir o lead')),
+              );
+            }
           },
         );
       },
