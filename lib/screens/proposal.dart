@@ -1,3 +1,4 @@
+import 'package:esferapro/screens/stacks/stack_proposal.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -126,8 +127,8 @@ class _ProposalState extends State<Proposal> {
                                 ],
                               ),
                             ),
-                            Expanded(child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center), flex: 2),
-                            Expanded(child: Text(_formatDate(proposal['proposalDate']), textAlign: TextAlign.center), flex: 2),
+                            Expanded(flex: 2, child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center)),
+                            Expanded(flex: 2, child: Text(_formatDate(proposal['proposalDate']), textAlign: TextAlign.center)),
                             Expanded(
                               flex: 2,
                               child: Row(
@@ -136,7 +137,6 @@ class _ProposalState extends State<Proposal> {
                                   IconButton(
                                     icon: Icon(Icons.edit),
                                     onPressed: () {
-                                      // Adicione a lógica de edição aqui
                                     },
                                   ),
                                   IconButton(
@@ -165,7 +165,7 @@ class _ProposalState extends State<Proposal> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProposalCadastro()), // Navegue para ProposalCadastro
+                MaterialPageRoute(builder: (context) => ProposalCadastro()),
               );
             },
             backgroundColor: Colors.purple,

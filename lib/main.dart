@@ -26,7 +26,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Color(0xFF34016E),
@@ -39,9 +39,9 @@ class SplashScreen extends StatelessWidget {
       child: SplashScreenView(
         navigateRoute: LoginScreen(),
         duration: 2000,
-        imageSize: 150,        // Tamanho da imagem do logo
-        imageSrc: "assets/logo.png", // Caminho para a imagem do logo
-        backgroundColor: Colors.transparent, // Fundo transparente para mostrar o gradiente
+        imageSize: 150,
+        imageSrc: "assets/logo.png",
+        backgroundColor: Colors.transparent,
       ),
     );
   }

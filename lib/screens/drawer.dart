@@ -1,10 +1,10 @@
-import 'package:esferapro/screens/calls.dart';
+import 'package:esferapro/screens/call.dart';
 import 'package:esferapro/screens/dashbord.dart';
 import 'package:esferapro/screens/main_screen.dart';
 import 'package:esferapro/screens/proposal.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'clientes.dart';
+import 'customer.dart';
 import 'help.dart';
 import 'tasks.dart';
 

@@ -1,5 +1,5 @@
-import 'dart:convert'; // Para decodificar a resposta JSON
-import 'package:esferapro/screens/stack_pages/stack_clients.dart';
+import 'dart:convert';
+import 'package:esferapro/screens/stacks/stack_clients.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +18,6 @@ class _ClientPageState extends State<ClientPage> {
   String? errorMessage; 
   TextEditingController searchController = TextEditingController(); 
 
-  // Função para buscar os dados dos clientes
   Future<void> fetchClientData({String? searchQuery}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? UserId = prefs.getInt('userId');
@@ -34,7 +33,6 @@ class _ClientPageState extends State<ClientPage> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Fetched data: ${json.encode(data)}');
 
         setState(() {
           if (data['content'] != null && data['content'] is List) {
@@ -44,13 +42,12 @@ class _ClientPageState extends State<ClientPage> {
             clients = []; 
             isCheckedList = []; 
           }
-          isLoading = false; // Atualiza o estado de carregamento
+          isLoading = false;
         });
       } else {
         throw Exception('Failed to load client data');
       }
     } catch (e) {
-      print('Error: $e');
       setState(() {
         isLoading = false;
         errorMessage = 'Failed to load client data'; 
@@ -61,19 +58,17 @@ class _ClientPageState extends State<ClientPage> {
   @override
   void initState() {
     super.initState();
-    fetchClientData(); // Carrega dados inicialmente
+    fetchClientData();
   }
 
-  // Função para buscar clientes quando o botão de pesquisa é pressionado
   void _searchClients() {
     setState(() {
-      clients = []; // Limpa a lista de clientes
-      isLoading = true; // Inicia o carregamento
+      clients = [];
+      isLoading = true;
     });
-    fetchClientData(searchQuery: searchController.text.trim()); // Chama a função com a query
+    fetchClientData(searchQuery: searchController.text.trim());
   }
 
-  // Função para atualizar o estado do checkbox
   void _updateCheckbox(int index, bool newValue) {
     setState(() {
       isCheckedList[index] = newValue;
@@ -83,28 +78,29 @@ class _ClientPageState extends State<ClientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
             children: [
-              _buildSearchBar(), // Barra de pesquisa
-              _buildHeader(), // Cabeçalho
-              Expanded(
-                child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : errorMessage != null
-                        ? Center(child: Text(errorMessage!))
-                        : clients.isEmpty
-                            ? const Center(
-                                child: Text('No client data available'))
-                            : ListView.builder(
-                                itemCount: clients.length,
-                                itemBuilder: (context, index) {
-                                  final clientData = clients[index];
-                                  return _buildClientTile(
-                                      context, clientData, index);
-                                },
-                              ),
+              _buildSearchBar(),
+              _buildHeader(),
+            Expanded(
+              child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : errorMessage != null
+              ? Center(child: Text(errorMessage!))
+              : clients.isEmpty
+              ? const Center(
+                child: Text('No client data available'))
+              : ListView.builder(
+                  itemCount: clients.length,
+                  itemBuilder: (context, index) {
+                    final clientData = clients[index];
+                    return _buildClientTile(
+                      context, clientData, index);
+                    },
+                  ),
               ),
             ],
           ),
@@ -175,7 +171,7 @@ class _ClientPageState extends State<ClientPage> {
           ),
           IconButton(
             icon: const Icon(Icons.search, color: Color(0xff6502d4)),
-            onPressed: _searchClients, // Chama a função de busca
+            onPressed: _searchClients,
           ),
         ],
       ),
@@ -220,7 +216,7 @@ class _ClientPageState extends State<ClientPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 1, // Proporção 1 para cada célula
+            flex: 1,
             child: Align(
               alignment: Alignment.center,
               child: Text(
@@ -230,7 +226,7 @@ class _ClientPageState extends State<ClientPage> {
             ),
           ),
           Expanded(
-            flex: 1, // Proporção 1 para cada célula
+            flex: 1,
             child: Align(
               alignment: Alignment.center,
               child: Text(
@@ -248,6 +244,16 @@ class _ClientPageState extends State<ClientPage> {
               children: [
                 ElevatedButton(
                   onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(
+                        Size(40, 40)),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -257,20 +263,19 @@ class _ClientPageState extends State<ClientPage> {
                       ),
                     ],
                   ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    )),
-                    minimumSize: MaterialStateProperty.all(
-                        Size(40, 40)), // Tamanho mínimo do botão
-                  ),
                 ),
-                SizedBox(width: 8.0), // Espaço entre os botões
+                SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: () => _showClientDetails(context, clientData),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(Size(40, 40)),
+                  ),
                   child: const Icon(
                     Icons.visibility,
                     color: Colors.black,
@@ -292,15 +297,6 @@ class _ClientPageState extends State<ClientPage> {
                     Icons.edit,
                     color: Colors.black,
                   ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(const Color(0xffe5e5e5)),
-                    padding: MaterialStateProperty.all(EdgeInsets.all(8.0)),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    )),
-                    minimumSize: MaterialStateProperty.all(Size(40, 40)),
-                  ),
                 ),
               ],
             ),
@@ -310,7 +306,7 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  // Função para exibir um modal com mais informações
+
   void _showClientDetails(
       BuildContext context, Map<String, dynamic> clientData) {
     final client = clientData['client'] ?? {};

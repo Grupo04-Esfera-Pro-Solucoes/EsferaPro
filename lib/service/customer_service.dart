@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserService {
+  final String baseUrl = 'http://10.0.2.2:8080';
+
   Future<void> postNewUser({
     required String name,
     required String cpfCnpj,
@@ -50,7 +52,7 @@ class UserService {
         "country": country
       }
     };
-  print(dados);
+
     try {
       final response = await http.post(
         url,
@@ -60,13 +62,12 @@ class UserService {
         body: jsonEncode(dados),
       );
 
-      if (response.statusCode == 200) {
-        print('Sucesso: ${utf8.decode(response.bodyBytes)}');
-      } else {
-        print('Erro: ${utf8.decode(response.bodyBytes)}');
+      if (response.statusCode != 200) {
+        throw Exception('Erro: ${utf8.decode(response.bodyBytes)}');
       }
+
     } catch (e) {
-      print('Erro ao enviar: $e');
+      throw Exception('Erro: $e');
     }
   }
 }

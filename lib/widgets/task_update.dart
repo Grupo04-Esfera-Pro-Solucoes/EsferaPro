@@ -14,8 +14,8 @@ class TaskUpdateDialog extends StatefulWidget {
     required this.onTaskUpdated,
     required this.onTaskDeleted,
     required this.userId,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   
   @override
   _TaskUpdateState createState() => _TaskUpdateState();

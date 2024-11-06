@@ -82,7 +82,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
 
   Future<bool> _validateCurrentPassword() async {
     final senhaAtual = _senhaAtualController.text;
-    final url = Uri.parse('http://grupo04.duckdns.org:8080/user/${widget.userId}/checkPassword?currentPassword=$senhaAtual');
+    final url = Uri.parse('http://10.0.2.2:8080/user/${widget.userId}/checkPassword?currentPassword=$senhaAtual');
 
     try {
       final response = await http.post(
@@ -113,7 +113,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
         final telefone = _telefoneController.text;
         final novaSenha = _novaSenhaController.text;
 
-        final url = Uri.parse('http://grupo04.duckdns.org:8080/user/${widget.userId}');
+        final url = Uri.parse('http://10.0.2.2:8080/user/${widget.userId}');
 
         final Map<String, dynamic> dados = {
           'name': nome,
