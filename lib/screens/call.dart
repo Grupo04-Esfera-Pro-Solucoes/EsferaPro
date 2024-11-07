@@ -1,5 +1,5 @@
-import 'package:esferapro/screens/stacks/call_edit.dart';
 import 'package:flutter/material.dart';
+import 'package:esferapro/screens/stacks/call_edit.dart';
 import 'package:esferapro/screens/stacks/stack_calls.dart';
 import 'package:esferapro/service/call_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +17,11 @@ class _CallPageState extends State<CallPage> {
   String? errorMessage;
   int? userId;
   final TextEditingController searchController = TextEditingController();
+
+  int currentPage = 1;
+  int totalPages = 1;
+  int pageSize = 20;
+  bool hasMoreData = true;
 
   @override
   void initState() {
@@ -37,22 +42,51 @@ class _CallPageState extends State<CallPage> {
     });
   }
 
-  Future<void> _fetchCalls() async {
-    if (userId != null) {
-      try {
-        final data = await callService.fetchAllLeads(userId.toString(), 1);
-        setState(() {
-          calls = data;
-          isLoading = false;
-        });
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-          errorMessage = 'Erro ao carregar ligações';
-        });
-      }
+  Future<void> _nextPage() async {
+    if (hasMoreData) {
+      setState(() {
+        currentPage++;
+        isLoading = true;
+      });
+      await _fetchCalls();
     }
   }
+
+  Future<void> _previousPage() async {
+    if (currentPage > 1) {
+      setState(() {
+        currentPage--;
+        isLoading = true;
+      });
+      await _fetchCalls();
+    }
+  }
+
+  Future<void> _fetchCalls() async {
+  if (userId != null) {
+    try {
+      final data = await callService.fetchAllLeads(
+        userId.toString(),
+        currentPage,
+        size: pageSize,
+      );
+      setState(() {
+        calls = data;
+        isLoading = false;
+        if (data.length < pageSize) {
+          hasMoreData = false;
+        } else {
+          hasMoreData = true;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Erro ao carregar ligações';
+      });
+    }
+  }
+}
 
   Future<void> _searchCallsByName() async {
     if (userId != null && searchController.text.isNotEmpty) {
@@ -115,8 +149,11 @@ class _CallPageState extends State<CallPage> {
                             ? const Center(
                                 child: Text('Nenhuma ligação disponível!'))
                             : ListView.builder(
-                                itemCount: calls.length,
+                                itemCount: calls.length + 1,
                                 itemBuilder: (context, index) {
+                                  if (index == calls.length) {
+                                    return _buildPaginationControls();
+                                  }
                                   final callData = calls[index];
                                   return _buildCallTile(context, callData);
                                 },
@@ -148,6 +185,28 @@ class _CallPageState extends State<CallPage> {
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: isLoading || currentPage == 1 ? null : _previousPage,
+            color: currentPage == 1 ? Colors.grey : Colors.black,
+          ),
+          Text('Página $currentPage'),
+          IconButton(
+            icon: Icon(Icons.arrow_forward),
+            onPressed: isLoading || !hasMoreData ? null : _nextPage,
+            color: !hasMoreData ? Colors.grey : Colors.black,
+          ),
+        ],
+      ),
     );
   }
 
