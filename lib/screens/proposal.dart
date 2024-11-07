@@ -1,9 +1,9 @@
+import 'dart:io';
 import 'package:esferapro/screens/stacks/stack_proposal.dart';
+import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Proposal extends StatefulWidget {
   @override
@@ -11,35 +11,15 @@ class Proposal extends StatefulWidget {
 }
 
 class _ProposalState extends State<Proposal> {
+  final ProposalService proposalService = ProposalService();
   List<Map<String, dynamic>> proposals = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchProposals();
-  }
-
   Future<void> _fetchProposals() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
-
-    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
-
-    if (userId == null) {
-      _showErrorSnackBar('Usuário não autenticado.');
-      return;
-    }
-
     try {
-      final response = await http.get(Uri.parse('$baseUrl/proposal/all/$userId?page=0&size=20&sort=idProposal'));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['content'];
-        setState(() {
-          proposals = data.map((item) => item as Map<String, dynamic>).toList();
-        });
-      } else {
-        _showErrorSnackBar('Erro ao buscar propostas');
-      }
+      final proposalsData = await proposalService.fetchProposals();
+      setState(() {
+        proposals = proposalsData;
+      });
     } catch (e) {
       _showErrorSnackBar('Erro: $e');
     }
@@ -73,11 +53,11 @@ class _ProposalState extends State<Proposal> {
     final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}/${parsedDate.year}";
     return formattedDate;
   }
-  
+
   String _formatDayMonth(String date) {
-  final DateTime parsedDate = DateTime.parse(date);
-  final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}";
-  return formattedDate;
+    final DateTime parsedDate = DateTime.parse(date);
+    final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}";
+    return formattedDate;
   }
 
   @override
@@ -109,10 +89,10 @@ class _ProposalState extends State<Proposal> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProposalCadastro()),
+                  MaterialPageRoute(builder: (context) => StackProposalCadastro()),
                 );
               },
-              backgroundColor:  const Color.fromRGBO(101, 2, 212, 1),
+              backgroundColor: const Color.fromRGBO(101, 2, 212, 1),
               child: const Icon(Icons.add, color: Colors.white),
             ),
           ),
@@ -139,15 +119,14 @@ class _ProposalState extends State<Proposal> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
+                  borderSide: BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 filled: true,
-                fillColor: Colors.white, 
+                fillColor: Colors.white,
               ),
             ),
           ),
@@ -163,7 +142,7 @@ class _ProposalState extends State<Proposal> {
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(10.0),
@@ -190,7 +169,7 @@ class _ProposalState extends State<Proposal> {
           bottom: BorderSide(color: Colors.grey[300]!),
         ),
       ),
-      padding: const EdgeInsets.all(14.0), 
+      padding: const EdgeInsets.all(14.0),
       child: Row(
         children: [
           Expanded(
@@ -220,7 +199,12 @@ class _ProposalState extends State<Proposal> {
                 IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Adicione a lógica de edição aqui
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => StackProposalEdicao(proposalId: proposal['id']),
+                    ),
+                  );
                   },
                 ),
                 IconButton(
@@ -237,38 +221,125 @@ class _ProposalState extends State<Proposal> {
     );
   }
 
-  void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) {
-  final proposal = proposalData;
-  final client = proposal['idLead']?['idClient'];
-  final status = proposal['idStatusProposal'];
+  Future<void> _downloadFile(String fileUrl, String fileName) async {
+  try {
+    // Realizando a requisição GET para obter o arquivo
+    final response = await http.get(Uri.parse(fileUrl));
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Detalhes da Proposta:'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Status: ${status?['name'] ?? 'N/A'}'),
-              Text('Cliente: ${client?['name'] ?? 'N/A'}'),
-              Text('Data: ${proposal['proposalDate'] ?? 'N/A'}'),
-              Text('Valor: ${proposal['value']?.toString() ?? 'N/A'}'),
-              Text('Descrição: ${proposal['description'] ?? 'N/A'}'),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Fechar'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
+    if (response.statusCode == 200) {
+      // Obtém o diretório de documentos padrão do dispositivo
+      final directory = await getApplicationDocumentsDirectory();
+
+      // Define o caminho completo para salvar o arquivo
+      final filePath = '${directory.path}/$fileName.pdf';
+      final file = File(filePath);
+
+      await file.writeAsBytes(response.bodyBytes);
+
+      // Exibe uma mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Arquivo baixado e salvo com sucesso!'))
       );
-    },
-  );
+    } else {
+      // Exibe uma mensagem de erro se a requisição falhar
+      _showErrorSnackBar('Erro ao baixar o arquivo');
+    }
+  } catch (e) {
+    // Exibe uma mensagem de erro caso ocorra algum problema
+    _showErrorSnackBar('Erro: $e');
+  }
 }
+
+  void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) async {
+    final proposal = proposalData;
+    final client = proposal['idLead']?['idClient'];
+    final status = proposal['idStatusProposal'];
+    final fileUrl = proposal['fileUrl'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Center(
+            child: Text(
+              'Detalhes da Proposta',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow('Cliente:', client?['name'] ?? 'N/A'),
+                _buildDetailRow('Status:', status?['name'] ?? 'N/A'),
+                _buildDetailRow('Data:', _formatDate(proposal['proposalDate']) ?? 'N/A'),
+                _buildDetailRow('Valor:', 'R\$ ${proposal['value']?.toString() ?? 'N/A'}'),
+                _buildDetailRow('Descrição:', proposal['description'] ?? 'N/A'),
+                _buildDetailRow('Anexo:', fileUrl != null ? 'Clique para baixar' : 'Proposta sem anexo'),
+                if (fileUrl != null)
+                  TextButton(
+                    onPressed: () => _downloadFile(fileUrl, 'proposal_file'),
+                    child: Text(
+                      'Baixar Anexo',
+                      style: TextStyle(color: Color(0xff6502d4)),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: Color(0xff6502d4), width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                ),
+                child: const Text(
+                  'Fechar',
+                  style: TextStyle(color: Color(0xff6502d4), fontSize: 18),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  Widget _buildDetailRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text: '$title ',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 16,
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: const TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
 }
