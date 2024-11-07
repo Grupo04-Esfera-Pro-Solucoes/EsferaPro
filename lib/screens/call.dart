@@ -1,4 +1,4 @@
-import 'package:esferapro/widgets/call_dialog.dart';
+import 'package:esferapro/screens/stacks/call_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:esferapro/screens/stacks/stack_calls.dart';
 import 'package:esferapro/service/call_service.dart';
@@ -240,7 +240,49 @@ class _CallPageState extends State<CallPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: () => showCallDialog(context, callData),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CallEdit(
+                              callData: callData,
+                              onEdit: (updatedCallData) async {
+                                try {
+                                  updatedCallData['idLead'] =
+                                      callData['idLead'];
+                                  await callService.updateLead(updatedCallData);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar( content: Text('Lead Atualizado com sucesso')),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar( content: Text('Erro ao atualizar o lead')),
+                                  );
+                                }
+                              },
+                              onDelete: (String idLead) async {
+                                try {
+                                  // Exclua o lead aqui
+                                  await callService.deleteCall(idLead);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Lead excluído com sucesso!')),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Erro ao excluir o lead')),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ).then((_) {
+                          _fetchCalls();
+                        });
+                      },
                       icon: const Icon(Icons.edit, color: Colors.black),
                       padding: EdgeInsets.zero,
                     ),
@@ -342,42 +384,6 @@ class _CallPageState extends State<CallPage> {
           ],
         ),
       ),
-    );
-  }
-
-  void showCallDialog(BuildContext context, Map<String, dynamic> callData) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return CallDialog(
-          callData: callData,
-          onEdit: (updatedCallData) async {
-            try {
-              updatedCallData['idLead'] = callData['idLead'];
-              await callService.updateLead(updatedCallData);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Lead atualizado com sucesso!')),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erro ao atualizar o lead')),
-              );
-            }
-          },
-          onDelete: (String idLead) async {
-            try {
-              await callService.deleteCall(idLead);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Lead excluído com sucesso!')),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erro ao excluir o lead')),
-              );
-            }
-          },
-        );
-      },
     );
   }
 }
