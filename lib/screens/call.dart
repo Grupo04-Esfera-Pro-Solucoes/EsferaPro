@@ -197,13 +197,13 @@ class _CallPageState extends State<CallPage> {
           IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: isLoading || currentPage == 1 ? null : _previousPage,
-            color: currentPage == 1 ? Colors.grey : Colors.black,
+            color: currentPage == 1 ? Colors.grey : Color(0xFF6502D4),
           ),
           Text('Página $currentPage'),
           IconButton(
             icon: Icon(Icons.arrow_forward),
             onPressed: isLoading || !hasMoreData ? null : _nextPage,
-            color: !hasMoreData ? Colors.grey : Colors.black,
+            color: !hasMoreData ? Colors.grey : Color(0xFF6502D4),
           ),
         ],
       ),
