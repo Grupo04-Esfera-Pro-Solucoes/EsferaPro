@@ -180,96 +180,76 @@ class _CallPageState extends State<CallPage> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      color: const Color(0xFFEAECF0),
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const [
-          Expanded(
-            child: Column(
-              children: [
-                Text('Cliente', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
-            ),
+  return Container(
+    color: const Color(0xFFEAECF0),
+    padding: const EdgeInsets.symmetric(vertical: 10.0),
+    child: Row(
+      children: const [
+        Expanded(
+          flex: 2,
+          child: Center(
+            child: Text('Cliente', style: TextStyle(fontSize: 18)),
           ),
-          Expanded(
-            child: Column(
-              children: [
-                Text('Resultado', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
-            ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Center(
+            child: Text('Status', style: TextStyle(fontSize: 18)),
           ),
-          Expanded(
-            child: Column(
-              children: [
-                Text('Data     ', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
-            ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Center(
+            child: Text('Data', style: TextStyle(fontSize: 18)),
           ),
-          Expanded(
-            child: Column(
-              children: [
-                Text('Info        ', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
-            ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Center(
+            child: Text('Ações', style: TextStyle(fontSize: 18)),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
-  Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Text(
-                      callData['idClient']['name'] ?? 'Sem Nome',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
+  return Column(
+    children: [
+      Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  callData['idClient']['name'] ?? 'Sem Nome',
+                  textAlign: TextAlign.center,
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    _getResultIcon(callData['result']['result'] ?? 'N/A'),
-                  ],
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: _getResultIcon(callData['result']['result'] ?? 'N/A'),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  _formatDate(callData['date'] ?? '0000-00-00'),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Text(
-                      _formatDate(callData['date'] ?? '0000-00-00'),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            ),
+            Expanded(
+              flex: 2,
+              child: Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
                       onPressed: () {
@@ -280,15 +260,14 @@ class _CallPageState extends State<CallPage> {
                               callData: callData,
                               onEdit: (updatedCallData) async {
                                 try {
-                                  updatedCallData['idLead'] =
-                                      callData['idLead'];
+                                  updatedCallData['idLead'] = callData['idLead'];
                                   await callService.updateLead(updatedCallData);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar( content: Text('Lead Atualizado com sucesso')),
+                                    SnackBar(content: Text('Lead Atualizado com sucesso')),
                                   );
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar( content: Text('Erro ao atualizar o lead')),
+                                    SnackBar(content: Text('Erro ao atualizar o lead')),
                                   );
                                 }
                               },
@@ -296,15 +275,11 @@ class _CallPageState extends State<CallPage> {
                                 try {
                                   await callService.deleteCall(idLead);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('Lead excluído com sucesso!')),
+                                    SnackBar(content: Text('Lead excluído com sucesso!')),
                                   );
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('Erro ao excluir o lead')),
+                                    SnackBar(content: Text('Erro ao excluir o lead')),
                                   );
                                 }
                               },
@@ -325,17 +300,18 @@ class _CallPageState extends State<CallPage> {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const Divider(
-          color: Color(0xffD3D3D3),
-          thickness: 1.0,
-          height: 1.0,
-        ),
-      ],
-    );
-  }
+      ),
+      const Divider(
+        color: Color(0xffD3D3D3),
+        thickness: 1.0,
+        height: 1.0,
+      ),
+    ],
+  );
+}
 
   void _showCallDetails(
       BuildContext context, Map<String, dynamic> callData) async {
