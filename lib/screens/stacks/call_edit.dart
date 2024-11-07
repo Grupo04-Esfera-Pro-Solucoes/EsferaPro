@@ -177,7 +177,7 @@ class _CallEditState extends State<CallEdit> {
                   ),
                   SizedBox(width: 20),
                   Text(
-                    'Cadastro de Ligações',
+                    'Editor de ligação',
                     style: TextStyle(
                       fontSize: 22,
                       color: Colors.white,

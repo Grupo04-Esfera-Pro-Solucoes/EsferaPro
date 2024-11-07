@@ -16,6 +16,7 @@ class _CallPageState extends State<CallPage> {
   bool isLoading = true;
   String? errorMessage;
   int? userId;
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -48,6 +49,27 @@ class _CallPageState extends State<CallPage> {
         setState(() {
           isLoading = false;
           errorMessage = 'Erro ao carregar ligações';
+        });
+      }
+    }
+  }
+
+  Future<void> _searchCallsByName() async {
+    if (userId != null && searchController.text.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+      try {
+        final data = await callService.fetchLeadsByName(searchController.text, userId.toString());
+        setState(() {
+          calls = data;
+          isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Erro ao buscar leads';
         });
       }
     }
@@ -106,8 +128,6 @@ class _CallPageState extends State<CallPage> {
   }
 
   Widget _buildSearchBar() {
-    TextEditingController searchController = TextEditingController();
-
     return Container(
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -131,7 +151,7 @@ class _CallPageState extends State<CallPage> {
                   border: InputBorder.none,
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.search, color: Color(0xff6502d4)),
-                    onPressed: () {},
+                    onPressed: _searchCallsByName,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 20.0),
@@ -262,7 +282,6 @@ class _CallPageState extends State<CallPage> {
                               },
                               onDelete: (String idLead) async {
                                 try {
-                                  // Exclua o lead aqui
                                   await callService.deleteCall(idLead);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
