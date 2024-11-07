@@ -61,7 +61,8 @@ class _CallPageState extends State<CallPage> {
         errorMessage = null;
       });
       try {
-        final data = await callService.fetchLeadsByName(searchController.text, userId.toString());
+        final data = await callService.fetchLeadsByName(
+            searchController.text, userId.toString());
         setState(() {
           calls = data;
           isLoading = false;
@@ -91,7 +92,7 @@ class _CallPageState extends State<CallPage> {
       case 'Ocupado':
         return Icon(Icons.phone_callback, color: Colors.blue);
       default:
-        return Icon(Icons.help_outline, color: Colors.grey); 
+        return Icon(Icons.help_outline, color: Colors.grey);
     }
   }
 
@@ -132,6 +133,14 @@ class _CallPageState extends State<CallPage> {
             MaterialPageRoute(builder: (context) => StackCalls()),
           ).then((_) {
             _fetchCalls();
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Ligação cadastrada com sucesso!'),
+                backgroundColor: Color(0xFF6502D4),
+                duration: Duration(seconds: 3),
+              ),
+            );
           });
         },
         backgroundColor: const Color(0xFF6502D4),
@@ -180,138 +189,159 @@ class _CallPageState extends State<CallPage> {
   }
 
   Widget _buildHeader() {
-  return Container(
-    color: const Color(0xFFEAECF0),
-    padding: const EdgeInsets.symmetric(vertical: 10.0),
-    child: Row(
-      children: const [
-        Expanded(
-          flex: 2,
-          child: Center(
-            child: Text('Cliente', style: TextStyle(fontSize: 18)),
+    return Container(
+      color: const Color(0xFFEAECF0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        children: const [
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text('Cliente', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: Text('Status', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: Text('Data', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text('Ações', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Text(
+                    callData['idClient']['name'] ?? 'Sem Nome',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: _getResultIcon(callData['result']['result'] ?? 'N/A'),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: Text(
+                    _formatDate(callData['date'] ?? '0000-00-00'),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CallEdit(
+                                callData: callData,
+                                onEdit: (updatedCallData) async {
+                                  try {
+                                    updatedCallData['idLead'] =
+                                        callData['idLead'];
+                                    await callService
+                                        .updateLead(updatedCallData);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('Lead Atualizado com sucesso'),
+                                        backgroundColor: Color(0xFF6502D4),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('Erro ao atualizar o lead'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                                onDelete: (String idLead) async {
+                                  try {
+                                    await callService.deleteCall(idLead);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('Lead excluído com sucesso!'),
+                                        backgroundColor: Color(0xFF6502D4),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erro ao excluir o lead'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ).then((_) {
+                            _fetchCalls();
+                          });
+                        },
+                        icon: const Icon(Icons.edit, color: Colors.black),
+                        padding: EdgeInsets.zero,
+                      ),
+                      IconButton(
+                        onPressed: () => _showCallDetails(context, callData),
+                        icon: const Icon(Icons.visibility, color: Colors.black),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: Center(
-            child: Text('Status', style: TextStyle(fontSize: 18)),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Center(
-            child: Text('Data', style: TextStyle(fontSize: 18)),
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Center(
-            child: Text('Ações', style: TextStyle(fontSize: 18)),
-          ),
+        const Divider(
+          color: Color(0xffD3D3D3),
+          thickness: 1.0,
+          height: 1.0,
         ),
       ],
-    ),
-  );
-}
-
-Widget _buildCallTile(BuildContext context, Map<String, dynamic> callData) {
-  return Column(
-    children: [
-      Container(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Text(
-                  callData['idClient']['name'] ?? 'Sem Nome',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: _getResultIcon(callData['result']['result'] ?? 'N/A'),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  _formatDate(callData['date'] ?? '0000-00-00'),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CallEdit(
-                              callData: callData,
-                              onEdit: (updatedCallData) async {
-                                try {
-                                  updatedCallData['idLead'] = callData['idLead'];
-                                  await callService.updateLead(updatedCallData);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Lead Atualizado com sucesso')),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Erro ao atualizar o lead')),
-                                  );
-                                }
-                              },
-                              onDelete: (String idLead) async {
-                                try {
-                                  await callService.deleteCall(idLead);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Lead excluído com sucesso!')),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Erro ao excluir o lead')),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ).then((_) {
-                          _fetchCalls();
-                        });
-                      },
-                      icon: const Icon(Icons.edit, color: Colors.black),
-                      padding: EdgeInsets.zero,
-                    ),
-                    IconButton(
-                      onPressed: () => _showCallDetails(context, callData),
-                      icon: const Icon(Icons.visibility, color: Colors.black),
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      const Divider(
-        color: Color(0xffD3D3D3),
-        thickness: 1.0,
-        height: 1.0,
-      ),
-    ],
-  );
-}
+    );
+  }
 
   void _showCallDetails(
       BuildContext context, Map<String, dynamic> callData) async {

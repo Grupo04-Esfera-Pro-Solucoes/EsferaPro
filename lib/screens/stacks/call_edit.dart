@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/formatters/masked_input_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 
@@ -254,29 +255,63 @@ class _CallEditState extends State<CallEdit> {
               const SizedBox(height: 16),
               _buildTitle('Data'),
               const SizedBox(height: 5),
-              _buildHalfWidthTextField(
-                controller: dateController,
-                hintText: 'dd/MM/yyyy',
-                readOnly: false,
+              GestureDetector(
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2010),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    String formattedDate =
+                        DateFormat('dd/MM/yyyy').format(pickedDate);
+                    dateController.text = formattedDate;
+                  }
+                },
+                child: AbsorbPointer(
+                  child: _buildHalfWidthTextField(
+                    controller: dateController,
+                    hintText: '00/00/0000',
+                    keyboardType: TextInputType.datetime,
+                    readOnly: false,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              _buildTitle('Hora e Duração'),
-              const SizedBox(height: 5),
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField(
-                      controller: timeController,
-                      hintText: 'Hora',
-                      readOnly: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitle('Hora'),
+                        const SizedBox(height: 5),
+                        _buildTextField(
+                          controller: timeController,
+                          hintText: '--:--',
+                          inputFormatters: [MaskedInputFormatter('00:00')],
+                          keyboardType: TextInputType.datetime,
+                          readOnly: false,
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildTextField(
-                      controller: durationController,
-                      hintText: 'Duração',
-                      readOnly: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitle('Duração'),
+                        const SizedBox(height: 5),
+                        _buildTextField(
+                          controller: durationController,
+                          hintText: '--:--',
+                          inputFormatters: [MaskedInputFormatter('00:00')],
+                          keyboardType: TextInputType.datetime,
+                          readOnly: false,
+                        ),
+                      ],
                     ),
                   ),
                 ],
