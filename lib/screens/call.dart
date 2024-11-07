@@ -80,6 +80,21 @@ class _CallPageState extends State<CallPage> {
     return DateFormat('dd/MM').format(parsedDate);
   }
 
+  Icon _getResultIcon(String result) {
+    switch (result) {
+      case 'Atendido':
+        return Icon(Icons.check_circle, color: Colors.green);
+      case 'Desligado':
+        return Icon(Icons.call_end, color: Colors.red);
+      case 'Cx. Postal':
+        return Icon(Icons.voicemail, color: Colors.orange);
+      case 'Ocupado':
+        return Icon(Icons.phone_callback, color: Colors.blue);
+      default:
+        return Icon(Icons.help_outline, color: Colors.grey); 
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -231,10 +246,7 @@ class _CallPageState extends State<CallPage> {
                 flex: 1,
                 child: Column(
                   children: [
-                    Text(
-                      callData['result']['result'] ?? 'Sem Resultado',
-                      textAlign: TextAlign.center,
-                    ),
+                    _getResultIcon(callData['result']['result'] ?? 'N/A'),
                   ],
                 ),
               ),
