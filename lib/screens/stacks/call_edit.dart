@@ -72,7 +72,7 @@ class _CallEditState extends State<CallEdit> {
     required String hintText,
     int maxLines = 1,
     List<TextInputFormatter>? inputFormatters,
-    TextInputType? keyboardType, 
+    TextInputType? keyboardType,
     required bool readOnly,
   }) {
     return Container(
@@ -159,7 +159,7 @@ class _CallEditState extends State<CallEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       backgroundColor: Colors.white,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xff6502d4),
         automaticallyImplyLeading: false,
@@ -221,20 +221,23 @@ class _CallEditState extends State<CallEdit> {
               const SizedBox(height: 5),
               DropdownButtonFormField<int>(
                 value: selectedResultId,
-                decoration: const InputDecoration(
-                  labelText: 'Resultado',
-                  labelStyle: TextStyle(color: Color(0xFF6502D4)),
+                decoration: InputDecoration(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6502D4)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6502D4)),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6502D4)),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.black),
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.black),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF0F0F7),
                 ),
                 items: const [
                   DropdownMenuItem(value: 1, child: Text('Atendido')),
@@ -307,8 +310,8 @@ class _CallEditState extends State<CallEdit> {
                           'idLead': widget.callData['id'],
                           'contact': contactController.text,
                           'date': DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                              .format(
-                                  DateFormat('dd/MM/yyyy').parse(dateController.text)),
+                              .format(DateFormat('dd/MM/yyyy')
+                                  .parse(dateController.text)),
                           'duration': durationController.text,
                           'description': descriptionController.text,
                           'result': {
@@ -327,40 +330,42 @@ class _CallEditState extends State<CallEdit> {
               ),
               const SizedBox(height: 16),
               Center(
-  child: ElevatedButton(
-    onPressed: () async {
-      await widget.onDelete(widget.callData['idLead'].toString());
-      Navigator.pop(context);
-    },
-    style: ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10), 
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      backgroundColor: const Color(0xFF6502D4), // Cor roxa
-      elevation: 2,
-      fixedSize: Size(MediaQuery.of(context).size.width * 0.5, 50),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: 28,
-        ),
-        SizedBox(width: 10),
-        Text(
-          'Excluir',
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.white,
-          ),
-        ),
-      ],
-    ),
-  ),
-)
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await widget.onDelete(widget.callData['idLead'].toString());
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: const Color(0xFF6502D4),
+                    elevation: 2,
+                    fixedSize:
+                        Size(MediaQuery.of(context).size.width * 0.5, 50),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Excluir',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
