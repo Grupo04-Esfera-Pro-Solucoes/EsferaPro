@@ -1,4 +1,5 @@
-import 'package:esferapro/screens/stacks/stack_proposal.dart';
+import 'package:esferapro/screens/stacks/stack_proposalCadastro.dart';
+import 'package:esferapro/screens/stacks/stack_proposalEdit.dart';
 import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -154,7 +155,7 @@ class _ProposalState extends State<Proposal> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: const Color.fromRGBO(101, 2, 212, 1)),
+            icon: const Icon(Icons.search, color: Color.fromRGBO(101, 2, 212, 1)),
             onPressed: () {
               // Aqui você pode implementar a lógica de busca usando o texto de searchController
               String searchQuery = searchController.text;
@@ -184,6 +185,7 @@ class _ProposalState extends State<Proposal> {
   Widget _buildProposalItem(Map<String, dynamic> proposal) {
     final client = proposal['idLead']?['idClient'];
     final statusID = proposal['idStatusProposal']?['idStatusProposal'] ?? 0;
+    final proposalId = proposal['idProposal'];
 
     return Container(
       decoration: BoxDecoration(
@@ -222,12 +224,12 @@ class _ProposalState extends State<Proposal> {
                 IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => StackProposalEdicao(proposalId: proposal['id']),
-                    ),
-                  );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StackProposalEdicao(proposalId: proposalId),
+                      ),
+                    );
                   },
                 ),
                 IconButton(
@@ -300,7 +302,7 @@ void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalDat
               children: [
                 _buildDetailRow('Cliente:', client?['name'] ?? 'N/A'),
                 _buildDetailRow('Status:', status?['name'] ?? 'N/A'),
-                _buildDetailRow('Data:', _formatDate(proposal['proposalDate']) ?? 'N/A'),
+                _buildDetailRow('Data:', _formatDate(proposal['proposalDate'])),
                 _buildDetailRow('Valor:', 'R\$ ${proposal['value']?.toString() ?? 'N/A'}'),
                 _buildDetailRow('Descrição:', proposal['description'] ?? 'N/A'),
                 _buildDetailRow('Anexo:', fileUrl != null ? 'Clique para baixar' : 'Proposta sem anexo'),
