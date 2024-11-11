@@ -37,7 +37,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   void _updateSelectedIndex(Widget page) {
-    if (page is Dashboard) {
+    if (page is MainScreen) {
       setState(() {
         _selectedIndex = 0;
       });

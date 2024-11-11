@@ -71,7 +71,7 @@ class ProposalService {
         throw Exception('Usuário não autenticado.');
       }
 
-      final url = Uri.parse('$baseUrl/proposal/all/$userId?page=0&size=20&sort=idProposal');
+      final url = Uri.parse('$baseUrl/proposal/all/$userId');
 
       try {
         final response = await http.get(url);

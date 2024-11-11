@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:esferapro/screens/stacks/stack_proposal.dart';
 import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Proposal extends StatefulWidget {
   @override
@@ -13,24 +11,45 @@ class Proposal extends StatefulWidget {
 class _ProposalState extends State<Proposal> {
   final ProposalService proposalService = ProposalService();
   List<Map<String, dynamic>> proposals = [];
+  bool isLoading = true;
+  String? errorMessage;
+  int? userId;
 
-  Future<void> _fetchProposals() async {
-    try {
-      final proposalsData = await proposalService.fetchProposals();
-      setState(() {
-        proposals = proposalsData;
-      });
-    } catch (e) {
-      _showErrorSnackBar('Erro: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
   }
 
-  void _showErrorSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  Future<void> _loadUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getInt('userId');
+      if (userId != null) {
+        _fetchProposals();
+      } else {
+        isLoading = false;
+        errorMessage = 'Usuário não encontrado';
+      }
+    });
+  }
+
+  Future<void> _fetchProposals() async {
+    if (userId != null) {
+      try {
+        final proposalsData = await proposalService.fetchProposals();
+
+        setState(() {
+          proposals = proposalsData;
+          isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Erro ao carregar propostas';
+        });
+      }
+    }
   }
 
   Icon _getStatusIcon(int statusID) {
@@ -70,14 +89,18 @@ class _ProposalState extends State<Proposal> {
               _buildSearchBar(),
               _buildHeader(),
               Expanded(
-                child: proposals.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+              child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorMessage != null
+                  ? Center(child: Text(errorMessage!))
+                  : proposals.isEmpty
+                    ? const Center(child: Text('Nenhuma proposta disponível!'))
                     : ListView.builder(
-                        itemCount: proposals.length,
-                        itemBuilder: (context, index) {
-                          final proposal = proposals[index];
-                          return _buildProposalItem(proposal);
-                        },
+                      itemCount: proposals.length,
+                      itemBuilder: (context, index) {
+                        final proposal = proposals[index];
+                        return _buildProposalItem(proposal);
+                      },
                       ),
               ),
             ],
@@ -221,36 +244,36 @@ class _ProposalState extends State<Proposal> {
     );
   }
 
-  Future<void> _downloadFile(String fileUrl, String fileName) async {
-  try {
-    // Realizando a requisição GET para obter o arquivo
-    final response = await http.get(Uri.parse(fileUrl));
+//   Future<void> _downloadFile(String fileUrl, String fileName) async {
+//   try {
+//     // Realizando a requisição GET para obter o arquivo
+//     final response = await http.get(Uri.parse(fileUrl));
 
-    if (response.statusCode == 200) {
-      // Obtém o diretório de documentos padrão do dispositivo
-      final directory = await getApplicationDocumentsDirectory();
+//     if (response.statusCode == 200) {
+//       // Obtém o diretório de documentos padrão do dispositivo
+//       final directory = await getApplicationDocumentsDirectory();
 
-      // Define o caminho completo para salvar o arquivo
-      final filePath = '${directory.path}/$fileName.pdf';
-      final file = File(filePath);
+//       // Define o caminho completo para salvar o arquivo
+//       final filePath = '${directory.path}/$fileName.pdf';
+//       final file = File(filePath);
 
-      await file.writeAsBytes(response.bodyBytes);
+//       await file.writeAsBytes(response.bodyBytes);
 
-      // Exibe uma mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Arquivo baixado e salvo com sucesso!'))
-      );
-    } else {
-      // Exibe uma mensagem de erro se a requisição falhar
-      _showErrorSnackBar('Erro ao baixar o arquivo');
-    }
-  } catch (e) {
-    // Exibe uma mensagem de erro caso ocorra algum problema
-    _showErrorSnackBar('Erro: $e');
-  }
-}
+//       // Exibe uma mensagem de sucesso
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('Arquivo baixado e salvo com sucesso!'))
+//       );
+//     } else {
+//       // Exibe uma mensagem de erro se a requisição falhar
+//       _showErrorSnackBar('Erro ao baixar o arquivo');
+//     }
+//   } catch (e) {
+//     // Exibe uma mensagem de erro caso ocorra algum problema
+//     _showErrorSnackBar('Erro: $e');
+//   }
+// }
 
-  void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) async {
+void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) async {
     final proposal = proposalData;
     final client = proposal['idLead']?['idClient'];
     final status = proposal['idStatusProposal'];
@@ -283,7 +306,7 @@ class _ProposalState extends State<Proposal> {
                 _buildDetailRow('Anexo:', fileUrl != null ? 'Clique para baixar' : 'Proposta sem anexo'),
                 if (fileUrl != null)
                   TextButton(
-                    onPressed: () => _downloadFile(fileUrl, 'proposal_file'),
+                    onPressed: () => (),//_downloadFile(fileUrl, 'proposal_file'),
                     child: Text(
                       'Baixar Anexo',
                       style: TextStyle(color: Color(0xff6502d4)),
@@ -314,7 +337,7 @@ class _ProposalState extends State<Proposal> {
     );
   }
   
-  Widget _buildDetailRow(String title, String value) {
+Widget _buildDetailRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: RichText(
