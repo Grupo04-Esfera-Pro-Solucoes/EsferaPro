@@ -18,18 +18,19 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
           icon: const Icon(Icons.account_circle),
           iconSize: 30,
           onPressed: () async {
-            final SharedPreferences prefs = await SharedPreferences.getInstance();
-int userId = prefs.getInt('userId') ?? 0; 
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            int userId = prefs.getInt('userId') ?? 0;
 
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => ConfigurationPage(userId: userId),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ConfigurationPage(userId: userId),
               ),
             );
-                    },
+          },
         ),
-       const SizedBox(width: 10),
+      const SizedBox(width: 10),
       IconButton(
         icon: const Icon(Icons.logout),
         iconSize: 30,

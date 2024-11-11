@@ -45,6 +45,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
       setState(() {
         _selectedIndex = 1;
       });
+      } else if (page is CallPage) {
+      setState(() {
+        _selectedIndex = 2;
+      });
+      } else if (page is Proposal) {
+      setState(() {
+        _selectedIndex = 3;
+      });
     } else if (page is TasksPage) {
       setState(() {
         _selectedIndex = 4;

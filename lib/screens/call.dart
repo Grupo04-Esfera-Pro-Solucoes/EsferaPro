@@ -1,4 +1,4 @@
-import 'package:esferapro/widgets/call_dialog.dart';
+import 'package:esferapro/screens/stacks/call_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:esferapro/screens/stacks/stack_calls.dart';
 import 'package:esferapro/service/call_service.dart';
@@ -39,8 +39,7 @@ class _CallPageState extends State<CallPage> {
   Future<void> _fetchCalls() async {
     if (userId != null) {
       try {
-        final data = await callService.fetchAllLeads(userId.toString());
-
+        final data = await callService.fetchAllLeads(userId.toString(), 1);
         setState(() {
           calls = data;
           isLoading = false;
@@ -51,29 +50,6 @@ class _CallPageState extends State<CallPage> {
           errorMessage = 'Erro ao carregar ligações';
         });
       }
-    }
-  }
-
-  Future<Map<String, dynamic>?> _fetchLeadResultById(
-      String idLeadResult) async {
-    try {
-      return await callService.fetchLeadResultById(idLeadResult);
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao buscar resultado do lead';
-      });
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> _fetchClientById(String idClient) async {
-    try {
-      return await callService.fetchClientById(idClient);
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Erro ao buscar cliente';
-      });
-      return null;
     }
   }
 
@@ -117,7 +93,9 @@ class _CallPageState extends State<CallPage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => StackCalls()),
-          );
+          ).then((_) {
+            _fetchCalls();
+          });
         },
         backgroundColor: const Color(0xFF6502D4),
         foregroundColor: Colors.white,
@@ -262,7 +240,49 @@ class _CallPageState extends State<CallPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: () => _showCallDialog(context, callData),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CallEdit(
+                              callData: callData,
+                              onEdit: (updatedCallData) async {
+                                try {
+                                  updatedCallData['idLead'] =
+                                      callData['idLead'];
+                                  await callService.updateLead(updatedCallData);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar( content: Text('Lead Atualizado com sucesso')),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar( content: Text('Erro ao atualizar o lead')),
+                                  );
+                                }
+                              },
+                              onDelete: (String idLead) async {
+                                try {
+                                  // Exclua o lead aqui
+                                  await callService.deleteCall(idLead);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Lead excluído com sucesso!')),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Erro ao excluir o lead')),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ).then((_) {
+                          _fetchCalls();
+                        });
+                      },
                       icon: const Icon(Icons.edit, color: Colors.black),
                       padding: EdgeInsets.zero,
                     ),
@@ -286,7 +306,8 @@ class _CallPageState extends State<CallPage> {
     );
   }
 
-  void _showCallDetails(BuildContext context, Map<String, dynamic> callData) async {
+  void _showCallDetails(
+      BuildContext context, Map<String, dynamic> callData) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -305,8 +326,10 @@ class _CallPageState extends State<CallPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailRow('Resultado:', callData['result']['result'] ?? 'N/A'),
-                _buildDetailRow('Data:', _formatDate(callData['date'] ?? '0000-00-00')),
+                _buildDetailRow(
+                    'Resultado:', callData['result']['result'] ?? 'N/A'),
+                _buildDetailRow(
+                    'Data:', _formatDate(callData['date'] ?? '0000-00-00')),
                 _buildDetailRow('Hora:', callData['callTime'] ?? 'N/A'),
                 _buildDetailRow('Duração:', callData['duration'] ?? 'N/A'),
                 _buildDetailRow('Descrição:', callData['description'] ?? 'N/A'),
@@ -321,7 +344,8 @@ class _CallPageState extends State<CallPage> {
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.white,
                   side: BorderSide(color: Color(0xff6502d4), width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
                 ),
                 child: const Text(
                   'Fechar',
@@ -360,31 +384,6 @@ class _CallPageState extends State<CallPage> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showCallDialog(BuildContext context, Map<String, dynamic> callData) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CallDialog(
-          callData: callData,
-          onEdit: (updatedCallData) {
-            setState(() {
-              final index =
-                  calls.indexWhere((call) => call['id'] == callData['id']);
-              if (index != -1) {
-                calls[index] = {...calls[index], ...updatedCallData};
-              }
-            });
-          },
-          onDelete: () {
-            setState(() {
-              calls.removeWhere((call) => call['id'] == callData['id']);
-            });
-          },
-        );
-      },
     );
   }
 }
