@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -29,13 +28,6 @@ class CallService {
         'idClient': idClient,
       },
     };
-
-    debugPrint('Dados enviados para postNewCall: ${jsonEncode(callData)}');
-
-    debugPrint('Dados enviados para postNewCall: ${jsonEncode(callData)}');
-
-    debugPrint('Dados enviados para postNewCall: ${jsonEncode(callData)}');
-
     try {
       final response = await http.post(
         url,
@@ -88,9 +80,9 @@ class CallService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchAllLeads(String userId, int page) async {
+  Future<List<Map<String, dynamic>>> fetchAllLeads(String userId, int page, {int size = 20}) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/lead/all/$userId?page=$page'),
+      Uri.parse('$baseUrl/lead/all/$userId?page=$page&size=$size'),
     );
 
     if (response.statusCode == 200) {

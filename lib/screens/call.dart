@@ -1,5 +1,5 @@
-import 'package:esferapro/screens/stacks/call_edit.dart';
 import 'package:flutter/material.dart';
+import 'package:esferapro/screens/stacks/call_edit.dart';
 import 'package:esferapro/screens/stacks/stack_calls.dart';
 import 'package:esferapro/service/call_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +16,12 @@ class _CallPageState extends State<CallPage> {
   bool isLoading = true;
   String? errorMessage;
   int? userId;
+  final TextEditingController searchController = TextEditingController();
+
+  int currentPage = 1;
+  int totalPages = 1;
+  int pageSize = 20;
+  bool hasMoreData = true;
 
   @override
   void initState() {
@@ -36,10 +42,61 @@ class _CallPageState extends State<CallPage> {
     });
   }
 
+  Future<void> _nextPage() async {
+    if (hasMoreData) {
+      setState(() {
+        currentPage++;
+        isLoading = true;
+      });
+      await _fetchCalls();
+    }
+  }
+
+  Future<void> _previousPage() async {
+    if (currentPage > 1) {
+      setState(() {
+        currentPage--;
+        isLoading = true;
+      });
+      await _fetchCalls();
+    }
+  }
+
   Future<void> _fetchCalls() async {
-    if (userId != null) {
+  if (userId != null) {
+    try {
+      final data = await callService.fetchAllLeads(
+        userId.toString(),
+        currentPage,
+        size: pageSize,
+      );
+      setState(() {
+        calls = data;
+        isLoading = false;
+        if (data.length < pageSize) {
+          hasMoreData = false;
+        } else {
+          hasMoreData = true;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Erro ao carregar ligações';
+      });
+    }
+  }
+}
+
+  Future<void> _searchCallsByName() async {
+    if (userId != null && searchController.text.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
       try {
-        final data = await callService.fetchAllLeads(userId.toString(), 1);
+        final data = await callService.fetchLeadsByName(
+            searchController.text, userId.toString());
         setState(() {
           calls = data;
           isLoading = false;
@@ -47,7 +104,7 @@ class _CallPageState extends State<CallPage> {
       } catch (e) {
         setState(() {
           isLoading = false;
-          errorMessage = 'Erro ao carregar ligações';
+          errorMessage = 'Erro ao buscar leads';
         });
       }
     }
@@ -56,6 +113,21 @@ class _CallPageState extends State<CallPage> {
   String _formatDate(String date) {
     DateTime parsedDate = DateTime.parse(date);
     return DateFormat('dd/MM').format(parsedDate);
+  }
+
+  Icon _getResultIcon(String result) {
+    switch (result) {
+      case 'Atendido':
+        return Icon(Icons.check_circle, color: Colors.green);
+      case 'Desligado':
+        return Icon(Icons.call_end, color: Colors.red);
+      case 'Cx. Postal':
+        return Icon(Icons.voicemail, color: Colors.orange);
+      case 'Ocupado':
+        return Icon(Icons.phone_callback, color: Colors.blue);
+      default:
+        return Icon(Icons.help_outline, color: Colors.grey);
+    }
   }
 
   @override
@@ -77,8 +149,11 @@ class _CallPageState extends State<CallPage> {
                             ? const Center(
                                 child: Text('Nenhuma ligação disponível!'))
                             : ListView.builder(
-                                itemCount: calls.length,
+                                itemCount: calls.length + 1,
                                 itemBuilder: (context, index) {
+                                  if (index == calls.length) {
+                                    return _buildPaginationControls();
+                                  }
                                   final callData = calls[index];
                                   return _buildCallTile(context, callData);
                                 },
@@ -95,6 +170,13 @@ class _CallPageState extends State<CallPage> {
             MaterialPageRoute(builder: (context) => StackCalls()),
           ).then((_) {
             _fetchCalls();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Ligação cadastrada com sucesso!'),
+                backgroundColor: Color(0xFF6502D4),
+                duration: Duration(seconds: 3),
+              ),
+            );
           });
         },
         backgroundColor: const Color(0xFF6502D4),
@@ -105,9 +187,29 @@ class _CallPageState extends State<CallPage> {
     );
   }
 
-  Widget _buildSearchBar() {
-    TextEditingController searchController = TextEditingController();
+  Widget _buildPaginationControls() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: isLoading || currentPage == 1 ? null : _previousPage,
+            color: currentPage == 1 ? Colors.grey : Color(0xFF6502D4),
+          ),
+          Text('Página $currentPage'),
+          IconButton(
+            icon: Icon(Icons.arrow_forward),
+            onPressed: isLoading || !hasMoreData ? null : _nextPage,
+            color: !hasMoreData ? Colors.grey : Color(0xFF6502D4),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildSearchBar() {
     return Container(
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -131,7 +233,7 @@ class _CallPageState extends State<CallPage> {
                   border: InputBorder.none,
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.search, color: Color(0xff6502d4)),
-                    onPressed: () {},
+                    onPressed: _searchCallsByName,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 20.0),
@@ -149,38 +251,29 @@ class _CallPageState extends State<CallPage> {
       color: const Color(0xFFEAECF0),
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: const [
           Expanded(
-            child: Column(
-              children: [
-                Text('Cliente', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
+            flex: 2,
+            child: Center(
+              child: Text('Cliente', style: TextStyle(fontSize: 18)),
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-                Text('Resultado', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
+            flex: 1,
+            child: Center(
+              child: Text('Status', style: TextStyle(fontSize: 18)),
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-                Text('Data     ', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
+            flex: 1,
+            child: Center(
+              child: Text('Data', style: TextStyle(fontSize: 18)),
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-                Text('Info        ', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 4),
-              ],
+            flex: 2,
+            child: Center(
+              child: Text('Ações', style: TextStyle(fontSize: 18)),
             ),
           ),
         ],
@@ -194,104 +287,107 @@ class _CallPageState extends State<CallPage> {
         Container(
           padding: const EdgeInsets.all(8.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Text(
-                      callData['idClient']['name'] ?? 'Sem Nome',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                flex: 2,
+                child: Center(
+                  child: Text(
+                    callData['idClient']['name'] ?? 'Sem Nome',
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
               Expanded(
                 flex: 1,
-                child: Column(
-                  children: [
-                    Text(
-                      callData['result']['result'] ?? 'Sem Resultado',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                child: Center(
+                  child: _getResultIcon(callData['result']['result'] ?? 'N/A'),
                 ),
               ),
               Expanded(
                 flex: 1,
-                child: Column(
-                  children: [
-                    Text(
-                      _formatDate(callData['date'] ?? '0000-00-00'),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                child: Center(
+                  child: Text(
+                    _formatDate(callData['date'] ?? '0000-00-00'),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CallEdit(
-                              callData: callData,
-                              onEdit: (updatedCallData) async {
-                                try {
-                                  updatedCallData['idLead'] =
-                                      callData['idLead'];
-                                  await callService.updateLead(updatedCallData);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar( content: Text('Lead Atualizado com sucesso')),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar( content: Text('Erro ao atualizar o lead')),
-                                  );
-                                }
-                              },
-                              onDelete: (String idLead) async {
-                                try {
-                                  // Exclua o lead aqui
-                                  await callService.deleteCall(idLead);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CallEdit(
+                                callData: callData,
+                                onEdit: (updatedCallData) async {
+                                  try {
+                                    updatedCallData['idLead'] =
+                                        callData['idLead'];
+                                    await callService
+                                        .updateLead(updatedCallData);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
                                         content:
-                                            Text('Lead excluído com sucesso!')),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                            Text('Lead Atualizado com sucesso'),
+                                        backgroundColor: Color(0xFF6502D4),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
                                         content:
-                                            Text('Erro ao excluir o lead')),
-                                  );
-                                }
-                              },
+                                            Text('Erro ao atualizar o lead'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                                onDelete: (String idLead) async {
+                                  try {
+                                    await callService.deleteCall(idLead);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text('Lead excluído com sucesso!'),
+                                        backgroundColor: Color(0xFF6502D4),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erro ao excluir o lead'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             ),
-                          ),
-                        ).then((_) {
-                          _fetchCalls();
-                        });
-                      },
-                      icon: const Icon(Icons.edit, color: Colors.black),
-                      padding: EdgeInsets.zero,
-                    ),
-                    IconButton(
-                      onPressed: () => _showCallDetails(context, callData),
-                      icon: const Icon(Icons.visibility, color: Colors.black),
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
+                          ).then((_) {
+                            _fetchCalls();
+                          });
+                        },
+                        icon: const Icon(Icons.edit, color: Colors.black),
+                        padding: EdgeInsets.zero,
+                      ),
+                      IconButton(
+                        onPressed: () => _showCallDetails(context, callData),
+                        icon: const Icon(Icons.visibility, color: Colors.black),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+
                 ),
               ),
             ],
