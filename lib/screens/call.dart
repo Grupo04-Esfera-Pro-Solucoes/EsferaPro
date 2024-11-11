@@ -170,7 +170,6 @@ class _CallPageState extends State<CallPage> {
             MaterialPageRoute(builder: (context) => StackCalls()),
           ).then((_) {
             _fetchCalls();
-
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Ligação cadastrada com sucesso!'),
@@ -388,6 +387,7 @@ class _CallPageState extends State<CallPage> {
                       ),
                     ],
                   ),
+
                 ),
               ),
             ],

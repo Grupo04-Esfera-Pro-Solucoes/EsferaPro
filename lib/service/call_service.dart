@@ -28,7 +28,6 @@ class CallService {
         'idClient': idClient,
       },
     };
-
     try {
       final response = await http.post(
         url,
