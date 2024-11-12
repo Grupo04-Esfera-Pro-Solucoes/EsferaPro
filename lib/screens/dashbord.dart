@@ -23,6 +23,7 @@ class _DashboardState extends State<Dashboard> {
   Map<String, dynamic> leadMonthData = {};
   Map<String, dynamic> proposalMonthData = {};
   bool isLoading = true;
+  double totalFaturamento = 0.0;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _DashboardState extends State<Dashboard> {
       userId = prefs.getInt('userId')!;
       _fetchDashboardData();
       _fetchProposalsData();
+      _fetchFaturamentoData();
       _fetchTasks();
     });
   }
@@ -67,6 +69,18 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  Future<void> _fetchFaturamentoData() async {
+    setState(() {
+      isLoading = true;
+    });
+    final faturamentoDataResult =
+        await _dashboardService.getFaturamento(userId.toString());
+    setState(() {
+      totalFaturamento = faturamentoDataResult['totalFaturamento'] ?? 0.0;
+      isLoading = false;
+    });
+  }
+
   Future<void> _fetchTasks() async {
     List<Task> fetchedTasks = await _taskService.fetchTasks(userId);
     setState(() {
@@ -89,7 +103,7 @@ class _DashboardState extends State<Dashboard> {
     return data['leadCount']?.reduce((a, b) => a + b) ?? 0;
   }
 
-   int getTotalProposals() {
+  int getTotalProposals() {
     return proposalMonthData['proposalCount']?.reduce((a, b) => a + b) ?? 0;
   }
 
@@ -228,44 +242,33 @@ class _DashboardState extends State<Dashboard> {
               ),
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Text(
                       'Faturamento Mensal',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Color(0xFF6502D4),
                       ),
                     ),
-                    Text(
-                      'R\$ 1.000,00',
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.arrow_upward,
-                          color: Colors.green,
-                          size: 16,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          '15% Mês anterior',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
+                    isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF6502D4),
+                            ),
+                          )
+                        : Text(
+                            'R\$ ${totalFaturamento.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 60,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),

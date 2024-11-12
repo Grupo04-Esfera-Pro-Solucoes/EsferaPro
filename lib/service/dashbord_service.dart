@@ -12,8 +12,7 @@ class DashboardService {
     });
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data;
+      return json.decode(response.body);
     } else {
       throw Exception('Falha ao carregar');
     }
@@ -26,8 +25,7 @@ class DashboardService {
     });
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data;
+      return json.decode(response.body);
     } else {
       throw Exception('Falha ao carregar');
     }
@@ -41,10 +39,38 @@ class DashboardService {
     });
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data;
+      return json.decode(response.body);
     } else {
       throw Exception('Falha ao carregar');
+    }
+  }
+
+  Future<Map<String, dynamic>> getFaturamento(String userId) async {
+    final url = Uri.parse('$baseUrl/proposal/faturamento/$userId');
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+    });
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Falha ao carregar faturamento');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchProposalStatistics(
+      String userId, String period) async {
+    final url =
+        Uri.parse('$baseUrl/proposal/statistics/$userId?period=$period');
+
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+    });
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Falha ao carregar as estatísticas de propostas');
     }
   }
 }
