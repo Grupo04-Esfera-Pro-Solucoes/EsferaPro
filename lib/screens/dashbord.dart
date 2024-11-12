@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/task_model.dart';
 import '../service/task_service.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../service/dashbord_service.dart';
 
 enum TaskStatus { todo, inProgress, done }
 
@@ -13,9 +14,13 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final TaskService _taskService = TaskService();
+  final DashboardService _dashboardService = DashboardService();
   List<Task> tasks = [];
   TaskStatus selectedStatus = TaskStatus.todo;
   late int userId;
+  bool showType1 = true;
+  Map<String, dynamic> leadWeekData = {};
+  Map<String, dynamic> leadMonthData = {};
 
   @override
   void initState() {
@@ -27,7 +32,19 @@ class _DashboardState extends State<Dashboard> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getInt('userId')!;
+      _fetchDashboardData();
       _fetchTasks();
+    });
+  }
+
+  Future<void> _fetchDashboardData() async {
+    final leadWeekDataResult =
+        await _dashboardService.getLeadsByDayOfTheWeek(userId.toString());
+    final leadMonthDataResult =
+        await _dashboardService.getLeadsByDayOfTheMonth(userId.toString());
+    setState(() {
+      leadWeekData = leadWeekDataResult;
+      leadMonthData = leadMonthDataResult;
     });
   }
 
@@ -48,98 +65,6 @@ class _DashboardState extends State<Dashboard> {
     }).toList();
   }
 
-  Widget _buildTaskCard(Task task) {
-    IconData statusIcon;
-    switch (task.status) {
-      case 'todo':
-        statusIcon = Icons.check_box_outline_blank;
-        break;
-      case 'inProgress':
-        statusIcon = Icons.sync;
-        break;
-      case 'done':
-        statusIcon = Icons.check_circle;
-        break;
-      default:
-        statusIcon = Icons.help;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  task.description.isNotEmpty ? task.description : 'Sem descrição',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  task.getFormattedDueDate(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Icon(
-            statusIcon,
-            color: const Color(0xFF6502D4),
-            size: 30,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryButton(String title, TaskStatus status) {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          selectedStatus = status;
-        });
-      },
-      child: Text(
-        title,
-        style: TextStyle(
-          color: selectedStatus == status ? Colors.white : Colors.white70,
-          fontSize: 16,
-          fontWeight: selectedStatus == status ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,50 +78,89 @@ class _DashboardState extends State<Dashboard> {
               children: [
                 Expanded(
                   child: Container(
-                    height: 150,
-                    margin: const EdgeInsets.only(right: 8.0),
+                    margin: const EdgeInsets.only(right: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 26, horizontal: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            'Ligações',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF6502D4),
-                            ),
-                          ),
-                          Text(
-                            '150',
-                            style: TextStyle(
-                              fontSize: 60, 
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.arrow_upward,
-                                color: Colors.green,
-                                size: 16,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showType1 = !showType1;
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              SizedBox(width: 4),
-                              Text(
-                                '10% Mês anterior',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 8.0, left: 4.0, right: 4.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      showType1
+                                          ? 'Ligações Semanais'
+                                          : 'Ligações Mensais',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF6502D4),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    AspectRatio(
+                                      aspectRatio: 1,
+                                      child: LineChart(
+                                        LineChartData(
+                                          gridData: FlGridData(show: false),
+                                          titlesData: FlTitlesData(show: false),
+                                          borderData: FlBorderData(show: false),
+                                          lineBarsData: [
+                                            LineChartBarData(
+                                              spots: List.generate(
+                                                  showType1
+                                                      ? leadWeekData['dateLead']
+                                                          .length
+                                                      : leadMonthData[
+                                                              'dateLead']
+                                                          .length, (index) {
+                                                return FlSpot(
+                                                  index.toDouble(),
+                                                  (showType1
+                                                              ? leadWeekData[
+                                                                  'leadCount']
+                                                              : leadMonthData[
+                                                                  'leadCount'])[
+                                                          index]
+                                                      .toDouble(),
+                                                );
+                                              }),
+                                              isCurved: true,
+                                              color: Colors.purple,
+                                              dotData: FlDotData(show: false),
+                                              belowBarData: BarAreaData(
+                                                  show: true,
+                                                  color: Colors.purple
+                                                      .withOpacity(0.2)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -212,7 +176,8 @@ class _DashboardState extends State<Dashboard> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -266,7 +231,8 @@ class _DashboardState extends State<Dashboard> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -466,7 +432,7 @@ class _DashboardState extends State<Dashboard> {
             const SizedBox(height: 16.0),
             Container(
               width: double.infinity,
-              height: 300, 
+              height: 300,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -486,14 +452,16 @@ class _DashboardState extends State<Dashboard> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildCategoryButton('A Fazer', TaskStatus.todo),
-                        _buildCategoryButton('Em Progresso', TaskStatus.inProgress),
+                        _buildCategoryButton(
+                            'Em Progresso', TaskStatus.inProgress),
                         _buildCategoryButton('Concluídas', TaskStatus.done),
                       ],
                     ),
                   ),
                   Expanded(
                     child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
                       itemCount: _filteredTasks.length,
                       itemBuilder: (context, index) {
                         return Container(
@@ -507,6 +475,101 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskCard(Task task) {
+    IconData statusIcon;
+    switch (task.status) {
+      case 'todo':
+        statusIcon = Icons.check_box_outline_blank;
+        break;
+      case 'inProgress':
+        statusIcon = Icons.sync;
+        break;
+      case 'done':
+        statusIcon = Icons.check_circle;
+        break;
+      default:
+        statusIcon = Icons.help;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  task.description.isNotEmpty
+                      ? task.description
+                      : 'Sem descrição',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  task.getFormattedDueDate(),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Icon(
+            statusIcon,
+            color: const Color(0xFF6502D4),
+            size: 30,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryButton(String title, TaskStatus status) {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          selectedStatus = status;
+        });
+      },
+      child: Text(
+        title,
+        style: TextStyle(
+          color: selectedStatus == status ? Colors.white : Colors.white70,
+          fontSize: 16,
+          fontWeight:
+              selectedStatus == status ? FontWeight.bold : FontWeight.normal,
         ),
       ),
     );
