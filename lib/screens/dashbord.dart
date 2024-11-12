@@ -21,6 +21,8 @@ class _DashboardState extends State<Dashboard> {
   bool showType1 = true;
   Map<String, dynamic> leadWeekData = {};
   Map<String, dynamic> leadMonthData = {};
+  Map<String, dynamic> proposalMonthData = {};
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -33,11 +35,15 @@ class _DashboardState extends State<Dashboard> {
     setState(() {
       userId = prefs.getInt('userId')!;
       _fetchDashboardData();
+      _fetchProposalsData();
       _fetchTasks();
     });
   }
 
   Future<void> _fetchDashboardData() async {
+    setState(() {
+      isLoading = true;
+    });
     final leadWeekDataResult =
         await _dashboardService.getLeadsByDayOfTheWeek(userId.toString());
     final leadMonthDataResult =
@@ -45,6 +51,19 @@ class _DashboardState extends State<Dashboard> {
     setState(() {
       leadWeekData = leadWeekDataResult;
       leadMonthData = leadMonthDataResult;
+      isLoading = false;
+    });
+  }
+
+  Future<void> _fetchProposalsData() async {
+    setState(() {
+      isLoading = true;
+    });
+    final proposalMonthDataResult =
+        await _dashboardService.getProposalsByDayOfTheMonth(userId.toString());
+    setState(() {
+      proposalMonthData = proposalMonthDataResult;
+      isLoading = false;
     });
   }
 
@@ -63,6 +82,15 @@ class _DashboardState extends State<Dashboard> {
       );
       return taskStatus == selectedStatus;
     }).toList();
+  }
+
+  int getTotalCalls(bool isWeekly) {
+    final data = isWeekly ? leadWeekData : leadMonthData;
+    return data['leadCount']?.reduce((a, b) => a + b) ?? 0;
+  }
+
+   int getTotalProposals() {
+    return proposalMonthData['proposalCount']?.reduce((a, b) => a + b) ?? 0;
   }
 
   @override
@@ -85,80 +113,55 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 26, horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                          vertical: 8, horizontal: 16),
+                      child: Stack(
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                showType1 = !showType1;
-                              });
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                showType1
+                                    ? 'Ligações da Semana'
+                                    : 'Ligações do Mês',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF6502D4),
+                                ),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    bottom: 8.0, left: 4.0, right: 4.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      showType1
-                                          ? 'Ligações Semanais'
-                                          : 'Ligações Mensais',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+                              isLoading
+                                  ? Center(
+                                      child: CircularProgressIndicator(
                                         color: Color(0xFF6502D4),
                                       ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    AspectRatio(
-                                      aspectRatio: 1,
-                                      child: LineChart(
-                                        LineChartData(
-                                          gridData: FlGridData(show: false),
-                                          titlesData: FlTitlesData(show: false),
-                                          borderData: FlBorderData(show: false),
-                                          lineBarsData: [
-                                            LineChartBarData(
-                                              spots: List.generate(
-                                                  showType1
-                                                      ? leadWeekData['dateLead']
-                                                          .length
-                                                      : leadMonthData[
-                                                              'dateLead']
-                                                          .length, (index) {
-                                                return FlSpot(
-                                                  index.toDouble(),
-                                                  (showType1
-                                                              ? leadWeekData[
-                                                                  'leadCount']
-                                                              : leadMonthData[
-                                                                  'leadCount'])[
-                                                          index]
-                                                      .toDouble(),
-                                                );
-                                              }),
-                                              isCurved: true,
-                                              color: Colors.purple,
-                                              dotData: FlDotData(show: false),
-                                              belowBarData: BarAreaData(
-                                                  show: true,
-                                                  color: Colors.purple
-                                                      .withOpacity(0.2)),
-                                            ),
-                                          ],
+                                    )
+                                  : Center(
+                                      child: Text(
+                                        '${getTotalCalls(showType1)}',
+                                        style: TextStyle(
+                                          fontSize: 60,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                            ],
+                          ),
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  showType1 = !showType1;
+                                });
+                              },
+                              child: Icon(
+                                showType1
+                                    ? Icons.bar_chart_outlined
+                                    : Icons.calendar_today,
+                                color: Color(0xFF6502D4),
+                                size: 24,
                               ),
                             ),
                           ),
@@ -169,50 +172,43 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 Expanded(
                   child: Container(
-                    height: 150,
-                    margin: const EdgeInsets.only(left: 8.0),
+                    margin: const EdgeInsets.only(left: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            'Propostas',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF6502D4),
-                            ),
-                          ),
-                          Text(
-                            '200',
-                            style: TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Row(
+                          vertical: 8, horizontal: 16),
+                      child: Stack(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                Icons.arrow_downward,
-                                color: Colors.red,
-                                size: 16,
-                              ),
-                              SizedBox(width: 4),
                               Text(
-                                '5% Mês anterior',
+                                'Propostas do Mês',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF6502D4),
                                 ),
                               ),
+                              isLoading
+                                  ? Center(
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF6502D4),
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Text(
+                                        '${getTotalProposals()}',
+                                        style: TextStyle(
+                                          fontSize: 60,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
                             ],
                           ),
                         ],
