@@ -33,7 +33,7 @@ class DashboardService {
 
   Future<Map<String, dynamic>> getProposalsByDayOfTheMonth(
       String userId) async {
-    final url = Uri.parse('$baseUrl/proposal/graph/proposalmonth/$userId');
+    final url = Uri.parse('$baseUrl/proposal/graph/proposalsmonth/$userId');
     final response = await http.get(url, headers: {
       'Content-Type': 'application/json',
     });
@@ -58,19 +58,37 @@ class DashboardService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchProposalStatistics(
+  Future<Map<String, int>> getProposalsByStatus(
       String userId, String period) async {
     final url =
-        Uri.parse('$baseUrl/proposal/statistics/$userId?period=$period');
+        Uri.parse("$baseUrl/proposal/statistics/$userId?period=$period");
 
     final response = await http.get(url, headers: {
       'Content-Type': 'application/json',
     });
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      List<dynamic> data = jsonDecode(response.body);
+
+      Map<String, int> statusCount = {
+        'Fechado': 0,
+        'Parado': 0,
+        'Acompanhar': 0,
+        'Negociação': 0,
+      };
+
+      for (var entry in data) {
+        String statusName = entry[0];
+        int count = entry[1];
+
+        if (statusCount.containsKey(statusName)) {
+          statusCount[statusName] = count;
+        }
+      }
+
+      return statusCount;
     } else {
-      throw Exception('Falha ao carregar as estatísticas de propostas');
+      throw Exception("Falha ao carregar dados de status");
     }
   }
 }

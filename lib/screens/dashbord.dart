@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 import '../model/task_model.dart';
 import '../service/task_service.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -13,10 +13,10 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  final TaskService _taskService = TaskService();
   final DashboardService _dashboardService = DashboardService();
-  List<Task> tasks = [];
+  final TaskService _taskService = TaskService();
   TaskStatus selectedStatus = TaskStatus.todo;
+  List<Task> tasks = [];
   late int userId;
   bool showType1 = true;
   Map<String, dynamic> leadWeekData = {};
@@ -24,6 +24,12 @@ class _DashboardState extends State<Dashboard> {
   Map<String, dynamic> proposalMonthData = {};
   bool isLoading = true;
   double totalFaturamento = 0.0;
+  Map<String, double> proposalData = {
+    'Fechado': 0.0,
+    'Parado': 0.0,
+    'Acompanhar': 0.0,
+    'Negociação': 0.0,
+  };
 
   @override
   void initState() {
@@ -63,7 +69,15 @@ class _DashboardState extends State<Dashboard> {
     });
     final proposalMonthDataResult =
         await _dashboardService.getProposalsByDayOfTheMonth(userId.toString());
+    final proposalDataResult = await _dashboardService.getProposalsByStatus(
+        userId.toString(), 'month');
     setState(() {
+      proposalData = {
+        'Fechado': (proposalDataResult['Fechado'] ?? 0).toDouble(),
+        'Parado': (proposalDataResult['Parado'] ?? 0).toDouble(),
+        'Acompanhar': (proposalDataResult['Acompanhar'] ?? 0).toDouble(),
+        'Negociação': (proposalDataResult['Negociação'] ?? 0).toDouble(),
+      };
       proposalMonthData = proposalMonthDataResult;
       isLoading = false;
     });
@@ -105,6 +119,17 @@ class _DashboardState extends State<Dashboard> {
 
   int getTotalProposals() {
     return proposalMonthData['proposalCount']?.reduce((a, b) => a + b) ?? 0;
+  }
+
+  double getPercentage(String status) {
+    double total = proposalData.values.fold(0, (sum, element) => sum + element);
+    double statusValue = proposalData[status] ?? 0.0;
+    return total == 0 ? 0 : (statusValue / total) * 100;
+  }
+
+  String getPercentageText(String status) {
+    double percentage = getPercentage(status);
+    return '${percentage.toStringAsFixed(0)}% $status';
   }
 
   @override
@@ -308,7 +333,8 @@ class _DashboardState extends State<Dashboard> {
                                     PieChartData(
                                       sections: [
                                         PieChartSectionData(
-                                          value: 50,
+                                          value: getPercentage(
+                                              'Fechado'),
                                           color: Color(0xFF6A1B9A),
                                           radius: 15,
                                           title: '',
@@ -317,7 +343,8 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                         ),
                                         PieChartSectionData(
-                                          value: 30,
+                                          value: getPercentage(
+                                              'Parado'),
                                           color: Color(0xFFAB47BC),
                                           radius: 15,
                                           title: '',
@@ -326,8 +353,19 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                         ),
                                         PieChartSectionData(
-                                          value: 20,
+                                          value: getPercentage(
+                                              'Acompanhar'),
                                           color: Color(0xFFCE93D8),
+                                          radius: 15,
+                                          title: '',
+                                          titleStyle: const TextStyle(
+                                            fontSize: 0,
+                                          ),
+                                        ),
+                                        PieChartSectionData(
+                                          value: getPercentage(
+                                              'Negociação'),
+                                          color: Color(0xFF7B1FA2),
                                           radius: 15,
                                           title: '',
                                           titleStyle: const TextStyle(
@@ -342,7 +380,7 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                   Center(
                                     child: Text(
-                                      '30',
+                                      '${getTotalProposals()}',
                                       style: const TextStyle(
                                         fontSize: 35,
                                         fontWeight: FontWeight.w500,
@@ -358,7 +396,7 @@ class _DashboardState extends State<Dashboard> {
                           Expanded(
                             flex: 1,
                             child: Column(
-                              children: const [
+                              children: [
                                 Row(
                                   children: [
                                     Icon(
@@ -369,7 +407,7 @@ class _DashboardState extends State<Dashboard> {
                                     SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        '50% Fechado',
+                                        getPercentageText('Fechado'),
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Color(0xFF6A1B9A),
@@ -389,7 +427,7 @@ class _DashboardState extends State<Dashboard> {
                                     SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        '30% Em Negociado',
+                                        getPercentageText('Parado'),
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Color(0xFFAB47BC),
@@ -409,10 +447,30 @@ class _DashboardState extends State<Dashboard> {
                                     SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        '20% Perdido',
+                                        getPercentageText('Acompanhar'),
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Color(0xFFCE93D8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      color: Color(0xFF7B1FA2),
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        getPercentageText('Negociação'),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xFF7B1FA2),
                                         ),
                                       ),
                                     ),
