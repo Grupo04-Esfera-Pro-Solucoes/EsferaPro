@@ -63,30 +63,30 @@ class _CallPageState extends State<CallPage> {
   }
 
   Future<void> _fetchCalls() async {
-  if (userId != null) {
-    try {
-      final data = await callService.fetchAllLeads(
-        userId.toString(),
-        currentPage,
-        size: pageSize,
-      );
-      setState(() {
-        calls = data;
-        isLoading = false;
-        if (data.length < pageSize) {
-          hasMoreData = false;
-        } else {
-          hasMoreData = true;
-        }
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-        errorMessage = 'Erro ao carregar ligações';
-      });
+    if (userId != null) {
+      try {
+        final data = await callService.fetchAllLeads(
+          userId.toString(),
+          currentPage,
+          size: pageSize,
+        );
+        setState(() {
+          calls = data;
+          isLoading = false;
+          if (data.length < pageSize) {
+            hasMoreData = false;
+          } else {
+            hasMoreData = true;
+          }
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Erro ao carregar ligações';
+        });
+      }
     }
   }
-}
 
   Future<void> _searchCallsByName() async {
     if (userId != null && searchController.text.isNotEmpty) {
@@ -168,15 +168,17 @@ class _CallPageState extends State<CallPage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => StackCalls()),
-          ).then((_) {
-            _fetchCalls();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Ligação cadastrada com sucesso!'),
-                backgroundColor: Color(0xFF6502D4),
-                duration: Duration(seconds: 3),
-              ),
-            );
+          ).then((success) {
+            if (success == true) {
+              _fetchCalls();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Ligação cadastrada com sucesso!'),
+                  backgroundColor: Color(0xFF6502D4),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
           });
         },
         backgroundColor: const Color(0xFF6502D4),
@@ -387,7 +389,6 @@ class _CallPageState extends State<CallPage> {
                       ),
                     ],
                   ),
-
                 ),
               ),
             ],

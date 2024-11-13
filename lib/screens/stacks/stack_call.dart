@@ -71,8 +71,7 @@ class _StackCallsState extends State<StackCalls> {
           MaterialPageRoute(builder: (context) => CallPage()),
         );
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> fetchClients() async {
