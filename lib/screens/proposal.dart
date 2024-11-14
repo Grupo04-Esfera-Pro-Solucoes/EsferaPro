@@ -279,7 +279,7 @@ void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalDat
     final proposal = proposalData;
     final client = proposal['idLead']?['idClient'];
     final status = proposal['idStatusProposal'];
-    final fileUrl = proposal['fileUrl'];
+    final file= proposal['file'];
 
     showDialog(
       context: context,
@@ -299,21 +299,43 @@ void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalDat
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                children: [
                 _buildDetailRow('Cliente:', client?['name'] ?? 'N/A'),
                 _buildDetailRow('Status:', status?['name'] ?? 'N/A'),
                 _buildDetailRow('Data:', _formatDate(proposal['proposalDate'])),
                 _buildDetailRow('Valor:', 'R\$ ${proposal['value']?.toString() ?? 'N/A'}'),
                 _buildDetailRow('Descrição:', proposal['description'] ?? 'N/A'),
-                _buildDetailRow('Anexo:', fileUrl != null ? 'Clique para baixar' : 'Proposta sem anexo'),
-                if (fileUrl != null)
-                  TextButton(
-                    onPressed: () => (),//_downloadFile(fileUrl, 'proposal_file'),
-                    child: Text(
-                      'Baixar Anexo',
-                      style: TextStyle(color: Color(0xff6502d4)),
+                GestureDetector(
+                  onTap: () async {
+                  if (file != null) {
+                    final proposalService = ProposalService();
+                    await proposalService.downloadProposalFile(proposal['idProposal']);
+                  }
+                  },
+                  child: RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                    TextSpan(
+                      text: 'Anexo: ',
+                      style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 16,
+                      ),
                     ),
+                    TextSpan(
+                      text: file != null ? 'Clique para baixar' : 'Proposta sem anexo',
+                      style: const TextStyle(
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xff6502d4),
+                      fontSize: 18,
+                      decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    ],
                   ),
+                  ),
+                ),
               ],
             ),
           ),

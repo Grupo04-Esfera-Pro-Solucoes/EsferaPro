@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProposalService {
   String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
@@ -101,7 +103,7 @@ class ProposalService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchSearchProposalByName(int idLead) async {
+  Future<Map<String, dynamic>> fetchSearchProposalByLeadId(int idLead) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
@@ -120,6 +122,38 @@ class ProposalService {
       }
     } catch (e) {
       throw Exception('Erro: $e');
+    }
+  }
+
+  Future<void> downloadProposalFile(int idProposal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('userId');
+
+    if (userId == null) {
+      throw Exception('Usuário não autenticado.');
+    }
+
+    final url = Uri.parse('$baseUrl/proposal/download/$idProposal/$userId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/proposal_$idProposal.pdf');
+        await file.writeAsBytes(bytes);
+
+        final xFile = XFile(file.path);
+
+        // Compartilhar o arquivo
+        await Share.shareXFiles([xFile]);
+
+        print('Download concluído e compartilhado: ${file.path}');
+      } else {
+        throw Exception('Erro ao buscar arquivo da proposta: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição: $e');
     }
   }
 
