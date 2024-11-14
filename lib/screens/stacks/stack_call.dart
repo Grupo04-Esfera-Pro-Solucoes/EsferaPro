@@ -61,18 +61,17 @@ class _StackCallsState extends State<StackCalls> {
         description: _callDescription.text,
       )
           .then((_) {
-        Navigator.pushReplacement(
+        Navigator.pop(
           context,
           MaterialPageRoute(builder: (context) => CallPage()),
         );
       }).catchError((error) {
-        Navigator.pushReplacement(
+        Navigator.pop(
           context,
           MaterialPageRoute(builder: (context) => CallPage()),
         );
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> fetchClients() async {
@@ -305,7 +304,7 @@ class _StackCallsState extends State<StackCalls> {
                           DateTime? pickedDate = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
+                            firstDate: DateTime(2010),
                             lastDate: DateTime(2100),
                           );
                           if (pickedDate != null) {

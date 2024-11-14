@@ -167,17 +167,20 @@ Widget _buildTaskCard(Task task) {
 
 DismissDirection getDismissDirection(Task task) {
     return task.status == 'done'
-        ? DismissDirection.startToEnd
+        ? DismissDirection.horizontal
         : DismissDirection.horizontal;
 }
 
 return Dismissible(
     key: ValueKey(task.id),
-    background: buildDismissBackground(Alignment.centerLeft, Icons.delete),
-    secondaryBackground: task.status == 'todo'
-        ? buildDismissBackground(Alignment.centerRight, Icons.delete)
-        : buildDismissBackground(Alignment.centerRight, Icons.change_circle_outlined),
-    direction: getDismissDirection(task),
+  background: buildDismissBackground(Alignment.centerLeft, 
+      task.status == 'done' 
+      ? Icons.delete 
+      : Icons.change_circle_outlined),
+  secondaryBackground: task.status == 'todo'
+      ? buildDismissBackground(Alignment.centerRight, Icons.delete)
+      : buildDismissBackground(Alignment.centerRight, Icons.change_circle_outlined),
+  direction: getDismissDirection(task),
     onDismissed: (direction) async {
       if (task.status == 'todo' && direction == DismissDirection.endToStart) {
         try {
@@ -228,25 +231,24 @@ return Dismissible(
           });
         }
       } else if (direction == DismissDirection.endToStart && task.status != 'todo') {
-        final currentStatus = TaskStatus.values.firstWhere(
-          (e) => e.toString().split('.').last == task.status,
-          orElse: () => TaskStatus.todo,
-        );
-        final previousStatus = _getPreviousStatus(currentStatus);
-
+  final currentStatus = TaskStatus.values.firstWhere(
+    (e) => e.toString().split('.').last == task.status,
+    orElse: () => TaskStatus.todo,
+  );
+  final previousStatus = _getPreviousStatus(currentStatus);
         try {
-          await _updateTaskStatus(task.id, previousStatus.toString().split('.').last);
-          setState(() {
-            tasks = tasks.map((t) => t.id == task.id ? Task(
-              id: t.id,
-              name: t.name,
-              description: t.description,
-              dueDate: t.dueDate,
-              status: previousStatus.toString().split('.').last,
-              userId: t.userId
-            ) : t).toList();
-          });
-        } catch (e) {
+    await _updateTaskStatus(task.id, previousStatus.toString().split('.').last);
+    setState(() {
+      tasks = tasks.map((t) => t.id == task.id ? Task(
+        id: t.id,
+        name: t.name,
+        description: t.description,
+        dueDate: t.dueDate,
+        status: previousStatus.toString().split('.').last,
+        userId: t.userId
+      ) : t).toList();
+    });
+  } catch (e) {
           setState(() {
             tasks = tasks.map((t) => t.id == task.id ? task : t).toList(); 
           });
