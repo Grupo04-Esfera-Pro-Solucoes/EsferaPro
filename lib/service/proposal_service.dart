@@ -65,7 +65,7 @@ class ProposalService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchProposals() async {
+  Future<List<Map<String, dynamic>>> fetchAllProposals() async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final int? userId = prefs.getInt('userId');
 
@@ -88,13 +88,17 @@ class ProposalService {
       }
     }
 
-  Future<List<dynamic>> getAllStatusProposals() async {
+  Future<List<Map<String, dynamic>>> getAllStatusProposals() async {
     final url = Uri.parse('$baseUrl/statusProposal');
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        return jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+        final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+        return data.map((status) => {
+          'idStatusProposal': status['idStatusProposal'],
+          'name': status['name'],
+        }).toList();
       } else {
         throw Exception('Erro ao buscar status das propostas: ${response.statusCode}');
       }
@@ -103,7 +107,7 @@ class ProposalService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchSearchProposalByLeadId(int idLead) async {
+  Future<Map<String, dynamic>> fetchProposalByLeadId(int idLead) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
@@ -112,6 +116,28 @@ class ProposalService {
     }
 
     final url = Uri.parse('$baseUrl/lead/$idLead/$userId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      } else {
+        throw Exception('Erro ao buscar proposta: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Erro: $e');
+    }
+  }
+
+    Future<Map<String, dynamic>> fetchProposalById(int idProposal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('userId');
+
+    if (userId == null) {
+      throw Exception("Usuário não autenticado.");
+    }
+
+    final url = Uri.parse('$baseUrl/proposal/$idProposal/$userId');
 
     try {
       final response = await http.get(url);
@@ -156,108 +182,46 @@ class ProposalService {
       throw Exception('Erro na requisição: $e');
     }
   }
-
-  Future<Map<String, dynamic>> fetchProposalById(int idProposal) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
-
-    if (userId == null) {
-      throw Exception("Usuário não autenticado.");
-    }
-
-    final url = Uri.parse('$baseUrl/proposal/$idProposal/$userId');
-
+  
+  Future<void> updateProposal(Map<String, dynamic> updatedProposalData) async {
     try {
-      final response = await http.get(url);
+      final response = await http.put(
+        Uri.parse('$baseUrl/lead/${updatedProposalData['idProposal']}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'service': updatedProposalData['service'],
+          'proposalDate': updatedProposalData['proposalDate'],
+          'value': updatedProposalData['value'],
+          'description': updatedProposalData['description'],
+          'idStatusProposal': updatedProposalData['idStatusProposal'],
+          'file': updatedProposalData['file'],
+        }),
+      );
+
       if (response.statusCode == 200) {
-        return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        print('Proposta atualizada com sucesso');
       } else {
-        throw Exception('Erro ao buscar proposta: ${response.statusCode}');
+        throw Exception('Falha ao atualizar a proposta: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Erro: $e');
+      print('Erro: $e');
+    }
+  }
+
+  Future<void> deleteProposal(int idProposal) async {
+    final url = Uri.parse('$baseUrl/proposal/delete/$idProposal');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao deletar proposta: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição delete: $e');
     }
   }
   
-  Future<Map<String, dynamic>> fetchProposalForEdit(int idProposal) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
-
-    if (userId == null) {
-      throw Exception("Usuário não autenticado.");
-    }
-
-    final url = Uri.parse('$baseUrl/proposal/$idProposal/$userId');
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      } else {
-        throw Exception('Erro ao buscar proposta para edição: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Erro: $e');
-    }
-  }
-  
-  Future<void> updateProposal({
-    required int idProposal,
-    required int idLead,
-    required String completionDate,
-    required int idStatusProposal,
-    required String clientId,
-    String? clientName,
-    String? description,
-    String? service,
-    double? value,
-    File? file,
-  }) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
-
-    if (userId == null) {
-      throw Exception("Usuário não autenticado.");
-    }
-
-    final url = Uri.parse('$baseUrl/proposal/$idProposal');
-
-    final request = http.MultipartRequest('PUT', url)
-      ..fields['idLead'] = idLead.toString()
-      ..fields['completionDate'] = completionDate
-      ..fields['idStatusProposal'] = idStatusProposal.toString()
-      ..fields['clientId'] = clientId;
-
-    if (description != null) {
-      request.fields['description'] = description;
-    }
-    if (service != null) {
-      request.fields['service'] = service;
-    }
-    if (value != null) {
-      request.fields['value'] = value.toString();
-    }
-    if (clientName != null) {
-      request.fields['clientName'] = clientName;
-    }
-
-    request.fields['user'] = jsonEncode({"idUser": userId});
-
-    if (file != null) {
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
-    }
-
-    try {
-      final response = await request.send();
-
-      if (response.statusCode != 200) {
-        throw Exception('Erro ao atualizar proposta: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Erro na requisição: $e');
-    }
-  }
-
-
-
 }

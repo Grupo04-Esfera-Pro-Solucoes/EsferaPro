@@ -49,7 +49,7 @@
       if (_leadId.text.isNotEmpty) {
         try {
           int idLead = int.parse(_leadId.text);
-          Map<String, dynamic> proposalDetails = await _createProposalService.fetchSearchProposalByLeadId(idLead);
+          Map<String, dynamic> proposalDetails = await _createProposalService.fetchProposalByLeadId(idLead);
           setState(() {
             _clientId.text = proposalDetails['idClient']['idClient'].toString();
             _clientName.text = proposalDetails['idClient']['name'].toString();
