@@ -1,9 +1,8 @@
-import 'package:esferapro/screens/stacks/stack_proposal.dart';
+import 'package:esferapro/screens/stacks/stack_proposalCadastro.dart';
+import 'package:esferapro/screens/stacks/stack_proposalEdit.dart';
+import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Proposal extends StatefulWidget {
   @override
@@ -11,46 +10,47 @@ class Proposal extends StatefulWidget {
 }
 
 class _ProposalState extends State<Proposal> {
+  final ProposalService proposalService = ProposalService();
   List<Map<String, dynamic>> proposals = [];
+  bool isLoading = true;
+  String? errorMessage;
+  int? userId;
 
   @override
   void initState() {
     super.initState();
-    _fetchProposals();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getInt('userId');
+      if (userId != null) {
+        _fetchProposals();
+      } else {
+        isLoading = false;
+        errorMessage = 'Usuário não encontrado';
+      }
+    });
   }
 
   Future<void> _fetchProposals() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final int? userId = prefs.getInt('userId');
+    if (userId != null) {
+      try {
+        final proposalsData = await proposalService.fetchAllProposals();
 
-    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
-
-    if (userId == null) {
-      _showErrorSnackBar('Usuário não autenticado.');
-      return;
-    }
-
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/proposal/all/$userId?page=0&size=20&sort=idProposal'));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['content'];
         setState(() {
-          proposals = data.map((item) => item as Map<String, dynamic>).toList();
+          proposals = proposalsData;
+          isLoading = false;
         });
-      } else {
-        _showErrorSnackBar('Erro ao buscar propostas');
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Erro ao carregar propostas';
+        });
       }
-    } catch (e) {
-      _showErrorSnackBar('Erro: $e');
     }
-  }
-
-  void _showErrorSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Icon _getStatusIcon(int statusID) {
@@ -73,11 +73,11 @@ class _ProposalState extends State<Proposal> {
     final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}/${parsedDate.year}";
     return formattedDate;
   }
-  
+
   String _formatDayMonth(String date) {
-  final DateTime parsedDate = DateTime.parse(date);
-  final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}";
-  return formattedDate;
+    final DateTime parsedDate = DateTime.parse(date);
+    final String formattedDate = "${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}";
+    return formattedDate;
   }
 
   @override
@@ -90,14 +90,18 @@ class _ProposalState extends State<Proposal> {
               _buildSearchBar(),
               _buildHeader(),
               Expanded(
-                child: proposals.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+              child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorMessage != null
+                  ? Center(child: Text(errorMessage!))
+                  : proposals.isEmpty
+                    ? const Center(child: Text('Nenhuma proposta disponível!'))
                     : ListView.builder(
-                        itemCount: proposals.length,
-                        itemBuilder: (context, index) {
-                          final proposal = proposals[index];
-                          return _buildProposalItem(proposal);
-                        },
+                      itemCount: proposals.length,
+                      itemBuilder: (context, index) {
+                        final proposalData = proposals[index];
+                        return _buildProposalTile(context, proposalData);
+                      },
                       ),
               ),
             ],
@@ -107,12 +111,23 @@ class _ProposalState extends State<Proposal> {
             right: 20,
             child: FloatingActionButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProposalCadastro()),
-                );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => StackProposalCadastro()),
+          ).then((success) {
+            if (success == true) {
+              _fetchProposals();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Ligação cadastrada com sucesso!'),
+                  backgroundColor: Color(0xFF6502D4),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+          });
               },
-              backgroundColor:  const Color.fromRGBO(101, 2, 212, 1),
+              backgroundColor: const Color.fromRGBO(101, 2, 212, 1),
               child: const Icon(Icons.add, color: Colors.white),
             ),
           ),
@@ -139,20 +154,19 @@ class _ProposalState extends State<Proposal> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
+                  borderSide: BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide(color: const Color.fromRGBO(101, 2, 212, 1), width: 2.0),
                 ),
                 filled: true,
-                fillColor: Colors.white, 
+                fillColor: Colors.white,
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: const Color.fromRGBO(101, 2, 212, 1)),
+            icon: const Icon(Icons.search, color: Color.fromRGBO(101, 2, 212, 1)),
             onPressed: () {
               // Aqui você pode implementar a lógica de busca usando o texto de searchController
               String searchQuery = searchController.text;
@@ -163,7 +177,7 @@ class _ProposalState extends State<Proposal> {
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(10.0),
@@ -179,96 +193,229 @@ class _ProposalState extends State<Proposal> {
     );
   }
 
-  Widget _buildProposalItem(Map<String, dynamic> proposal) {
-    final client = proposal['idLead']?['idClient'];
-    final statusID = proposal['idStatusProposal']?['idStatusProposal'] ?? 0;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!),
+  Widget _buildProposalTile(BuildContext context, Map<String, dynamic> proposalData) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Row(
+                  children: [
+                    _getStatusIcon(proposalData['idStatusProposal']?['id'] ?? 0),
+                    const SizedBox(width: 8.0),
+                    Flexible(
+                      child: Text(
+                        proposalData['idClient']?['name'] ?? 'Sem Nome',
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(flex: 2, child: Text(proposalData['value'] != null ? proposalData['value'].toStringAsFixed(2) : 'N/A', textAlign: TextAlign.center)),
+              Expanded(flex: 1, child: Text(_formatDayMonth(proposalData['proposalDate'] ?? ''), textAlign: TextAlign.center)),
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StackProposalEdit(
+                                proposalData: proposalData,
+                                onEdit: (updatedProposalData) async {
+                                  try {
+                                    updatedProposalData['idProposal'] = proposalData['idProposal'];
+                                    await proposalService
+                                    .updateProposal(updatedProposalData,);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Proposta atualizada com sucesso'),
+                                        backgroundColor: Color(0xFF6502D4),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erro ao atualizar a proposta'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                                onDelete: (String idProposal) async {
+                                  try {
+                                    await proposalService.deleteProposal(int.parse(idProposal));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Proposta excluída com sucesso!'),
+                                        backgroundColor: Color(0xFF6502D4),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erro ao excluir a proposta'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ).then((_) {
+                            _fetchProposals();
+                          });
+                        },
+                        icon: const Icon(Icons.edit, color: Colors.black),
+                        padding: EdgeInsets.zero,
+                      ),
+                      IconButton(
+                        onPressed: () => _showProposalDetails(context, proposalData),
+                        icon: const Icon(Icons.visibility, color: Colors.black),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      padding: const EdgeInsets.all(14.0), 
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                _getStatusIcon(statusID),
-                const SizedBox(width: 8.0),
-                Flexible(
-                  child: Text(
-                    client?['name'] ?? 'N/A',
-                    textAlign: TextAlign.left,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
+        const Divider(
+          color: Color(0xffD3D3D3),
+          thickness: 1.0,
+          height: 1.0,
+        ),
+      ],
+    );
+  }
+
+void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) async {
+    final proposal = proposalData;
+    final client = proposal['idLead']?['idClient'];
+    final status = proposal['idStatusProposal'];
+    final file= proposal['file'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Center(
+            child: Text(
+              'Detalhes da Proposta',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                _buildDetailRow('Cliente:', client?['name'] ?? 'N/A'),
+                _buildDetailRow('Status:', status?['name'] ?? 'N/A'),
+                _buildDetailRow('Data:', _formatDate(proposal['proposalDate'])),
+                _buildDetailRow('Valor:', 'R\$ ${proposal['value'] != null ? proposal['value'].toStringAsFixed(2) : 'N/A'}'),
+                _buildDetailRow('Descrição:', proposal['description'] ?? 'N/A'),
+                GestureDetector(
+                  onTap: () async {
+                  if (file != null) {
+                    final proposalService = ProposalService();
+                    await proposalService.downloadProposalFile(proposal['idProposal']);
+                  }
+                  },
+                  child: RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                    TextSpan(
+                      text: 'Anexo: ',
+                      style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 16,
+                      ),
+                    ),
+                    TextSpan(
+                      text: file != null ? 'Clique para baixar' : 'Proposta sem anexo',
+                      style: const TextStyle(
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xff6502d4),
+                      fontSize: 18,
+                      decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    ],
+                  ),
                   ),
                 ),
               ],
             ),
           ),
-          Expanded(flex: 2, child: Text(proposal['value']?.toString() ?? 'N/A', textAlign: TextAlign.center)),
-          Expanded(flex: 1, child: Text(_formatDayMonth(proposal['proposalDate']), textAlign: TextAlign.center)),
-          Expanded(
-            flex: 2,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    // Adicione a lógica de edição aqui
-                  },
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: Color(0xff6502d4), width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
                 ),
-                IconButton(
-                  icon: Icon(Icons.visibility),
-                  onPressed: () {
-                    _showProposalDetails(context, proposal);
-                  },
+                child: const Text(
+                  'Fechar',
+                  style: TextStyle(color: Color(0xff6502d4), fontSize: 18),
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        );
+      },
+    );
+  }
+  
+Widget _buildDetailRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: RichText(
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text: '$title ',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 16,
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: const TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  void _showProposalDetails(BuildContext context, Map<String, dynamic> proposalData) {
-  final proposal = proposalData;
-  final client = proposal['idLead']?['idClient'];
-  final status = proposal['idStatusProposal'];
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Detalhes da Proposta:'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Status: ${status?['name'] ?? 'N/A'}'),
-              Text('Cliente: ${client?['name'] ?? 'N/A'}'),
-              Text('Data: ${proposal['proposalDate'] ?? 'N/A'}'),
-              Text('Valor: ${proposal['value']?.toString() ?? 'N/A'}'),
-              Text('Descrição: ${proposal['description'] ?? 'N/A'}'),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Fechar'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
 
 }

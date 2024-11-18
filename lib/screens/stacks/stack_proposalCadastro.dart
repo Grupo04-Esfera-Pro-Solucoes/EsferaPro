@@ -5,12 +5,12 @@
   import 'package:intl/intl.dart';
   import 'dart:io';
 
-  class ProposalCadastro extends StatefulWidget {
+  class StackProposalCadastro extends StatefulWidget {
     @override
-    _ProposalCadastroState createState() => _ProposalCadastroState();
+    _StackProposalCadastroState createState() => _StackProposalCadastroState();
   }
 
-  class _ProposalCadastroState extends State<ProposalCadastro> {
+  class _StackProposalCadastroState extends State<StackProposalCadastro> {
     final TextEditingController _service = TextEditingController();
     final TextEditingController _description = TextEditingController();
     final TextEditingController _value = TextEditingController();
@@ -49,7 +49,7 @@
       if (_leadId.text.isNotEmpty) {
         try {
           int idLead = int.parse(_leadId.text);
-          Map<String, dynamic> proposalDetails = await _createProposalService.fetchSearchProposalByName(idLead);
+          Map<String, dynamic> proposalDetails = await _createProposalService.fetchProposalByLeadId(idLead);
           setState(() {
             _clientId.text = proposalDetails['idClient']['idClient'].toString();
             _clientName.text = proposalDetails['idClient']['name'].toString();

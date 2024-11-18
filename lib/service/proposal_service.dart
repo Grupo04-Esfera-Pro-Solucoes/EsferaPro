@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProposalService {
   String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
@@ -63,13 +65,40 @@ class ProposalService {
     }
   }
 
-  Future<List<dynamic>> getAllStatusProposals() async {
+  Future<List<Map<String, dynamic>>> fetchAllProposals() async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final int? userId = prefs.getInt('userId');
+
+      if (userId == null) {
+        throw Exception('Usuário não autenticado.');
+      }
+
+      final url = Uri.parse('$baseUrl/proposal/all/$userId');
+
+      try {
+        final response = await http.get(url);
+        if (response.statusCode == 200) {
+          final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes))['content'];
+          return data.map((item) => item as Map<String, dynamic>).toList();
+        } else {
+          throw Exception('Erro ao buscar propostas: ${response.statusCode}');
+        }
+      } catch (e) {
+        throw Exception('Erro: $e');
+      }
+    }
+
+  Future<List<Map<String, dynamic>>> getAllStatusProposals() async {
     final url = Uri.parse('$baseUrl/statusProposal');
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        return jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+        final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+        return data.map((status) => {
+          'idStatusProposal': status['idStatusProposal'],
+          'name': status['name'],
+        }).toList();
       } else {
         throw Exception('Erro ao buscar status das propostas: ${response.statusCode}');
       }
@@ -78,7 +107,7 @@ class ProposalService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchSearchProposalByName(int idLead) async {
+  Future<Map<String, dynamic>> fetchProposalByLeadId(int idLead) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
@@ -99,4 +128,100 @@ class ProposalService {
       throw Exception('Erro: $e');
     }
   }
+
+    Future<Map<String, dynamic>> fetchProposalById(int idProposal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('userId');
+
+    if (userId == null) {
+      throw Exception("Usuário não autenticado.");
+    }
+
+    final url = Uri.parse('$baseUrl/proposal/$idProposal/$userId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      } else {
+        throw Exception('Erro ao buscar proposta: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Erro: $e');
+    }
+  }
+
+  Future<void> downloadProposalFile(int idProposal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('userId');
+
+    if (userId == null) {
+      throw Exception('Usuário não autenticado.');
+    }
+
+    final url = Uri.parse('$baseUrl/proposal/download/$idProposal/$userId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/proposal_$idProposal.pdf');
+        await file.writeAsBytes(bytes);
+
+        final xFile = XFile(file.path);
+
+        // Compartilhar o arquivo
+        await Share.shareXFiles([xFile]);
+
+        print('Download concluído e compartilhado: ${file.path}');
+      } else {
+        throw Exception('Erro ao buscar arquivo da proposta: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição: $e');
+    }
+  }
+  
+  Future<void> updateProposal(Map<String, dynamic> updatedProposalData) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/lead/${updatedProposalData['idProposal']}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'service': updatedProposalData['service'],
+          'proposalDate': updatedProposalData['proposalDate'],
+          'value': updatedProposalData['value'],
+          'description': updatedProposalData['description'],
+          'idStatusProposal': updatedProposalData['idStatusProposal'],
+          'file': updatedProposalData['file'],
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Proposta atualizada com sucesso');
+      } else {
+        throw Exception('Falha ao atualizar a proposta: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro: $e');
+    }
+  }
+
+  Future<void> deleteProposal(int idProposal) async {
+    final url = Uri.parse('$baseUrl/proposal/delete/$idProposal');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao deletar proposta: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição delete: $e');
+    }
+  }
+  
 }
