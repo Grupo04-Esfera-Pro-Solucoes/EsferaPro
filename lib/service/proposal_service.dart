@@ -64,8 +64,7 @@ class ProposalService {
       throw Exception('Erro na requisição: $e');
     }
   }
-
-  Future<List<Map<String, dynamic>>> fetchAllProposals() async {
+  Future<List<Map<String, dynamic>>> fetchAllProposals(String userId, int page, {int size = 20}) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final int? userId = prefs.getInt('userId');
 
@@ -223,5 +222,7 @@ class ProposalService {
       throw Exception('Erro na requisição delete: $e');
     }
   }
+
+  fetchProposalsByName(String text, String string) {}
   
 }

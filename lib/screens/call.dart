@@ -287,7 +287,7 @@ class _CallPageState extends State<CallPage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Row(
             children: [
               Expanded(
@@ -307,12 +307,11 @@ class _CallPageState extends State<CallPage> {
               ),
               Expanded(
                 flex: 1,
-                child: Center(
                   child: Text(
                     _formatDate(callData['date'] ?? '0000-00-00'),
                     textAlign: TextAlign.center,
                   ),
-                ),
+
               ),
               Expanded(
                 flex: 2,
