@@ -129,7 +129,7 @@ class ProposalService {
     }
   }
 
-    Future<Map<String, dynamic>> fetchProposalById(int idProposal) async {
+  Future<Map<String, dynamic>> fetchProposalById(int idProposal) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
 
@@ -186,17 +186,17 @@ class ProposalService {
   Future<void> updateProposal(Map<String, dynamic> updatedProposalData) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl/lead/${updatedProposalData['idProposal']}'),
+        Uri.parse('$baseUrl/proposal/${updatedProposalData['idProposal']}'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
+          'completionDate': updatedProposalData['completionDate'],
           'service': updatedProposalData['service'],
-          'proposalDate': updatedProposalData['proposalDate'],
           'value': updatedProposalData['value'],
           'description': updatedProposalData['description'],
           'idStatusProposal': updatedProposalData['idStatusProposal'],
-          'file': updatedProposalData['file'],
+          'file': updatedProposalData['file'] != null ? base64Encode(base64Decode(updatedProposalData['file'])) : null,
         }),
       );
 
