@@ -104,7 +104,7 @@ class _ProposalState extends State<Proposal> {
       } catch (e) {
         setState(() {
           isLoading = false;
-          errorMessage = 'Erro ao buscar leads';
+          errorMessage = 'Erro ao buscar propostas';
         });
       }
     }
@@ -149,11 +149,13 @@ class _ProposalState extends State<Proposal> {
                             ? const Center(
                                 child: Text('Nenhuma proposta disponível!'))
                             : ListView.builder(
-                                itemCount: proposals.length,
+                                itemCount: proposals.length + 1,
                                 itemBuilder: (context, index) {
+                                  if (index == proposals.length) {
+                                    return _buildPaginationControls();
+                                  }
                                   final proposalData = proposals[index];
-                                  return _buildProposalTile(
-                                      context, proposalData);
+                                  return _buildProposalTile(context, proposalData);
                                 },
                               ),
               ),
@@ -187,6 +189,28 @@ class _ProposalState extends State<Proposal> {
     );
   }
 
+  Widget _buildPaginationControls() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: isLoading || currentPage == 1 ? null : _previousPage,
+            color: currentPage == 1 ? Colors.grey : Color(0xFF6502D4),
+          ),
+          Text('Página $currentPage'),
+          IconButton(
+            icon: Icon(Icons.arrow_forward),
+            onPressed: isLoading || !hasMoreData ? null : _nextPage,
+            color: !hasMoreData ? Colors.grey : Color(0xFF6502D4),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchBar() {
     return Container(
       color: const Color(0xFFEAECF0),
@@ -211,7 +235,7 @@ class _ProposalState extends State<Proposal> {
                   border: InputBorder.none,
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.search, color: Color(0xff6502d4)),
-                    onPressed: null,
+                    onPressed: _searchProposalsByName,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 20.0),
