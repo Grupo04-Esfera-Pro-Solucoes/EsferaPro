@@ -70,4 +70,43 @@ class UserService {
       throw Exception('Erro: $e');
     }
   }
+
+  Future<void> updateClient(Map<String, dynamic> updatedClientData) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/client/${updatedClientData['idLead']}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'contact': updatedClientData['name'],
+          'cpfCnpj': updatedClientData['cpfCnpj'],
+          'company': updatedClientData['company'],
+          'role': updatedClientData['role'],
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Lead atualizado com sucesso');
+      } else {
+        throw Exception('Falha ao atualizar o lead: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro: $e');
+    }
+  }
+
+  Future<void> deleteCall(String userId) async {
+    final url = Uri.parse('$baseUrl/client/$userId');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao deletar ligação: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro na requisição delete: $e');
+    }
+  }
 }
