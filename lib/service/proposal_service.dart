@@ -65,7 +65,26 @@ class ProposalService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchAllProposals() async {
+    Future<List<Map<String, dynamic>>> getAllStatusProposals() async {
+    final url = Uri.parse('$baseUrl/statusProposal');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
+        return data.map((status) => {
+          'idStatusProposal': status['idStatusProposal'],
+          'name': status['name'],
+        }).toList();
+      } else {
+        throw Exception('Erro ao buscar status das propostas: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Erro: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchAllProposals(String userId, int page, {int size = 20}) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final int? userId = prefs.getInt('userId');
 
@@ -87,25 +106,6 @@ class ProposalService {
         throw Exception('Erro: $e');
       }
     }
-
-  Future<List<Map<String, dynamic>>> getAllStatusProposals() async {
-    final url = Uri.parse('$baseUrl/statusProposal');
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
-        return data.map((status) => {
-          'idStatusProposal': status['idStatusProposal'],
-          'name': status['name'],
-        }).toList();
-      } else {
-        throw Exception('Erro ao buscar status das propostas: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Erro: $e');
-    }
-  }
 
   Future<Map<String, dynamic>> fetchProposalByLeadId(int idLead) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -129,6 +129,19 @@ class ProposalService {
     }
   }
 
+Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String userId) async {
+  final response = await http.get(
+      Uri.parse('$baseUrl/proposal/search/$name/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (data['content'] as List).cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Erro ao buscar leads: ${response.statusCode}');
+    }
+}
+ 
     Future<Map<String, dynamic>> fetchProposalById(int idProposal) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('userId');
@@ -223,5 +236,5 @@ class ProposalService {
       throw Exception('Erro na requisição delete: $e');
     }
   }
-  
+ 
 }
