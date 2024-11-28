@@ -320,6 +320,7 @@ class _StackClientsState extends State<StackClients> {
                     child: CustomSizedElevatedButton(
                       onPressed: () {
                         _postNewUser();
+                        Navigator.of(context).pop(true);
                       },
                       text: 'Salvar',
                     ),
