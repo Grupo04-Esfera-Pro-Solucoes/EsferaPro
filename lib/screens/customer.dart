@@ -12,16 +12,16 @@ class ClientPage extends StatefulWidget {
 }
 
 class _ClientPageState extends State<ClientPage> {
-  List<dynamic> clients = []; 
-  List<bool> isCheckedList = []; 
-  bool isLoading = true; 
-  String? errorMessage; 
-  TextEditingController searchController = TextEditingController(); 
+  List<dynamic> clients = [];
+  List<bool> isCheckedList = [];
+  bool isLoading = true;
+  String? errorMessage;
+  TextEditingController searchController = TextEditingController();
 
   Future<void> fetchClientData({String? searchQuery}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int? UserId = prefs.getInt('userId');
-    
+
     final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
 
     final url = searchQuery != null && searchQuery.isNotEmpty
@@ -38,8 +38,8 @@ class _ClientPageState extends State<ClientPage> {
             clients = data['content'];
             isCheckedList = List<bool>.filled(clients.length, false);
           } else {
-            clients = []; 
-            isCheckedList = []; 
+            clients = [];
+            isCheckedList = [];
           }
           isLoading = false;
         });
@@ -49,7 +49,7 @@ class _ClientPageState extends State<ClientPage> {
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to load client data'; 
+        errorMessage = 'Failed to load client data';
       });
     }
   }
@@ -84,22 +84,22 @@ class _ClientPageState extends State<ClientPage> {
             children: [
               _buildSearchBar(),
               _buildHeader(),
-            Expanded(
-              child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : errorMessage != null
-              ? Center(child: Text(errorMessage!))
-              : clients.isEmpty
-              ? const Center(
-                child: Text('No client data available'))
-              : ListView.builder(
-                  itemCount: clients.length,
-                  itemBuilder: (context, index) {
-                    final clientData = clients[index];
-                    return _buildClientTile(
-                      context, clientData, index);
-                    },
-                  ),
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : errorMessage != null
+                        ? Center(child: Text(errorMessage!))
+                        : clients.isEmpty
+                            ? const Center(
+                                child: Text('No client data available'))
+                            : ListView.builder(
+                                itemCount: clients.length,
+                                itemBuilder: (context, index) {
+                                  final clientData = clients[index];
+                                  return _buildClientTile(
+                                      context, clientData, index);
+                                },
+                              ),
               ),
             ],
           ),
@@ -107,11 +107,18 @@ class _ClientPageState extends State<ClientPage> {
             bottom: 20,
             right: 20,
             child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => StackClients()),
+              onTap: () async {
+                // Aguarda o retorno da página do Stack
+                final result = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => StackClients(),
+                  ),
                 );
+                if (result == true) {
+                  Future.delayed(Duration(milliseconds: 30), () {
+                    _searchClients();
+                  });
+                }
               },
               child: Container(
                 width: 60,
@@ -164,7 +171,7 @@ class _ClientPageState extends State<ClientPage> {
                   borderSide: BorderSide(color: Color(0xff6502d4), width: 2.0),
                 ),
                 filled: true,
-                fillColor: Colors.white, 
+                fillColor: Colors.white,
               ),
             ),
           ),
@@ -241,8 +248,9 @@ class _ClientPageState extends State<ClientPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(width: 8.0),
                 ElevatedButton(
-                  onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  onPressed: () => Null,
                   style: ButtonStyle(
                     backgroundColor:
                         WidgetStateProperty.all(const Color(0xffe5e5e5)),
@@ -250,17 +258,11 @@ class _ClientPageState extends State<ClientPage> {
                     shape: WidgetStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50),
                     )),
-                    minimumSize: WidgetStateProperty.all(
-                        Size(40, 40)),
+                    minimumSize: WidgetStateProperty.all(Size(40, 40)),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        'assets/zap.png',
-                        height: 24,
-                      ),
-                    ],
+                  child: const Icon(
+                    Icons.edit,
+                    color: Colors.black,
                   ),
                 ),
                 SizedBox(width: 8.0),
@@ -280,6 +282,28 @@ class _ClientPageState extends State<ClientPage> {
                     color: Colors.black,
                   ),
                 ),
+                SizedBox(width: 8.0),
+                ElevatedButton(
+                  onPressed: () => _openWhatsApp(contacts[0]['data']),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(const Color(0xffe5e5e5)),
+                    padding: WidgetStateProperty.all(EdgeInsets.all(8.0)),
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    )),
+                    minimumSize: WidgetStateProperty.all(Size(40, 40)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/zap.png',
+                        height: 24,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -287,7 +311,6 @@ class _ClientPageState extends State<ClientPage> {
       ),
     );
   }
-
 
   void _showClientDetails(
       BuildContext context, Map<String, dynamic> clientData) {
