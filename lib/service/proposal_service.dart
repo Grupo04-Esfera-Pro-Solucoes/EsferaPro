@@ -130,6 +130,7 @@ class ProposalService {
   }
 
 Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String userId) async {
+
   final response = await http.get(
       Uri.parse('$baseUrl/proposal/search/$name/$userId'),
     );
@@ -184,7 +185,6 @@ Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String user
 
         final xFile = XFile(file.path);
 
-        // Compartilhar o arquivo
         await Share.shareXFiles([xFile]);
 
         print('Download concluído e compartilhado: ${file.path}');
@@ -196,32 +196,42 @@ Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String user
     }
   }
   
-  Future<void> updateProposal(Map<String, dynamic> updatedProposalData) async {
-    try {
-      final response = await http.put(
-        Uri.parse('$baseUrl/lead/${updatedProposalData['idProposal']}'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'service': updatedProposalData['service'],
-          'proposalDate': updatedProposalData['proposalDate'],
-          'value': updatedProposalData['value'],
-          'description': updatedProposalData['description'],
-          'idStatusProposal': updatedProposalData['idStatusProposal'],
-          'file': updatedProposalData['file'],
-        }),
-      );
+  
+Future<void> updateProposal(Map<String, dynamic> updatedProposalData) async {
+  try {
+    var uri = Uri.parse('$baseUrl/lead/${updatedProposalData['idProposal']}');
+    
+    var request = http.MultipartRequest('PUT', uri)
+      ..headers.addAll({
+        'Content-Type': 'multipart/form-data',
+      })
+      ..fields['service'] = updatedProposalData['service']
+      ..fields['proposalDate'] = updatedProposalData['proposalDate']
+      ..fields['value'] = updatedProposalData['value'].toString()
+      ..fields['description'] = updatedProposalData['description']
+      ..fields['idStatusProposal'] = updatedProposalData['idStatusProposal'].toString();
 
-      if (response.statusCode == 200) {
-        print('Proposta atualizada com sucesso');
-      } else {
-        throw Exception('Falha ao atualizar a proposta: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Erro: $e');
+    if (updatedProposalData['file'] != null) {
+      var file = updatedProposalData['file'];
+      var multipartFile = await http.MultipartFile.fromPath('file', file.path);
+      request.files.add(multipartFile);
+      print('Arquivo adicionado: ${file.path}');
+    } else {
+      print('Nenhum arquivo foi adicionado');
     }
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      print('Proposta atualizada com sucesso');
+      var responseData = await response.stream.bytesToString();
+      print('Resposta do servidor: $responseData');
+    } else {
+      throw Exception('Falha ao atualizar a proposta: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Erro durante a atualização da proposta: $e');
   }
+}
 
   Future<void> deleteProposal(int idProposal) async {
     final url = Uri.parse('$baseUrl/proposal/delete/$idProposal');
@@ -236,5 +246,4 @@ Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String user
       throw Exception('Erro na requisição delete: $e');
     }
   }
- 
 }

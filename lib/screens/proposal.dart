@@ -1,4 +1,4 @@
-import 'package:esferapro/screens/stacks/stack_proposalCadastro.dart';
+import 'package:esferapro/screens/stacks/stack_proposal_cadastro.dart';
 import 'package:esferapro/screens/stacks/stack_proposalEdit.dart';
 import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +40,7 @@ class _ProposalState extends State<Proposal> {
         errorMessage = 'Usuário não encontrado';
       }
     });
+
   }
 
   Future<void> _nextPage() async {
