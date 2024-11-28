@@ -129,7 +129,8 @@ class ProposalService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String userId) async {
+Future<List<Map<String, dynamic>>> fetchProposalsByName(String name, String userId) async {
+
   final response = await http.get(
       Uri.parse('$baseUrl/proposal/search/$name/$userId'),
     );

@@ -89,7 +89,6 @@ class _ProposalState extends State<Proposal> {
     }
   }
 
-
   Future<void> _searchProposalsByName() async {
     if (userId != null && searchController.text.isNotEmpty) {
       setState(() {
