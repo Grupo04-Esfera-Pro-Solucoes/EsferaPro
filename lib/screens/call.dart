@@ -251,7 +251,7 @@ class _CallPageState extends State<CallPage> {
   Widget _buildHeader() {
     return Container(
       color: const Color(0xFFEAECF0),
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: const [
           Expanded(
@@ -395,8 +395,8 @@ class _CallPageState extends State<CallPage> {
         ),
         const Divider(
           color: Color(0xffD3D3D3),
-          thickness: 1.0,
-          height: 1.0,
+          thickness: 1,
+          height: 1,
         ),
       ],
     );

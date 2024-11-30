@@ -4,7 +4,7 @@ import 'package:esferapro/screens/main_screen.dart';
 import 'package:esferapro/screens/proposal.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'customer.dart';
+import 'client.dart';
 import 'help.dart';
 import 'tasks.dart';
 

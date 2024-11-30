@@ -1,4 +1,4 @@
-import 'package:esferapro/service/customer_service.dart';
+import 'package:esferapro/service/client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -24,11 +24,11 @@ class _StackClientsState extends State<StackClients> {
   final TextEditingController _addressCity = TextEditingController();
   final TextEditingController _addressCountry = TextEditingController();
 
-  final UserService _userService = UserService();
+  final ClientService _clientService = ClientService();
 
   void _postNewUser() {
-    _userService
-        .postNewUser(
+    _clientService
+        .postNewClient(
       name: _clientName.text,
       cpfCnpj: _clientCpfCnpj.text,
       company: _clientCompany.text,
@@ -320,7 +320,6 @@ class _StackClientsState extends State<StackClients> {
                     child: CustomSizedElevatedButton(
                       onPressed: () {
                         _postNewUser();
-                        Navigator.of(context).pop(true);
                       },
                       text: 'Salvar',
                     ),
