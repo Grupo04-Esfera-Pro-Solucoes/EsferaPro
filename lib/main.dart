@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';
 import 'screens/login.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 void main() async {
+  // Inicializa as permissões do Flutter Background
+  WidgetsFlutterBinding.ensureInitialized();
+  final hasPermissions = await FlutterBackground.hasPermissions;
+  if (!hasPermissions) {
+    await FlutterBackground.initialize();
+  }
+
   await dotenv.load();
   runApp(MyApp());
 }
