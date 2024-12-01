@@ -114,7 +114,7 @@ class _StackClientsState extends State<StackClients> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 36.0),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 36),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

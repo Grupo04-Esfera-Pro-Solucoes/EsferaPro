@@ -1,9 +1,9 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:esferapro/screens/stacks/stack_client.dart';
 import 'package:esferapro/screens/stacks/client_edit.dart';
 import 'package:esferapro/service/client_service.dart';
-import 'package:flutter/material.dart';
-import 'package:esferapro/screens/stacks/stack_client.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
 
 class ClientPage extends StatefulWidget {
   @override
@@ -299,98 +299,108 @@ class _ClientPageState extends State<ClientPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ClientEdit(
-                                clientData: clientData,
-                                onEdit: (updatedClientData) async {
-                                  try {
-                                    final clientId =
-                                        updatedClientData['client']['id'];
-                                    final name =
-                                        updatedClientData['client']['name'];
-                                    final cpfCnpj =
-                                        updatedClientData['client']['cpfCnpj'];
-                                    final company =
-                                        updatedClientData['client']['company'];
-                                    final role =
-                                        updatedClientData['client']['role'];
-                                    final date =
-                                        updatedClientData['client']['date'];
+                              clientData: clientData,
+                              onEdit: (updatedClientData) async {
+                                try {
+                                  final clientId =
+                                      updatedClientData['client']['id'];
+                                  final name =
+                                      updatedClientData['client']['name'];
+                                  final cpfCnpj =
+                                      updatedClientData['client']['cpfCnpj'];
+                                  final company =
+                                      updatedClientData['client']['company'];
+                                  final role =
+                                      updatedClientData['client']['role'];
+                                  final email =
+                                      updatedClientData['client']['email'];
+                                  final date =
+                                      updatedClientData['client']['date'];
+                                  final contactNumber =
+                                      updatedClientData['contact'][0]['data'];
+                                  final address = updatedClientData['address'];
 
-                                    final address =
-                                        updatedClientData['address'];
+                                  await clientService.updateClient(
+                                    clientId: clientId,
+                                    name: name,
+                                    cpfCnpj: cpfCnpj,
+                                    company: company,
+                                    role: role,
+                                    email: email,
+                                    date: date,
+                                    contactNumber:
+                                        contactNumber,
+                                    addressNumber: address['number'],
+                                    zipCode: address['zipCode'],
+                                    street: address['street'],
+                                    state: address['state'],
+                                    city: address['city'],
+                                    country: address['country'],
+                                  );
 
-                                    final contacts =
-                                        updatedClientData['contact'];
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Cliente atualizado com sucesso'),
+                                      backgroundColor: Color(0xFF6502D4),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text('Erro ao atualizar cliente: $e'),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                              onDelete: (String idClient) async {
+                                final SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                final userId = prefs.getInt('userId');
 
-                                    await clientService.updateClient(
-                                      clientId: clientId,
-                                      name: name,
-                                      cpfCnpj: cpfCnpj,
-                                      company: company,
-                                      role: role,
-                                      date: date,
-                                      address: address,
-                                      contacts: contacts,
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text('Client updated successfully'),
-                                        backgroundColor: Color(0xFF6502D4),
-                                        duration: Duration(seconds: 3),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text('Failed to update client: $e'),
-                                        backgroundColor: Colors.red,
-                                        duration: Duration(seconds: 3),
-                                      ),
-                                    );
-                                  }
-                                },
-                                onDelete: (String idClient) async {
-                                  if (userId == null) {
-                                    await _loadUserId();
-                                  }
+                                if (userId == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Usuário não encontrado'),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                  return;
+                                }
 
-                                  if (userId == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Usuário não encontrado'),
-                                        backgroundColor: Colors.red,
-                                        duration: Duration(seconds: 3),
-                                      ),
-                                    );
-                                    return;
-                                  }
+                                try {
+                                  final clientId = int.parse(idClient);
 
-                                  try {
-                                    final clientId = int.parse(idClient);
+                                  await clientService.deleteClient(
+                                    clientId: clientId,
+                                    userId: userId,
+                                  );
 
-                                    await clientService.deleteClient(
-                                        clientId: clientId, userId: userId!);
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Cliente deletado com sucesso'),
-                                        backgroundColor: Color(0xFF6502D4),
-                                        duration: Duration(seconds: 3),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text('Falha ao deletar cliente'),
-                                        backgroundColor: Colors.red,
-                                        duration: Duration(seconds: 3),
-                                      ),
-                                    );
-                                  }
-                                }),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text('Cliente deletado com sucesso'),
+                                      backgroundColor: Color(0xFF6502D4),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text('Erro ao deletar cliente: $e'),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
                           ),
                         ).then((_) {
                           _fetchClients();

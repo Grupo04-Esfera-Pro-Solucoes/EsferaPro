@@ -119,10 +119,19 @@ class ClientService {
     required String cpfCnpj,
     required String company,
     required String role,
+    required String email,
     required String date,
-    required Map<String, dynamic> address,
-    required List<Map<String, dynamic>> contacts,
+    required String contactNumber,
+    required String addressNumber,
+    required String zipCode,
+    required String street,
+    required String state,
+    required String city,
+    required String country,
   }) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('userId');
+    
     final String url = '$baseUrl/client-address-contact/update/$clientId';
 
     final Map<String, dynamic> requestData = {
@@ -131,17 +140,24 @@ class ClientService {
         "cpfCnpj": cpfCnpj,
         "company": company,
         "role": role,
+        "email": email,
         "date": date,
+        "user": {"idUser": userId}
       },
+      "contact": [
+        {
+          "data": contactNumber,
+          "idTypeContact": {"idTypeContact": 2, "type": "telefone"}
+        }
+      ],
       "address": {
-        "zipCode": address['zipCode'],
-        "country": address['country'],
-        "state": address['state'],
-        "city": address['city'],
-        "street": address['street'],
-        "number": address['number'],
-      },
-      "contact": contacts
+        "zipCode": zipCode,
+        "street": street,
+        "number": addressNumber,
+        "state": state,
+        "city": city,
+        "country": country
+      }
     };
 
     try {

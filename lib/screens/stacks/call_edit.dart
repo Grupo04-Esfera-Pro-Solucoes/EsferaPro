@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/masked_input_formatter.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class CallEdit extends StatefulWidget {
   final Map<String, dynamic> callData;
@@ -52,18 +52,17 @@ class _CallEditState extends State<CallEdit> {
     selectedResultId = widget.callData['result']['idLeadResult'] ?? 1;
   }
 
-  Widget _buildTitle(String title, {bool isRequired = false}) {
+  Widget _buildTitle(String title) {
     return Row(
       children: [
         Text(
           title,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
-        if (isRequired)
-          const Text(
-            ' *',
-            style: TextStyle(color: Colors.red),
-          ),
+        const Text(
+          ' *',
+          style: TextStyle(color: Colors.red),
+        ),
       ],
     );
   }
