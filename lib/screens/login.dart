@@ -2,6 +2,7 @@ import 'package:esferapro/service/login_service.dart';
 import 'package:flutter/material.dart';
 import 'package:esferapro/screens/main_screen.dart';
 import 'package:esferapro/screens/stacks/register.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Importar o shared_preferences
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +20,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final AuthService _authService = AuthService();
 
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  // Função para verificar o status do login ao iniciar a tela
+  void _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      // Se o usuário já está logado, navega diretamente para a MainScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    }
+  }
+
+  // Função para validar o usuário
   void _validateUser(BuildContext context) async {
     String email = _email.text;
     String password = _password.text;
@@ -36,6 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
     bool success = await _authService.login(email, password);
 
     if (success) {
+      // Salva o estado de login no SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true); // Salva o estado de login
+      await prefs.setString('userEmail', email); // Salva o email do usuário
+
+      // Navega para a MainScreen após login bem-sucedido
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),
@@ -142,24 +170,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Color.fromARGB(255, 132, 34, 244), width: 1.0),
                           ),
-                          suffixIcon: Padding (
+                          suffixIcon: Padding(
                             padding: const EdgeInsets.only(right: 12.0),
                             child: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                              color: const Color(0xFF98A2B3),
+                              icon: Icon(
+                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                color: const Color(0xFF98A2B3),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
                           ),
-                        )
                         ),
                       ),
                       const SizedBox(height: 10),
-                      if (_error.isNotEmpty) 
+                      if (_error.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(

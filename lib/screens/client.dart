@@ -523,14 +523,22 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  void _openWhatsApp(String number) async {
-    String formattedNumber = number.replaceAll(RegExp(r'[\s\(\)\-]'), '');
-    print(formattedNumber);
-    final String url = 'https://wa.me/$formattedNumber';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Não foi possível abrir o WhatsApp';
-    }
+void _openWhatsApp(String number) async {
+  // Clean up the phone number by removing spaces, parentheses, and dashes
+  String formattedNumber = number.replaceAll(RegExp(r'[\s\(\)\-]'), '');
+  
+  if (!formattedNumber.startsWith('+')) {
+    formattedNumber = '+55$formattedNumber'; 
   }
+
+  final Uri url = Uri.parse('https://wa.me/$formattedNumber');
+
+  try {
+      await launchUrl(url);
+  } catch (e) {
+    print("Erro ao tentar abrir o WhatsApp: $e");
+    
+  }
+}
+
 }

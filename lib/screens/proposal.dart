@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import 'package:esferapro/screens/stacks/stack_proposal.dart';
 import 'package:esferapro/screens/stacks/proposal_edit.dart';
-=======
-import 'package:esferapro/screens/stacks/stack_proposal_cadastro.dart';
-import 'package:esferapro/screens/stacks/stack_proposalEdit.dart';
->>>>>>> aa61acbdfade580c1ac97603fc7a19ee647a092c
 import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

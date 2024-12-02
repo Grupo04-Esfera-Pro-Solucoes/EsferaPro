@@ -35,8 +35,13 @@ AppBar buildAppBar(BuildContext context, String title, {String? currentRoute}) {
         icon: const Icon(Icons.logout),
         iconSize: 30,
         onPressed: () async {
+          // Remove todos os dados de login armazenados no SharedPreferences
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.remove('userId');
+          await prefs.remove('isLoggedIn'); // Remover a flag de login
+          await prefs.remove('userEmail');  // Opcional: Remover o e-mail do usuário, se necessário
+
+          // Navega de volta para a tela de login após o logout
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => const LoginScreen(),
