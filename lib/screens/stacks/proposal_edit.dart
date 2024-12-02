@@ -1,4 +1,3 @@
-// ignore: file_names
 import 'package:esferapro/service/proposal_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

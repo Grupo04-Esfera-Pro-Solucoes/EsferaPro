@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ClientEdit extends StatefulWidget {
   final Map<String, dynamic> clientData;
   final Future<void> Function(Map<String, dynamic> updatedClientData) onEdit;
-  final Future<void> Function(String) onDelete;
+  final Future<void> Function(int) onDelete;
 
   const ClientEdit({
     required this.clientData,
@@ -25,7 +25,6 @@ class _ClientEditState extends State<ClientEdit> {
   late TextEditingController companyController;
   late TextEditingController roleController;
   late TextEditingController dateController;
-  late TextEditingController emailController;
   late TextEditingController contactNumberController;
   late TextEditingController addressNumberController;
   late TextEditingController zipCodeController;
@@ -38,44 +37,34 @@ class _ClientEditState extends State<ClientEdit> {
   int? userId;
 
   @override
-  void initState() {
-    super.initState();
-    _loadUserId();
+void initState() {
+  super.initState();
+  _loadUserId();
 
-    nameController =
-        TextEditingController(text: widget.clientData['client']?['name'] ?? '');
-    cpfCnpjController = TextEditingController(
-        text: widget.clientData['client']?['cpfCnpj'] ?? '');
-    companyController = TextEditingController(
-        text: widget.clientData['client']?['company'] ?? '');
-    roleController =
-        TextEditingController(text: widget.clientData['client']?['role'] ?? '');
-    emailController = TextEditingController(text: widget.clientData['client']?['email'] ?? '');
-    dateController = TextEditingController(
-      text: widget.clientData['client']?['date'] != null
-          ? DateFormat('dd/MM/yyyy')
-              .format(DateTime.parse(widget.clientData['client']['date']))
-          : DateFormat('dd/MM/yyyy').format(DateTime.now()),
-    );
-    zipCodeController = TextEditingController(
-        text: widget.clientData['address']?['zipCode'] ?? '');
-    countryController = TextEditingController(
-        text: widget.clientData['address']?['country'] ?? '');
-    stateController = TextEditingController(
-        text: widget.clientData['address']?['state'] ?? '');
-    cityController = TextEditingController(
-        text: widget.clientData['address']?['city'] ?? '');
-    streetController = TextEditingController(
-        text: widget.clientData['address']?['street'] ?? '');
-    numberController = TextEditingController(
-        text: widget.clientData['address']?['number'] ?? '');
-    contactNumberController = TextEditingController(
-        text: widget.clientData['contacts'] != null && widget.clientData['contacts'].isNotEmpty
-            ? widget.clientData['contacts'][0]['data'] ?? ''
-            : '');
-  }
+  nameController = TextEditingController(text: widget.clientData['client']?['name'] ?? '');
+  cpfCnpjController = TextEditingController(text: widget.clientData['client']?['cpfCnpj'] ?? '');
+  companyController = TextEditingController(text: widget.clientData['client']?['company'] ?? '');
+  roleController = TextEditingController(text: widget.clientData['client']?['role'] ?? '');
+  dateController = TextEditingController(
+    text: widget.clientData['client']?['date'] != null
+        ? DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.clientData['client']['date']))
+        : DateFormat('dd/MM/yyyy').format(DateTime.now()),
+  );
+  zipCodeController = TextEditingController(text: widget.clientData['address']?['zipCode'] ?? '');
+  countryController = TextEditingController(text: widget.clientData['address']?['country'] ?? '');
+  stateController = TextEditingController(text: widget.clientData['address']?['state'] ?? '');
+  cityController = TextEditingController(text: widget.clientData['address']?['city'] ?? '');
+  streetController = TextEditingController(text: widget.clientData['address']?['street'] ?? '');
+  numberController = TextEditingController(text: widget.clientData['address']?['number'] ?? '');
 
-    Future<void> _loadUserId() async {
+  contactList = List<Map<String, dynamic>>.from(widget.clientData['contact'] ?? []);
+
+  contactNumberController = TextEditingController(
+    text: contactList.isNotEmpty ? contactList[0]['data'] ?? '' : '',
+  );
+}
+
+  Future<void> _loadUserId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getInt('userId');
@@ -195,13 +184,6 @@ class _ClientEditState extends State<ClientEdit> {
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildTitle('Email'),
-                  const SizedBox(height: 5),
-                  _buildTextField(
-                    controller: emailController,
-                    hintText: 'exemplo@email.com',
                   ),
                   const SizedBox(height: 10),
                   _buildTitle('Contato'),
@@ -326,26 +308,27 @@ class _ClientEditState extends State<ClientEdit> {
                       Expanded(
                         child: _buildCustomSizedElevatedButton(
                           onPressed: () async {
+                            List<Map<String, dynamic>> updatedContacts =
+                                contactList.map((contact) {
+                              return {
+                                'data': contact['data'],
+                                'idTypeContact': {
+                                  'idTypeContact': 2,
+                                  'type': 'telefone',
+                                },
+                              };
+                            }).toList();
                             final updatedClientData = {
                               'client': {
-                                'id': widget.clientData['client']['id'],
+                                'id': widget.clientData['client']['idClient'],
                                 'name': nameController.text,
                                 'cpfCnpj': cpfCnpjController.text,
                                 'company': companyController.text,
                                 'role': roleController.text,
-                                'email': emailController.text,
                                 'date': dateController.text,
                                 'user': {'idUser': userId},
                               },
-                              'contact': [
-                                {
-                                  'data': contactNumberController.text,
-                                  'idTypeContact': {
-                                    'idTypeContact': 2,
-                                    'type': 'telefone',
-                                  },
-                                }
-                              ],
+                              'contact': updatedContacts,
                               'address': {
                                 'zipCode': zipCodeController.text,
                                 'street': streetController.text,
@@ -367,8 +350,8 @@ class _ClientEditState extends State<ClientEdit> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () async {
-                        await widget.onDelete(widget.clientData['client']['id']
-                            .toString());
+                        await widget
+                            .onDelete(widget.clientData['client']['idClient']);
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(

@@ -1,3 +1,4 @@
+import 'package:esferapro/screens/client.dart';
 import 'package:esferapro/service/client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,8 +45,16 @@ class _StackClientsState extends State<StackClients> {
       country: _addressCountry.text,
     )
         .then((_) {
-      Navigator.pop(context);
-    });
+        Navigator.pop(
+          context,
+          MaterialPageRoute(builder: (context) => ClientPage()),
+        );
+      }).catchError((error) {
+        Navigator.pop(
+          context,
+          MaterialPageRoute(builder: (context) => ClientPage()),
+        );
+      });
   }
 
   Future<void> _selectDate(BuildContext context) async {

@@ -1,165 +1,131 @@
+import '../service/configuration_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'app_bar.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfigurationPage extends StatefulWidget {
   final int userId;
 
-  const ConfigurationPage({required this.userId});
+  const ConfigurationPage({required this.userId, Key? key}) : super(key: key);
 
   @override
   _ConfigurationPageState createState() => _ConfigurationPageState();
 }
 
 class _ConfigurationPageState extends State<ConfigurationPage> {
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _cargoController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _telefoneController = TextEditingController();
-  final TextEditingController _senhaAtualController = TextEditingController();
-  final TextEditingController _novaSenhaController = TextEditingController();
-  final TextEditingController _repitaNovaSenhaController = TextEditingController();
+  final _nomeController = TextEditingController();
+  final _cargoController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  final _senhaAtualController = TextEditingController();
+  final _novaSenhaController = TextEditingController();
+  final _repitaNovaSenhaController = TextEditingController();
 
   bool _obscureSenhaAtual = true;
   bool _obscureNovaSenha = true;
   bool _obscureRepitaNovaSenha = true;
+
+  final ConfigurationService _configurationService = ConfigurationService();
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
 
-    _nomeController.addListener(_checkFields);
-    _cargoController.addListener(_checkFields);
-    _emailController.addListener(_checkFields);
-    _telefoneController.addListener(_checkFields);
-    _senhaAtualController.addListener(_checkFields);
-    _novaSenhaController.addListener(_checkFields);
-    _repitaNovaSenhaController.addListener(_checkFields);
+    [_nomeController, _cargoController, _emailController, _telefoneController, _senhaAtualController, _novaSenhaController, _repitaNovaSenhaController]
+        .forEach((controller) => controller.addListener(_checkFields));
   }
 
   @override
   void dispose() {
-    _nomeController.dispose();
-    _cargoController.dispose();
-    _emailController.dispose();
-    _telefoneController.dispose();
-    _senhaAtualController.dispose();
-    _novaSenhaController.dispose();
-    _repitaNovaSenhaController.dispose();
+    [_nomeController, _cargoController, _emailController, _telefoneController, _senhaAtualController, _novaSenhaController, _repitaNovaSenhaController]
+        .forEach((controller) => controller.dispose());
     super.dispose();
   }
 
-  void _checkFields() {
-    setState(() {});
-  }
-
   Future<void> _fetchUserData() async {
-    final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8080';
-
-    final url = Uri.parse('$baseUrl/user/${widget.userId}');
     try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        
+      final userData = await _configurationService.fetchUserData(widget.userId);
+      if (userData != null) {
         setState(() {
-          _nomeController.text = data['name'] ?? '';
-          _cargoController.text = data['role'] ?? '';
-          _emailController.text = data['email'] ?? '';
-          _telefoneController.text = data['phone'] ?? '';
+          _nomeController.text = userData['name'] ?? '';
+          _cargoController.text = userData['role'] ?? '';
+          _emailController.text = userData['email'] ?? '';
+          _telefoneController.text = userData['phone'] ?? '';
         });
       } else {
-        print('Erro ao buscar os dados do usuário.');
-      }
-    } catch (e) {
-      print('Erro: $e');
-    }
-  }
-
-  Future<bool> _validateCurrentPassword() async {
-    final senhaAtual = _senhaAtualController.text;
-    final url = Uri.parse('http://localhost:8080/user/${widget.userId}/checkPassword?currentPassword=$senhaAtual');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data == true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      print('Erro: $e');
-      return false;
-    }
-  }
-
-  void _updateUserInfo() async {
-    try {
-      final validPassword = await _validateCurrentPassword();
-
-      if (validPassword) {
-        final nome = _nomeController.text;
-        final cargo = _cargoController.text;
-        final email = _emailController.text;
-        final telefone = _telefoneController.text;
-        final novaSenha = _novaSenhaController.text;
-
-        final url = Uri.parse('http://localhost:8080/user/${widget.userId}');
-
-        final Map<String, dynamic> dados = {
-          'name': nome,
-          'email': email,
-          'phone': telefone,
-          'role': cargo,
-          'passwordHash': novaSenha.isNotEmpty ? novaSenha : null,
-        };
-
-        final response = await http.put(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(dados),
-        );
-
-        if (response.statusCode == 200) {
-          _showCustomDialog(
-            title: 'Sucesso!',
-            content: 'Informações atualizadas com sucesso.',
-            isSuccess: true,
-          );
-
-          _senhaAtualController.clear();
-          _novaSenhaController.clear();
-          _repitaNovaSenhaController.clear();
-        } else {
-          _showCustomDialog(
-            title: 'Erro!',
-            content: json.decode(response.body)['message'] ?? 'Erro desconhecido',
-            isSuccess: false,
-          );
-        }
-      } else {
         _showCustomDialog(
-          title: 'Erro!',
-          content: 'Senha atual inválida.',
+          title: 'Erro',
+          content: 'Não foi possível carregar os dados do usuário.',
           isSuccess: false,
         );
       }
     } catch (e) {
       _showCustomDialog(
-        title: 'Erro!',
-        content: e.toString(),
+        title: 'Erro',
+        content: 'Falha ao carregar os dados do usuário: $e',
         isSuccess: false,
       );
     }
+  }
+
+  Future<void> _updateUserInfo() async {
+    if (_novaSenhaController.text != _repitaNovaSenhaController.text) {
+      _showCustomDialog(
+        title: 'Erro!',
+        content: 'As senhas não coincidem.',
+        isSuccess: false,
+      );
+      return;
+    }
+
+    try {
+      final isPasswordValid = await _configurationService.validateCurrentPassword(
+        widget.userId,
+        _senhaAtualController.text,
+      );
+
+      if (!isPasswordValid) {
+        _showCustomDialog(
+          title: 'Erro',
+          content: 'A senha atual está incorreta.',
+          isSuccess: false,
+        );
+        return;
+      }
+
+      final success = await _configurationService.updateUserInfo(
+        userId: widget.userId,
+        name: _nomeController.text,
+        role: _cargoController.text,
+        email: _emailController.text,
+        phone: _telefoneController.text,
+        newPassword: _novaSenhaController.text.isNotEmpty ? _novaSenhaController.text : null,
+      );
+
+      if (success) {
+        _showCustomDialog(
+          title: 'Sucesso',
+          content: 'As informações foram atualizadas com sucesso.',
+          isSuccess: true,
+        );
+      } else {
+        _showCustomDialog(
+          title: 'Erro',
+          content: 'Houve um problema ao atualizar as informações.',
+          isSuccess: false,
+        );
+      }
+    } catch (e) {
+      _showCustomDialog(
+        title: 'Erro',
+        content: 'Falha ao atualizar as informações: $e',
+        isSuccess: false,
+      );
+    }
+  }
+
+  void _checkFields() {
+    setState(() {});
   }
 
   void _showCustomDialog({

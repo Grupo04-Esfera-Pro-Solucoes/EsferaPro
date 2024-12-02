@@ -30,30 +30,6 @@ class _ClientPageState extends State<ClientPage> {
     fetchClientData();
   }
 
-  Future<void> _fetchClients() async {
-    try {
-      final data = await clientService.fetchClientData();
-      setState(() {
-        client = data;
-      });
-    } catch (e) {
-      print("Erro ao buscar clientes: $e");
-    }
-  }
-
-  Future<void> _loadUserId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userId = prefs.getInt('userId');
-      if (userId != null) {
-        isLoading = false;
-      } else {
-        isLoading = false;
-        errorMessage = 'Usuário não encontrado';
-      }
-    });
-  }
-
   Future<void> fetchClientData({String? searchQuery}) async {
     setState(() {
       isLoading = true;
@@ -61,17 +37,21 @@ class _ClientPageState extends State<ClientPage> {
     });
 
     try {
-      final clients =
-          await clientService.fetchClientData(searchQuery: searchQuery);
+      final clients = await clientService.fetchClientData(
+        searchQuery: searchQuery ?? searchController.text.trim(),
+        page: currentPage - 1,
+        size: pageSize,
+      );
       setState(() {
         client = clients;
         isCheckedList = List<bool>.filled(client.length, false);
         isLoading = false;
+        hasMoreData = clients.length == pageSize;
       });
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to load client data';
+        errorMessage = 'Falha ao carregar dados dos clientes';
       });
     }
   }
@@ -88,9 +68,8 @@ class _ClientPageState extends State<ClientPage> {
     if (hasMoreData) {
       setState(() {
         currentPage++;
-        isLoading = true;
       });
-      await fetchClientData();
+      await fetchClientData(searchQuery: searchController.text.trim());
     }
   }
 
@@ -98,9 +77,8 @@ class _ClientPageState extends State<ClientPage> {
     if (currentPage > 1) {
       setState(() {
         currentPage--;
-        isLoading = true;
       });
-      await fetchClientData();
+      await fetchClientData(searchQuery: searchController.text.trim());
     }
   }
 
@@ -289,121 +267,109 @@ class _ClientPageState extends State<ClientPage> {
                 ),
               ),
               Expanded(
-                flex: 3,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ClientEdit(
-                              clientData: clientData,
-                              onEdit: (updatedClientData) async {
-                                try {
-                                  final clientId =
-                                      updatedClientData['client']['id'];
-                                  final name =
-                                      updatedClientData['client']['name'];
-                                  final cpfCnpj =
-                                      updatedClientData['client']['cpfCnpj'];
-                                  final company =
-                                      updatedClientData['client']['company'];
-                                  final role =
-                                      updatedClientData['client']['role'];
-                                  final email =
-                                      updatedClientData['client']['email'];
-                                  final date =
-                                      updatedClientData['client']['date'];
-                                  final contactNumber =
-                                      updatedClientData['contact'][0]['data'];
-                                  final address = updatedClientData['address'];
+              flex: 3,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      final SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.getInt('userId');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClientEdit(
+                            clientData: {
+                              'client': clientData['client'],
+                              'contact': [
+                                contacts.isNotEmpty ? contacts[0] : {}
+                              ], 
+                              'address': clientData['address'],
+                            },
+                            onEdit: (updatedClientData) async {
+                              try {
+                                final clientId = updatedClientData['client']['id'];
+                                final name = updatedClientData['client']['name'];
+                                final cpfCnpj = updatedClientData['client']['cpfCnpj'];
+                                final company = updatedClientData['client']['company'];
+                                final role = updatedClientData['client']['role'];
+                                final date = updatedClientData['client']['date'];
+                                final contactNumber = updatedClientData['contact'].isNotEmpty
+                                    ? updatedClientData['contact'][0]['data']
+                                    : '';
+                                final address = updatedClientData['address'];
 
-                                  await clientService.updateClient(
-                                    clientId: clientId,
-                                    name: name,
-                                    cpfCnpj: cpfCnpj,
-                                    company: company,
-                                    role: role,
-                                    email: email,
-                                    date: date,
-                                    contactNumber:
-                                        contactNumber,
-                                    addressNumber: address['number'],
-                                    zipCode: address['zipCode'],
-                                    street: address['street'],
-                                    state: address['state'],
-                                    city: address['city'],
-                                    country: address['country'],
-                                  );
+                                await clientService.updateClient(
+                                  clientId: clientId,
+                                  name: name,
+                                  cpfCnpj: cpfCnpj,
+                                  company: company,
+                                  role: role,
+                                  date: date,
+                                  contactNumber: contactNumber,
+                                  addressNumber: address['number'],
+                                  zipCode: address['zipCode'],
+                                  street: address['street'],
+                                  state: address['state'],
+                                  city: address['city'],
+                                  country: address['country'],
+                                );
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Cliente atualizado com sucesso'),
-                                      backgroundColor: Color(0xFF6502D4),
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content:
-                                          Text('Erro ao atualizar cliente: $e'),
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                }
-                              },
-                              onDelete: (String idClient) async {
-                                final SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
-                                final userId = prefs.getInt('userId');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Cliente atualizado com sucesso'),
+                                    backgroundColor: Color(0xFF6502D4),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Cliente atualizado com sucesso'),
+                                    backgroundColor: Color(0xFF6502D4),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            },
+                            onDelete: (int idClient) async {
+                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                              final userId = prefs.getInt('userId');
+                              if (userId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Usuário não encontrado'),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                                return;
+                              }
 
-                                if (userId == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Usuário não encontrado'),
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                try {
-                                  final clientId = int.parse(idClient);
-
-                                  await clientService.deleteClient(
-                                    clientId: clientId,
-                                    userId: userId,
-                                  );
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Text('Cliente deletado com sucesso'),
-                                      backgroundColor: Color(0xFF6502D4),
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content:
-                                          Text('Erro ao deletar cliente: $e'),
-                                      backgroundColor: Colors.red,
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                              try {
+                                await clientService.deleteClient(clientId: idClient, userId: userId);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Cliente deletado com sucesso'),
+                                    backgroundColor: Color(0xFF6502D4),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erro ao deletar cliente: $e'),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            },
                           ),
-                        ).then((_) {
-                          _fetchClients();
+                        ),
+                      ).then((_) {
+                          fetchClientData();
                         });
                       },
                       icon: const Icon(Icons.edit, color: Colors.black),
@@ -470,28 +436,28 @@ class _ClientPageState extends State<ClientPage> {
                 const Text('Cliente:',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                _buildDetailRow('Name:', ' ${client['name'] ?? 'No name'}'),
+                _buildDetailRow('Nome:', ' ${client['name'] ?? 'No name'}'),
                 _buildDetailRow(
-                    'CPF/CNPJ', ' ${client['cpfCnpj'] ?? 'No CPF/CNPJ'}'),
+                    'CPF/CNPJ:', ' ${client['cpfCnpj'] ?? 'No CPF/CNPJ'}'),
                 _buildDetailRow(
-                    'Company', ' ${client['company'] ?? 'No company'}'),
-                _buildDetailRow('Role', ' ${client['role'] ?? 'No role'}'),
+                    'Empresa:', ' ${client['company'] ?? 'No company'}'),
+                _buildDetailRow('Cargo:', ' ${client['role'] ?? 'No role'}'),
                 _buildDetailRow(
-                    'Date', ' ${client['formattedDate'] ?? 'No date'}'),
+                    'Data:', ' ${client['formattedDate'] ?? 'No date'}'),
                 const SizedBox(height: 10),
                 const Text('Endereço:',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                _buildDetailRow('Rua:', ' ${address['street'] ?? 'No street'}'),
                 _buildDetailRow(
-                    'Street', ' ${address['street'] ?? 'No street'}'),
+                    'Número:', ' ${address['number'] ?? 'No number'}'),
+                _buildDetailRow('Cidade:', ' ${address['city'] ?? 'No city'}'),
                 _buildDetailRow(
-                    'Number', ' ${address['number'] ?? 'No number'}'),
-                _buildDetailRow('City', ' ${address['city'] ?? 'No city'}'),
-                _buildDetailRow('State', ' ${address['state'] ?? 'No state'}'),
+                    'Estado:', ' ${address['state'] ?? 'No state'}'),
                 _buildDetailRow(
-                    'Zip Code', ' ${address['zipCode'] ?? 'No zip code'}'),
+                    'CEP:', ' ${address['zipCode'] ?? 'No zip code'}'),
                 _buildDetailRow(
-                    'Country', ' ${address['country'] ?? 'No country'}'),
+                    'País:', ' ${address['country'] ?? 'No country'}'),
                 const SizedBox(height: 10),
                 const Text('Contato:',
                     style:
