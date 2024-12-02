@@ -63,6 +63,7 @@ class _CallPageState extends State<CallPage> {
   }
 
   Future<void> _fetchCalls() async {
+    print("chamouuuuu");
     if (userId != null) {
       try {
         final data = await callService.fetchAllLeads(

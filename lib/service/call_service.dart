@@ -82,7 +82,7 @@ class CallService {
 
   Future<List<Map<String, dynamic>>> fetchAllLeads(String userId, int page, {int size = 20}) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/lead/all/$userId?page=$page&size=$size'),
+      Uri.parse('$baseUrl/lead/all/$userId'),
     );
 
     if (response.statusCode == 200) {

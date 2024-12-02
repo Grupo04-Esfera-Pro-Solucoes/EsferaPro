@@ -32,7 +32,7 @@ class _TaskUpdateState extends State<TaskUpdateDialog> {
   void initState() {
     super.initState();
     titleController.text = widget.task.name;
-    timeController.text = DateFormat('dd/MM/yyyy').format(widget.task.dueDate);
+    timeController.text = DateFormat('dd/mm/yyyy').format(widget.task.dueDate);
     descriptionController.text = widget.task.description;
   }
 
