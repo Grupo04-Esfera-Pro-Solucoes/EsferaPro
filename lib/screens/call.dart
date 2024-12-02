@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:esferapro/screens/stacks/call_edit.dart';
-import 'package:esferapro/screens/stacks/stack_call.dart';
-import 'package:esferapro/service/call_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:esferapro/screens/stacks/stack_call.dart';
+import 'package:esferapro/screens/stacks/call_edit.dart';
+import 'package:esferapro/service/call_service.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CallPage extends StatefulWidget {
@@ -11,12 +11,12 @@ class CallPage extends StatefulWidget {
 }
 
 class _CallPageState extends State<CallPage> {
+  final TextEditingController searchController = TextEditingController();
   final CallService callService = CallService();
   List<dynamic> calls = [];
   bool isLoading = true;
   String? errorMessage;
   int? userId;
-  final TextEditingController searchController = TextEditingController();
 
   int currentPage = 1;
   int totalPages = 1;
@@ -251,7 +251,7 @@ class _CallPageState extends State<CallPage> {
   Widget _buildHeader() {
     return Container(
       color: const Color(0xFFEAECF0),
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: const [
           Expanded(
@@ -395,8 +395,8 @@ class _CallPageState extends State<CallPage> {
         ),
         const Divider(
           color: Color(0xffD3D3D3),
-          thickness: 1.0,
-          height: 1.0,
+          thickness: 1,
+          height: 1,
         ),
       ],
     );

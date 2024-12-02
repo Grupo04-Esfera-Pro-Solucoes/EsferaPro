@@ -1,4 +1,5 @@
-import 'package:esferapro/service/customer_service.dart';
+import 'package:esferapro/screens/client.dart';
+import 'package:esferapro/service/client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -24,11 +25,11 @@ class _StackClientsState extends State<StackClients> {
   final TextEditingController _addressCity = TextEditingController();
   final TextEditingController _addressCountry = TextEditingController();
 
-  final UserService _userService = UserService();
+  final ClientService _clientService = ClientService();
 
   void _postNewUser() {
-    _userService
-        .postNewUser(
+    _clientService
+        .postNewClient(
       name: _clientName.text,
       cpfCnpj: _clientCpfCnpj.text,
       company: _clientCompany.text,
@@ -44,8 +45,16 @@ class _StackClientsState extends State<StackClients> {
       country: _addressCountry.text,
     )
         .then((_) {
-      Navigator.pop(context);
-    });
+        Navigator.pop(
+          context,
+          MaterialPageRoute(builder: (context) => ClientPage()),
+        );
+      }).catchError((error) {
+        Navigator.pop(
+          context,
+          MaterialPageRoute(builder: (context) => ClientPage()),
+        );
+      });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -114,7 +123,7 @@ class _StackClientsState extends State<StackClients> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 36.0),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 36),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -320,7 +329,6 @@ class _StackClientsState extends State<StackClients> {
                     child: CustomSizedElevatedButton(
                       onPressed: () {
                         _postNewUser();
-                        Navigator.of(context).pop(true);
                       },
                       text: 'Salvar',
                     ),

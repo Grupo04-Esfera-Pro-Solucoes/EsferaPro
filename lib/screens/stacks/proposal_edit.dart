@@ -51,9 +51,7 @@ class _StackProposalEditState extends State<StackProposalEdit> {
     clientNameController = TextEditingController(text: widget.proposalData['idLead']['idClient']['name'] ?? '');
     selectedStatusId = widget.proposalData['idStatusProposal']['idStatusProposal'] ?? 1;
     fileController = TextEditingController();
-  if (widget.proposalData.containsKey('file') && widget.proposalData['file'] != null) {
-    fileController.text = widget.proposalData['file'];
-  }
+    selectedFile = null;
   }
 
   void _selectDate(BuildContext context) async {
@@ -410,67 +408,67 @@ class _StackProposalEditState extends State<StackProposalEdit> {
                     const SizedBox(height: 32.0),
                     const Center(
                       child: Text(
-                      'Anexo de Arquivo',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                        'Anexo de Arquivo',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16.0),
                     Center(
                       child: GestureDetector(
-                      onTap: () async {
-                        FilePickerResult? result = await FilePicker.platform.pickFiles(
-                        type: FileType.any,
-                        allowMultiple: false,
-                        );
+                        onTap: () async {
+                          FilePickerResult? result = await FilePicker.platform.pickFiles(
+                            type: FileType.any,
+                            allowMultiple: false,
+                          );
 
-                        if (result != null) {
-                        setState(() {
-                          selectedFile = File(result.files.single.path!);
-                          fileController.text = "${result.files.single.name} anexado";
-                        });
+                          if (result != null) {
+                            setState(() {
+                              selectedFile = File(result.files.single.path!);
+                              fileController.text = "${result.files.single.name} anexado";
+                            });
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Arquivo selecionado com sucesso!')),
-                        );
-                        } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Nenhum arquivo selecionado.')),
-                        );
-                        }
-                      },
-                      child: Container(
-                        width: 250.0,
-                        height: 150.0,
-                        decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFF475467)),
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.white,
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Arquivo selecionado com sucesso!')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Nenhum arquivo selecionado.')),
+                            );
+                          }
+                        },
+                        child: Container(
+                          width: 250.0,
+                          height: 150.0,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Color(0xFF475467)),
+                            borderRadius: BorderRadius.circular(8.0),
+                            color: Colors.white,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.attach_file,
+                                color: Color(0xFF475467),
+                                size: 30.0,
+                              ),
+                              const SizedBox(height: 8.0),
+                              Text(
+                                fileController.text.isEmpty
+                                    ? 'Clique aqui para anexar um arquivo'
+                                    : fileController.text,
+                                style: const TextStyle(
+                                  color: Color(0xFF475467),
+                                  fontSize: 16.0,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                          Icons.attach_file,
-                          color: Color(0xFF475467),
-                          size: 30.0,
-                          ),
-                          const SizedBox(height: 8.0),
-                          Text(
-                          fileController.text.isEmpty
-                            ? 'Clique aqui para anexar um arquivo'
-                            : 'Arquivo anexado',
-                          style: const TextStyle(
-                            color: Color(0xFF475467),
-                            fontSize: 16.0,
-                          ),
-                          textAlign: TextAlign.center,
-                          ),
-                        ],
-                        ),
-                      ),
                       ),
                     ),
                     const SizedBox(height: 32.0),
@@ -505,26 +503,28 @@ class _StackProposalEditState extends State<StackProposalEdit> {
                         ),
                         const SizedBox(width: 20),
                         Expanded(
-                            child: _buildCustomSizedElevatedButton(
+                          child: _buildCustomSizedElevatedButton(
                             onPressed: () async {
                               final updatedProposalData = {
-                              'idUser': 1,
-                              'idLead': int.parse(leadIdController.text),
-                              'service': serviceController.text,
-                              'proposalDate': DateFormat("yyyy-MM-dd")
-                                .format(DateFormat('dd/MM/yyyy').parse(dateController.text)),
-                              'value': double.parse(valueController.text.replaceAll(RegExp(r'[^\d.]'), '')),
-                              'description': descriptionController.text,
-                              'idStatusProposal': selectedStatusId,
-                              'clientId': clientIdController.text,
-                              'file': selectedFile != null ? selectedFile!.path : '',
+                                'idLead': widget.proposalData['idLead']['idLead'],
+                                'service': serviceController.text,
+                                'proposalDate': DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                                    .format(DateFormat('dd/MM/yyyy')
+                                    .parse(dateController.text)),
+                                'value': valueController.text,
+                                'description': descriptionController.text,
+                                'idStatusProposal': {
+                                  'idStatusProposal': selectedStatusId,
+                                },
+                                'file': selectedFile,
                               };
+
                               await widget.onEdit(updatedProposalData);
                               Navigator.pop(context);
                             },
                             text: 'Salvar',
-                            ),
-                          ),                
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -606,8 +606,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     if (newText.isNotEmpty) {
-      double value = double.parse(newText) / 100;
-      newText = 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
+      newText = 'R\$ ${double.parse(newText) / 100}';
     }
     return TextEditingValue(
       text: newText,
