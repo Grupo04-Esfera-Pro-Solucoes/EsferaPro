@@ -71,7 +71,7 @@
                   .format(DateFormat('dd/MM/yyyy').parse(_date.text)),
               description: _description.text,
               service: _service.text,
-              value: double.parse(_value.text.replaceAll('R\$ ', '').replaceAll('.', '').replaceAll(',', '.')),
+              value: double.parse(_value.text.replaceAll('R\$ ', '')),
               idStatusProposal: _selectedStatus!,
               clientId: _clientId.text,
               file: _selectedFile != null ? _selectedFile! : File(''),
@@ -572,7 +572,8 @@
     TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
       String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
       if (newText.isNotEmpty) {
-double value = double.parse(newText) / 100; newText = 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';      }
+        newText = 'R\$ $newText';
+      }
       return TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(offset: newText.length),
