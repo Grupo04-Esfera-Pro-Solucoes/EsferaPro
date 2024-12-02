@@ -366,7 +366,7 @@ class _StackCallsState extends State<StackCalls> {
                   Expanded(
                     child: CustomSizedElevatedButton(
                       onPressed: _postNewCall,
-                      text: 'Cadastrar',
+                      text: 'Salvar',
                     ),
                   ),
                 ],

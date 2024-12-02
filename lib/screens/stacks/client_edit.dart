@@ -149,7 +149,7 @@ void initState() {
                   _buildTitle('Cargo'),
                   const SizedBox(height: 5),
                   _buildTextField(
-                    controller: companyController,
+                    controller: roleController,
                     hintText: 'Seu cargo na empresa',
                   ),
                   const SizedBox(height: 10),
