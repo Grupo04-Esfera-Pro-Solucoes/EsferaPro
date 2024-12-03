@@ -77,7 +77,7 @@
               file: _selectedFile != null ? _selectedFile! : File(''),
             )
             .then((_) {
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         }).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Erro ao salvar proposta: $error')),
