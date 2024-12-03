@@ -52,6 +52,13 @@ class _StackClientsState extends State<StackClients> {
         MaterialPageRoute(builder: (context) => ClientPage()),
       );
     }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cliente cadastrado com sucesso!'),
+          backgroundColor: Color(0xFF6502D4),
+          duration: Duration(seconds: 3),
+        ),
+      );
       Navigator.pop(
         context,
         MaterialPageRoute(builder: (context) => ClientPage()),
@@ -399,57 +406,55 @@ class _StackClientsState extends State<StackClients> {
     );
   }
 
-Widget _buildHalfWidthTextField({
-  required TextEditingController controller,
-  required String hintText,
-  List<TextInputFormatter>? inputFormatters,
-  void Function(String)? onChanged,
-}) {
-  return TextField(
-    controller: controller,
-    inputFormatters: inputFormatters,
-    onChanged: onChanged,
-    style: const TextStyle(fontSize: 16),
-    decoration: InputDecoration(
-      hintText: hintText,
-      filled: true,
-      fillColor: const Color(0xFFF0F0F7),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
+  Widget _buildHalfWidthTextField({
+    required TextEditingController controller,
+    required String hintText,
+    List<TextInputFormatter>? inputFormatters,
+    void Function(String)? onChanged,
+  }) {
+    return TextField(
+      controller: controller,
+      inputFormatters: inputFormatters,
+      onChanged: onChanged,
+      style: const TextStyle(fontSize: 16),
+      decoration: InputDecoration(
+        hintText: hintText,
+        filled: true,
+        fillColor: const Color(0xFFF0F0F7),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+          fontSize: 12,
+        ),
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-      hintStyle: const TextStyle(
-        color: Colors.grey,
-        fontSize: 12,
-      ),
-    ),
-  );
-}
-
+    );
+  }
 
   Future<void> _fetchAddressFromZipCode(String zipCode) async {
-  try {
-    final url = Uri.parse('https://viacep.com.br/ws/$zipCode/json/');
-    final response = await http.get(url);
+    try {
+      final url = Uri.parse('https://viacep.com.br/ws/$zipCode/json/');
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        _addressStreet.text = data['logradouro'] ?? '';
-        _addressCity.text = data['localidade'] ?? '';
-        _addressState.text = data['uf'] ?? '';
-        _addressCountry.text = 'Brasil'; // Supondo país fixo.
-      });
-    } else {
-      // Opcional: Tratar erro caso o CEP não seja encontrado.
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _addressStreet.text = data['logradouro'] ?? '';
+          _addressCity.text = data['localidade'] ?? '';
+          _addressState.text = data['uf'] ?? '';
+          _addressCountry.text = 'Brasil'; // Supondo país fixo.
+        });
+      } else {
+        // Opcional: Tratar erro caso o CEP não seja encontrado.
+      }
+    } catch (e) {
+      // Opcional: Tratar erro de conexão ou requisição.
     }
-  } catch (e) {
-    // Opcional: Tratar erro de conexão ou requisição.
   }
-}
-
 }
 
 class CustomSizedElevatedButton extends StatelessWidget {

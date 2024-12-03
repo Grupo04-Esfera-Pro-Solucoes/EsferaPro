@@ -130,14 +130,6 @@ class _ClientPageState extends State<ClientPage> {
             _searchClient();
           });
 
-          // Exibe o SnackBar após o retorno
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ligação cadastrada com sucesso!'),
-              backgroundColor: Color(0xFF6502D4),
-              duration: Duration(seconds: 3),
-            ),
-          );
         },
         backgroundColor: const Color(0xFF6502D4),
         foregroundColor: Colors.white,

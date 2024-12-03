@@ -435,7 +435,7 @@
                             Expanded(
                               child: CustomSizedElevatedButton(
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, false);
                                 },
                                 text: 'Cancelar',
                                 isCancelButton: true,
