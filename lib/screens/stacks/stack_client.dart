@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/input_formatters.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class StackClients extends StatefulWidget {
   @override
@@ -45,42 +47,42 @@ class _StackClientsState extends State<StackClients> {
       country: _addressCountry.text,
     )
         .then((_) {
-        Navigator.pop(
-          context,
-          MaterialPageRoute(builder: (context) => ClientPage()),
-        );
-      }).catchError((error) {
-        Navigator.pop(
-          context,
-          MaterialPageRoute(builder: (context) => ClientPage()),
-        );
-      });
+      Navigator.pop(
+        context,
+        MaterialPageRoute(builder: (context) => ClientPage()),
+      );
+    }).catchError((error) {
+      Navigator.pop(
+        context,
+        MaterialPageRoute(builder: (context) => ClientPage()),
+      );
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime(1900),
-    lastDate: DateTime(2100),
-  );
-  
-  if (picked != null) {
-    final now = DateTime.now();
-    
-    final combinedDateTime = DateTime(
-      picked.year,
-      picked.month,
-      picked.day,
-      now.hour,
-      now.minute,
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
     );
 
-    setState(() {
-      _clientDate.text = DateFormat('yyyy-MM-dd').format(combinedDateTime);
-    });
+    if (picked != null) {
+      final now = DateTime.now();
+
+      final combinedDateTime = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        now.hour,
+        now.minute,
+      );
+
+      setState(() {
+        _clientDate.text = DateFormat('yyyy-MM-dd').format(combinedDateTime);
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -216,8 +218,14 @@ class _StackClientsState extends State<StackClients> {
                       const SizedBox(height: 5),
                       _buildHalfWidthTextField(
                         controller: _addressZipCode,
-                        hintText: '00000-00',
+                        hintText: '00000-000',
                         inputFormatters: [ZipCodeInputFormatter()],
+                        onChanged: (value) {
+                          if (value.length == 9) {
+                            // Verifica se o CEP está completo
+                            _fetchAddressFromZipCode(value);
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -391,32 +399,57 @@ class _StackClientsState extends State<StackClients> {
     );
   }
 
-  Widget _buildHalfWidthTextField({
-    required TextEditingController controller,
-    required String hintText,
-    List<TextInputFormatter>? inputFormatters,
-  }) {
-    return TextField(
-      controller: controller,
-      inputFormatters: inputFormatters,
-      style: const TextStyle(fontSize: 16),
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xFFF0F0F7),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.black),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-          fontSize: 12,
-        ),
+Widget _buildHalfWidthTextField({
+  required TextEditingController controller,
+  required String hintText,
+  List<TextInputFormatter>? inputFormatters,
+  void Function(String)? onChanged,
+}) {
+  return TextField(
+    controller: controller,
+    inputFormatters: inputFormatters,
+    onChanged: onChanged,
+    style: const TextStyle(fontSize: 16),
+    decoration: InputDecoration(
+      hintText: hintText,
+      filled: true,
+      fillColor: const Color(0xFFF0F0F7),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
       ),
-    );
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+      hintStyle: const TextStyle(
+        color: Colors.grey,
+        fontSize: 12,
+      ),
+    ),
+  );
+}
+
+
+  Future<void> _fetchAddressFromZipCode(String zipCode) async {
+  try {
+    final url = Uri.parse('https://viacep.com.br/ws/$zipCode/json/');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        _addressStreet.text = data['logradouro'] ?? '';
+        _addressCity.text = data['localidade'] ?? '';
+        _addressState.text = data['uf'] ?? '';
+        _addressCountry.text = 'Brasil'; // Supondo país fixo.
+      });
+    } else {
+      // Opcional: Tratar erro caso o CEP não seja encontrado.
+    }
+  } catch (e) {
+    // Opcional: Tratar erro de conexão ou requisição.
   }
+}
+
 }
 
 class CustomSizedElevatedButton extends StatelessWidget {
