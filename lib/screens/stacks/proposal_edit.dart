@@ -531,7 +531,7 @@ class _StackProposalEditState extends State<StackProposalEdit> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () async {
-                          await widget.onDelete(widget.proposalData['idLead'].toString());
+                          await widget.onDelete(widget.proposalData['idProposal'].toString());
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(

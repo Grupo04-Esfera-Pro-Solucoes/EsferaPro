@@ -200,7 +200,7 @@ class _taskCreateState extends State<TaskCreateDialog> {
                     backgroundColor: const Color(0xFF6502D4),
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text("Adicionar"),
+                  child: const Text("Salvar"),
                 ),
               ),
             ),

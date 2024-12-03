@@ -333,8 +333,7 @@ class _DashboardState extends State<Dashboard> {
                                     PieChartData(
                                       sections: [
                                         PieChartSectionData(
-                                          value: getPercentage(
-                                              'Fechado'),
+                                          value: getPercentage('Fechado'),
                                           color: Color(0xFF6A1B9A),
                                           radius: 15,
                                           title: '',
@@ -343,8 +342,7 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                         ),
                                         PieChartSectionData(
-                                          value: getPercentage(
-                                              'Parado'),
+                                          value: getPercentage('Parado'),
                                           color: Color(0xFFAB47BC),
                                           radius: 15,
                                           title: '',
@@ -353,8 +351,7 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                         ),
                                         PieChartSectionData(
-                                          value: getPercentage(
-                                              'Acompanhar'),
+                                          value: getPercentage('Acompanhar'),
                                           color: Color(0xFFCE93D8),
                                           radius: 15,
                                           title: '',
@@ -363,8 +360,7 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                         ),
                                         PieChartSectionData(
-                                          value: getPercentage(
-                                              'Negociação'),
+                                          value: getPercentage('Negociação'),
                                           color: Color(0xFF7B1FA2),
                                           radius: 15,
                                           title: '',
@@ -446,14 +442,18 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                     SizedBox(width: 8),
                                     Expanded(
-                                      child: Text(
-                                        getPercentageText('Acompanhar'),
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Color(0xFFCE93D8),
+                                      child: FittedBox(
+                                        fit: BoxFit
+                                            .scaleDown, // Ajusta o texto para caber no espaço disponível
+                                        child: Text(
+                                          getPercentageText('Acompanhar'),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color(0xFFCE93D8),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: 8),
