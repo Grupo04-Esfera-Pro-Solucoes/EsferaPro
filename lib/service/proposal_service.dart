@@ -234,7 +234,7 @@ Future<void> updateProposal(Map<String, dynamic> updatedProposalData) async {
 }
 
   Future<void> deleteProposal(int idProposal) async {
-    final url = Uri.parse('$baseUrl/proposal/delete/$idProposal');
+    final url = Uri.parse('$baseUrl/proposal/$idProposal');
 
     try {
       final response = await http.delete(url);
