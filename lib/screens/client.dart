@@ -124,21 +124,21 @@ class _ClientPageState extends State<ClientPage> {
               builder: (context) => StackClients(),
             ),
           );
-            // Chama a função de busca de clientes após o retorno
-            Future.delayed(Duration(milliseconds: 30), () {
-              print("\n\n\n\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n\n");
-              _searchClient();
-            });
+          // Chama a função de busca de clientes após o retorno
+          Future.delayed(Duration(milliseconds: 30), () {
+            print("\n\n\n\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n\n");
+            _searchClient();
+          });
 
-            // Exibe o SnackBar após o retorno
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Ligação cadastrada com sucesso!'),
-                backgroundColor: Color(0xFF6502D4),
-                duration: Duration(seconds: 3),
-              ),
-            );
-          },
+          // Exibe o SnackBar após o retorno
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Ligação cadastrada com sucesso!'),
+              backgroundColor: Color(0xFF6502D4),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        },
         backgroundColor: const Color(0xFF6502D4),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
@@ -263,11 +263,15 @@ class _ClientPageState extends State<ClientPage> {
                 flex: 2,
                 child: Align(
                   alignment: Alignment.center,
-                  child: Text(
-                    contacts.isNotEmpty && contacts[0]['data'] != null
-                        ? contacts[0]['data']
-                        : 'No CPF',
-                    textAlign: TextAlign.center,
+                  child: FittedBox(
+                    fit: BoxFit
+                        .scaleDown, // Ajusta o tamanho do texto para caber no espaço
+                    child: Text(
+                      contacts.isNotEmpty && contacts[0]['data'] != null
+                          ? contacts[0]['data']
+                          : 'No CPF',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),
