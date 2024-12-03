@@ -117,23 +117,28 @@ class _ClientPageState extends State<ClientPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => StackClients()),
-          ).then((success) {
-            if (success == true) {
+        onPressed: () async {
+          // Aguarda o retorno da página do Stack
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => StackClients(),
+            ),
+          );
+            // Chama a função de busca de clientes após o retorno
+            Future.delayed(Duration(milliseconds: 30), () {
+              print("\n\n\n\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n\n");
               _searchClient();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Ligação cadastrada com sucesso!'),
-                  backgroundColor: Color(0xFF6502D4),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-            }
-          });
-        },
+            });
+
+            // Exibe o SnackBar após o retorno
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Ligação cadastrada com sucesso!'),
+                backgroundColor: Color(0xFF6502D4),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          },
         backgroundColor: const Color(0xFF6502D4),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
@@ -267,108 +272,122 @@ class _ClientPageState extends State<ClientPage> {
                 ),
               ),
               Expanded(
-              flex: 3,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      final SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      prefs.getInt('userId');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ClientEdit(
-                            clientData: {
-                              'client': clientData['client'],
-                              'contact': [
-                                contacts.isNotEmpty ? contacts[0] : {}
-                              ], 
-                              'address': clientData['address'],
-                            },
-                            onEdit: (updatedClientData) async {
-                              try {
-                                final clientId = updatedClientData['client']['id'];
-                                final name = updatedClientData['client']['name'];
-                                final cpfCnpj = updatedClientData['client']['cpfCnpj'];
-                                final company = updatedClientData['client']['company'];
-                                final role = updatedClientData['client']['role'];
-                                final date = updatedClientData['client']['date'];
-                                final contactNumber = updatedClientData['contact'].isNotEmpty
-                                    ? updatedClientData['contact'][0]['data']
-                                    : '';
-                                final address = updatedClientData['address'];
+                flex: 3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        final SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        prefs.getInt('userId');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ClientEdit(
+                              clientData: {
+                                'client': clientData['client'],
+                                'contact': [
+                                  contacts.isNotEmpty ? contacts[0] : {}
+                                ],
+                                'address': clientData['address'],
+                              },
+                              onEdit: (updatedClientData) async {
+                                try {
+                                  final clientId =
+                                      updatedClientData['client']['id'];
+                                  final name =
+                                      updatedClientData['client']['name'];
+                                  final cpfCnpj =
+                                      updatedClientData['client']['cpfCnpj'];
+                                  final company =
+                                      updatedClientData['client']['company'];
+                                  final role =
+                                      updatedClientData['client']['role'];
+                                  final date =
+                                      updatedClientData['client']['date'];
+                                  final contactNumber =
+                                      updatedClientData['contact'].isNotEmpty
+                                          ? updatedClientData['contact'][0]
+                                              ['data']
+                                          : '';
+                                  final address = updatedClientData['address'];
 
-                                await clientService.updateClient(
-                                  clientId: clientId,
-                                  name: name,
-                                  cpfCnpj: cpfCnpj,
-                                  company: company,
-                                  role: role,
-                                  date: date,
-                                  contactNumber: contactNumber,
-                                  addressNumber: address['number'],
-                                  zipCode: address['zipCode'],
-                                  street: address['street'],
-                                  state: address['state'],
-                                  city: address['city'],
-                                  country: address['country'],
-                                );
+                                  await clientService.updateClient(
+                                    clientId: clientId,
+                                    name: name,
+                                    cpfCnpj: cpfCnpj,
+                                    company: company,
+                                    role: role,
+                                    date: date,
+                                    contactNumber: contactNumber,
+                                    addressNumber: address['number'],
+                                    zipCode: address['zipCode'],
+                                    street: address['street'],
+                                    state: address['state'],
+                                    city: address['city'],
+                                    country: address['country'],
+                                  );
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Cliente atualizado com sucesso'),
-                                    backgroundColor: Color(0xFF6502D4),
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Cliente atualizado com sucesso'),
-                                    backgroundColor: Color(0xFF6502D4),
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              }
-                            },
-                            onDelete: (int idClient) async {
-                              final SharedPreferences prefs = await SharedPreferences.getInstance();
-                              final userId = prefs.getInt('userId');
-                              if (userId == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Usuário não encontrado'),
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                                return;
-                              }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Cliente atualizado com sucesso'),
+                                      backgroundColor: Color(0xFF6502D4),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Cliente atualizado com sucesso'),
+                                      backgroundColor: Color(0xFF6502D4),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                              onDelete: (int idClient) async {
+                                final SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                final userId = prefs.getInt('userId');
+                                if (userId == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Usuário não encontrado'),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                  return;
+                                }
 
-                              try {
-                                await clientService.deleteClient(clientId: idClient, userId: userId);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Cliente deletado com sucesso'),
-                                    backgroundColor: Color(0xFF6502D4),
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Erro ao deletar cliente: $e'),
-                                    backgroundColor: Colors.red,
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              }
-                            },
+                                try {
+                                  await clientService.deleteClient(
+                                      clientId: idClient, userId: userId);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text('Cliente deletado com sucesso'),
+                                      backgroundColor: Color(0xFF6502D4),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text('Erro ao deletar cliente: $e'),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
                           ),
-                        ),
-                      ).then((_) {
+                        ).then((_) {
                           fetchClientData();
                         });
                       },
@@ -523,22 +542,20 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-void _openWhatsApp(String number) async {
-  // Clean up the phone number by removing spaces, parentheses, and dashes
-  String formattedNumber = number.replaceAll(RegExp(r'[\s\(\)\-]'), '');
-  
-  if (!formattedNumber.startsWith('+')) {
-    formattedNumber = '+55$formattedNumber'; 
-  }
+  void _openWhatsApp(String number) async {
+    // Clean up the phone number by removing spaces, parentheses, and dashes
+    String formattedNumber = number.replaceAll(RegExp(r'[\s\(\)\-]'), '');
 
-  final Uri url = Uri.parse('https://wa.me/$formattedNumber');
+    if (!formattedNumber.startsWith('+')) {
+      formattedNumber = '+55$formattedNumber';
+    }
 
-  try {
+    final Uri url = Uri.parse('https://wa.me/$formattedNumber');
+
+    try {
       await launchUrl(url);
-  } catch (e) {
-    print("Erro ao tentar abrir o WhatsApp: $e");
-    
+    } catch (e) {
+      print("Erro ao tentar abrir o WhatsApp: $e");
+    }
   }
-}
-
 }
