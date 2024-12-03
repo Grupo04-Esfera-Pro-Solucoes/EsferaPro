@@ -57,7 +57,7 @@ class _taskCreateState extends State<TaskCreateDialog> {
                       TextField(
                         controller: timeController,
                         decoration: InputDecoration(
-                          hintText: "dd/MM/yyyy",
+                          hintText: "dd/mm/yyyy",
                           hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
                           border: const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFF6502D4)),
@@ -177,7 +177,7 @@ class _taskCreateState extends State<TaskCreateDialog> {
 
                     DateTime? dueDate;
                     try {
-                      dueDate = DateFormat('dd/mm/yyyy').parseStrict(dueDateStr);
+                      dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
                     } catch (e) {
                       setState(() {
                         _isDateInvalid = true;
