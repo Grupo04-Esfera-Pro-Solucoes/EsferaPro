@@ -423,6 +423,7 @@ class _CallPageState extends State<CallPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildDetailRow('ID:', callData['idLead']?.toString() ?? 'N/A'),
                 _buildDetailRow(
                     'Resultado:', callData['result']['result'] ?? 'N/A'),
                 _buildDetailRow(

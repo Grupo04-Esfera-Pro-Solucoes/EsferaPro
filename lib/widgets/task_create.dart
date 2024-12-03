@@ -177,7 +177,7 @@ class _taskCreateState extends State<TaskCreateDialog> {
 
                     DateTime? dueDate;
                     try {
-                      dueDate = DateFormat('dd/MM/yyyy').parseStrict(dueDateStr);
+                      dueDate = DateFormat('dd/mm/yyyy').parseStrict(dueDateStr);
                     } catch (e) {
                       setState(() {
                         _isDateInvalid = true;
