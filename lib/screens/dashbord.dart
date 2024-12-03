@@ -299,7 +299,7 @@ class _DashboardState extends State<Dashboard> {
                               child: Text(
                                 'R\$ ${totalFaturamento.toStringAsFixed(2)}',
                                 style: TextStyle(
-                                  fontSize: 60,
+                                  fontSize: 55,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
                                 ),
