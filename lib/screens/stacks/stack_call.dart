@@ -1,4 +1,3 @@
-import 'package:esferapro/screens/call.dart';
 import 'package:esferapro/widgets/hybridCpfCnpj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,18 +60,15 @@ class _StackCallsState extends State<StackCalls> {
         description: _callDescription.text,
       )
           .then((_) {
-        Navigator.pop(
-          context,
-          MaterialPageRoute(builder: (context) => CallPage()),
-        );
-      }).catchError((error) {
-        Navigator.pop(
-          context,
-          MaterialPageRoute(builder: (context) => CallPage()),
-        );
-      });
-    } catch (e) {}
+      Navigator.pop(context, true);
+    }).catchError((error) {
+
+      Navigator.pop(context, true);
+    });
+  } catch (e) {
+    Navigator.pop(context, true);
   }
+}
 
   Future<void> fetchClients() async {
     if (userId != null && _clientCpfCnpj.text.isNotEmpty) {
@@ -356,7 +352,7 @@ class _StackCallsState extends State<StackCalls> {
                   Expanded(
                     child: CustomSizedElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pop(context, true);
                       },
                       text: 'Cancelar',
                       isCancelButton: true,
