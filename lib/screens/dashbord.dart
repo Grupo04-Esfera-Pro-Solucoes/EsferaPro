@@ -158,14 +158,18 @@ class _DashboardState extends State<Dashboard> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                showType1
-                                    ? 'Ligações da Semana'
-                                    : 'Ligações do Mês',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF6502D4),
+                              FittedBox(
+                                fit: BoxFit
+                                    .scaleDown, // Ajusta o texto para caber no espaço disponível
+                                child: Text(
+                                  showType1
+                                      ? 'Ligações da Semana'
+                                      : 'Ligações do Mês',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF6502D4),
+                                  ),
                                 ),
                               ),
                               isLoading
@@ -286,14 +290,22 @@ class _DashboardState extends State<Dashboard> {
                               color: Color(0xFF6502D4),
                             ),
                           )
-                        : Text(
-                            'R\$ ${totalFaturamento.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                        : Align(
+                            alignment:
+                                Alignment.center, // Alinha o texto no centro
+                            child: FittedBox(
+                              fit: BoxFit
+                                  .scaleDown, // Ajusta o texto para caber no espaço disponível
+                              child: Text(
+                                'R\$ ${totalFaturamento.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 60,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
-                          ),
+                          )
                   ],
                 ),
               ),
