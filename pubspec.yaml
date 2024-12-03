@@ -29,6 +29,7 @@ dependencies:
   path_provider: ^2.1.5
   share_plus: ^10.1.2
   flutter_background: ^1.0.3
+  flutter_launcher_icons: ^0.14.1
 
 
 dev_dependencies:
@@ -45,3 +46,10 @@ flutter:
     - assets/logo.png
     - assets/zap.png
     - .env
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path_android: "assets/icon.jpg"
+  adaptive_icon_background: "#fff" 
+  adaptive_icon_foreground: "assets/icon.jpg"
